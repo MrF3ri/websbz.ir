@@ -6,6 +6,7 @@
     "dev": "vite",
     "build": "vite build",
     "build:ssr": "vite build && vite build --ssr",
+    "check": "npm run types:check",
     "types:check": "vue-tsc --noEmit"
   },
   "dependencies": {
