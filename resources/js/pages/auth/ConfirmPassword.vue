@@ -16,15 +16,14 @@ import PasskeyVerify from '@/components/PasskeyVerify.vue';
 
 defineOptions({
     layout: {
-        title: 'Confirm password',
-        description:
-            'This is a secure area of the application. Please confirm your password before continuing.',
+        title: 'تأیید مجدد رمز عبور',
+        description: 'این بخش امن است. برای ادامه، رمز عبور حساب کاربری خود را دوباره وارد کنید.',
     },
 });
 </script>
 
 <template>
-    <Head title="Confirm password" />
+    <Head title="تأیید رمز عبور" />
 
     <!-- @chisel-passkeys -->
     <PasskeyVerify
@@ -32,9 +31,9 @@ defineOptions({
             options: confirmOptions(),
             submit: confirmStore(),
         }"
-        label="Confirm with passkey"
-        loading-label="Confirming..."
-        separator="Or confirm with password"
+        label="تأیید با Passkey"
+        loading-label="در حال تأیید..."
+        separator="یا با رمز عبور تأیید کنید"
     />
     <!-- @end-chisel-passkeys -->
 
@@ -42,32 +41,32 @@ defineOptions({
         v-bind="store.form()"
         reset-on-success
         v-slot="{ errors, processing }"
+        dir="rtl"
+        class="text-right"
     >
-        <div class="space-y-6">
+        <div class="grid gap-5">
             <div class="grid gap-2">
-                <Label htmlFor="password">Password</Label>
+                <Label for="password">رمز عبور</Label>
                 <PasswordInput
                     id="password"
                     name="password"
-                    class="mt-1 block w-full"
                     required
                     autocomplete="current-password"
                     autofocus
+                    :disabled="processing"
                 />
-
                 <InputError :message="errors.password" />
             </div>
 
-            <div class="flex items-center">
-                <Button
-                    class="w-full"
-                    :disabled="processing"
-                    data-test="confirm-password-button"
-                >
-                    <Spinner v-if="processing" />
-                    Confirm password
-                </Button>
-            </div>
+            <Button
+                type="submit"
+                class="w-full"
+                :disabled="processing"
+                data-test="confirm-password-button"
+            >
+                <Spinner v-if="processing" />
+                {{ processing ? 'در حال بررسی...' : 'تأیید رمز عبور' }}
+            </Button>
         </div>
     </Form>
 </template>
