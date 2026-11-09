@@ -2,11 +2,15 @@
 
 namespace App\Models;
 
+use App\Modules\Business\Models\Business;
+use App\Modules\Business\Models\BusinessMember;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
@@ -33,6 +37,29 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
+
+    /**
+     * Get the businesses this user belongs to.
+     *
+     * @return BelongsToMany<Business, $this, BusinessMember>
+     */
+    public function businesses(): BelongsToMany
+    {
+        return $this->belongsToMany(Business::class, 'business_members')
+            ->using(BusinessMember::class)
+            ->withPivot(['id', 'role'])
+            ->withTimestamps();
+    }
+
+    /**
+     * Get the membership records for this user.
+     *
+     * @return HasMany<BusinessMember, $this>
+     */
+    public function memberships(): HasMany
+    {
+        return $this->hasMany(BusinessMember::class);
+    }
 
     /**
      * Get the attributes that should be cast.
