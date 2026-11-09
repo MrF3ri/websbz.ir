@@ -17,6 +17,11 @@ use Illuminate\Support\Str;
  * @property string $name
  * @property string $slug
  * @property BusinessStatus $status
+ * @property string|null $phone
+ * @property string|null $email
+ * @property string|null $address
+ * @property string|null $city
+ * @property string|null $postal_code
  *
  * @method static Builder<static> query()
  */
@@ -33,6 +38,11 @@ class Business extends Model
         'name',
         'slug',
         'status',
+        'phone',
+        'email',
+        'address',
+        'city',
+        'postal_code',
     ];
 
     /**
