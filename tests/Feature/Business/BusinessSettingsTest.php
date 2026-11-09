@@ -39,6 +39,7 @@ class BusinessSettingsTest extends TestCase
             );
 
         $response = $this->put(route('business.settings.update'), [
+            'name' => 'Updated Business Name',
             'phone' => '+989121234567',
             'email' => 'contact@example.test',
             'address' => 'Valiasr Street, No. 10',
@@ -55,6 +56,7 @@ class BusinessSettingsTest extends TestCase
 
         $this->assertDatabaseHas('businesses', [
             'id' => $business->id,
+            'name' => 'Updated Business Name',
             'phone' => '+989121234567',
             'email' => 'contact@example.test',
             'address' => 'Valiasr Street, No. 10',
@@ -81,6 +83,7 @@ class BusinessSettingsTest extends TestCase
                 'active_business_id' => $otherBusiness->getKey(),
             ])
             ->put(route('business.settings.update'), [
+                'name' => 'Updated Own Business',
                 // A client-supplied ID must never select the record to update.
                 'business_id' => $otherBusiness->getKey(),
                 'phone' => '+989000000000',
@@ -90,19 +93,54 @@ class BusinessSettingsTest extends TestCase
 
         $this->assertDatabaseHas('businesses', [
             'id' => $ownBusiness->id,
+            'name' => 'Updated Own Business',
             'phone' => '+989000000000',
             'city' => 'Attacker City',
         ]);
 
         $this->assertDatabaseHas('businesses', [
             'id' => $otherBusiness->id,
+            'name' => 'Other Business',
             'phone' => null,
             'city' => null,
         ]);
     }
 
-    private function createBusinessFor(User $user, string $name): Business
+    public function test_manager_can_view_but_cannot_update_business_settings(): void
     {
+        $manager = User::factory()->create([
+            'email_verified_at' => now(),
+        ]);
+
+        $business = $this->createBusinessFor(
+            $manager,
+            'Managed Business',
+            BusinessRole::Manager
+        );
+
+        $this->actingAs($manager)
+            ->get(route('business.settings.edit'))
+            ->assertOk();
+
+        $this->actingAs($manager)
+            ->put(route('business.settings.update'), [
+                'name' => 'Unauthorized Rename',
+                'phone' => '+989111111111',
+            ])
+            ->assertForbidden();
+
+        $this->assertDatabaseHas('businesses', [
+            'id' => $business->id,
+            'name' => 'Managed Business',
+            'phone' => null,
+        ]);
+    }
+
+    private function createBusinessFor(
+        User $user,
+        string $name,
+        BusinessRole $role = BusinessRole::Owner
+    ): Business {
         $business = Business::query()->create([
             'name' => $name,
             'slug' => str($name)->slug()->toString(),
@@ -110,7 +148,7 @@ class BusinessSettingsTest extends TestCase
 
         $business->members()->create([
             'user_id' => $user->getKey(),
-            'role' => BusinessRole::Owner,
+            'role' => $role,
         ]);
 
         return $business;
