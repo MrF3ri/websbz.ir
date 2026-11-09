@@ -13,6 +13,13 @@ class BusinessOnboardingTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->withoutVite();
+    }
+
     public function test_authenticated_user_can_view_onboarding_page(): void
     {
         $user = User::factory()->create([
@@ -24,7 +31,7 @@ class BusinessOnboardingTest extends TestCase
             ->assertOk()
             ->assertInertia(
                 fn (Assert $page) => $page
-                    ->component('Business/Create')
+                    ->component('Business/Create', false)
             );
     }
 
