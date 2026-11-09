@@ -62,7 +62,7 @@ class AuthenticationFlowTest extends TestCase
     {
         $email = 'throttled@example.com';
         $ip = '127.0.0.1';
-        $throttleKey = Str::transliterate(Str::lower($email).'|'.$ip);
+        $throttleKey = md5('login'.Str::transliterate(Str::lower($email).'|'.$ip));
 
         // Pre-fill the same limiter bucket Fortify uses, so this test verifies
         // the actual login route's throttle middleware without depending on
