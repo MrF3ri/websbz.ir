@@ -18,7 +18,7 @@ const form = useForm({
 });
 
 function submit() {
-    form.post(route('onboarding.store'));
+    form.post('/onboarding');
 }
 </script>
 
