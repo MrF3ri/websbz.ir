@@ -18,18 +18,16 @@ const code = ref<string>('');
 const authConfigContent = computed<TwoFactorConfigContent>(() => {
     if (showRecoveryInput.value) {
         return {
-            title: 'Recovery code',
-            description:
-                'Please confirm access to your account by entering one of your emergency recovery codes.',
-            buttonText: 'login using an authentication code',
+            title: 'کد بازیابی',
+            description: 'برای تأیید دسترسی به حساب، یکی از کدهای بازیابی اضطراری خود را وارد کنید.',
+            buttonText: 'ورود با کد تأییدکننده',
         };
     }
 
     return {
-        title: 'Authentication code',
-        description:
-            'Enter the authentication code provided by your authenticator application.',
-        buttonText: 'login using a recovery code',
+        title: 'تأیید هویت دومرحله‌ای',
+        description: 'کد شش‌رقمی نمایش‌داده‌شده در برنامه احراز هویت خود را وارد کنید.',
+        buttonText: 'ورود با کد بازیابی',
     };
 });
 
@@ -48,85 +46,87 @@ const toggleRecoveryMode = (clearErrors: () => void): void => {
 </script>
 
 <template>
-    <Head title="Two-factor authentication" />
+    <Head title="تأیید هویت دومرحله‌ای" />
 
-    <div class="space-y-6">
+    <div dir="rtl" class="space-y-6 text-right">
         <template v-if="!showRecoveryInput">
             <Form
                 v-bind="store.form()"
-                class="space-y-4"
+                class="space-y-5"
                 reset-on-error
                 @error="code = ''"
                 #default="{ errors, processing, clearErrors }"
             >
                 <input type="hidden" name="code" :value="code" />
-                <div
-                    class="flex flex-col items-center justify-center space-y-3 text-center"
-                >
-                    <div class="flex w-full items-center justify-center">
-                        <InputOTP
-                            id="otp"
-                            v-model="code"
-                            :maxlength="6"
-                            :disabled="processing"
-                            autofocus
-                        >
-                            <InputOTPGroup>
-                                <InputOTPSlot
-                                    v-for="index in 6"
-                                    :key="index"
-                                    :index="index - 1"
-                                />
-                            </InputOTPGroup>
-                        </InputOTP>
-                    </div>
+                <div class="flex flex-col items-center justify-center gap-3">
+                    <InputOTP
+                        id="otp"
+                        v-model="code"
+                        :maxlength="6"
+                        :disabled="processing"
+                        autofocus
+                        dir="ltr"
+                    >
+                        <InputOTPGroup>
+                            <InputOTPSlot
+                                v-for="index in 6"
+                                :key="index"
+                                :index="index - 1"
+                            />
+                        </InputOTPGroup>
+                    </InputOTP>
                     <InputError :message="errors.code" />
                 </div>
-                <Button type="submit" class="w-full" :disabled="processing"
-                    >Continue</Button
-                >
-                <div class="text-center text-sm text-muted-foreground">
-                    <span>or you can </span>
+
+                <Button type="submit" class="w-full" :disabled="processing">
+                    {{ processing ? 'در حال بررسی...' : 'تأیید و ورود' }}
+                </Button>
+
+                <p class="text-center text-sm text-muted-foreground">
+                    یا
                     <button
                         type="button"
-                        class="text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-neutral-500"
+                        class="font-medium text-primary underline underline-offset-4"
                         @click="() => toggleRecoveryMode(clearErrors)"
                     >
                         {{ authConfigContent.buttonText }}
                     </button>
-                </div>
+                </p>
             </Form>
         </template>
 
         <template v-else>
             <Form
                 v-bind="store.form()"
-                class="space-y-4"
-                reset-on-error
+                class="space-y-5"
                 #default="{ errors, processing, clearErrors }"
             >
                 <Input
                     name="recovery_code"
                     type="text"
-                    placeholder="Enter recovery code"
+                    placeholder="کد بازیابی را وارد کنید"
                     v-focus
                     required
+                    :disabled="processing"
+                    dir="ltr"
+                    class="text-left"
                 />
                 <InputError :message="errors.recovery_code" />
-                <Button type="submit" class="w-full" :disabled="processing"
-                    >Continue</Button
-                >
 
-                <div class="text-center text-sm text-muted-foreground">
-                    <span>or you can </span>
+                <Button type="submit" class="w-full" :disabled="processing">
+                    {{ processing ? 'در حال بررسی...' : 'تأیید و ورود' }}
+                </Button>
+
+                <p class="text-center text-sm text-muted-foreground">
+                    یا
                     <button
                         type="button"
-                        class="text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-neutral-500"
+                        class="font-medium text-primary underline underline-offset-4"
                         @click="() => toggleRecoveryMode(clearErrors)"
                     >
                         {{ authConfigContent.buttonText }}
                     </button>
-                </div>
+                </p>
             </Form>
         </template>
     </div>
