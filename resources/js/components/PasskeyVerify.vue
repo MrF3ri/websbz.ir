@@ -36,7 +36,7 @@ const { verify, isLoading, error, isSupported } = usePasskeyVerify({
 </script>
 
 <template>
-    <div v-if="isSupported">
+    <div v-if="isSupported" dir="rtl">
         <div class="grid gap-2">
             <Button
                 type="button"
@@ -46,15 +46,15 @@ const { verify, isLoading, error, isSupported } = usePasskeyVerify({
                 :disabled="isLoading"
             >
                 <Spinner v-if="isLoading" />
-                <KeyRound v-else class="h-4 w-4" />
+                <KeyRound v-else class="size-4" />
                 {{
                     isLoading
-                        ? (props.loadingLabel ?? 'Authenticating...')
-                        : (props.label ?? 'Sign in with a passkey')
+                        ? (props.loadingLabel ?? 'در حال احراز هویت...')
+                        : (props.label ?? 'ورود با Passkey')
                 }}
             </Button>
 
-            <div v-if="error" class="text-center">
+            <div v-if="error" class="text-center" role="alert">
                 <InputError :message="error" />
             </div>
         </div>
@@ -63,9 +63,9 @@ const { verify, isLoading, error, isSupported } = usePasskeyVerify({
             <div class="absolute inset-0 flex items-center">
                 <Separator class="w-full" />
             </div>
-            <div class="relative flex justify-center text-xs uppercase">
+            <div class="relative flex justify-center text-xs">
                 <span class="bg-background px-2 text-muted-foreground">
-                    {{ props.separator ?? 'Or continue with email' }}
+                    {{ props.separator ?? 'یا با ایمیل ادامه دهید' }}
                 </span>
             </div>
         </div>
