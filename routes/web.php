@@ -1,6 +1,7 @@
 <?php
 
 use App\Modules\Business\Http\Controllers\BusinessOnboardingController;
+use App\Modules\Business\Http\Controllers\BusinessSettingsController;
 use App\Modules\Tenancy\Http\Middleware\TenantMiddleware;
 use Illuminate\Support\Facades\Route;
 
@@ -16,6 +17,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::middleware([TenantMiddleware::class])->group(function () {
         Route::inertia('dashboard', 'Dashboard')->name('dashboard');
+
+        Route::get('/business/settings', [BusinessSettingsController::class, 'edit'])
+            ->name('business.settings.edit');
+
+        Route::put('/business/settings', [BusinessSettingsController::class, 'update'])
+            ->name('business.settings.update');
     });
 });
 

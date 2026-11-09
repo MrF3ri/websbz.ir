@@ -19,8 +19,8 @@ import PasskeyVerify from '@/components/PasskeyVerify.vue';
 
 defineOptions({
     layout: {
-        title: 'Log in to your account',
-        description: 'Enter your email and password below to log in',
+        title: 'ورود به حساب کاربری',
+        description: 'برای ورود، آدرس ایمیل و رمز عبور خود را وارد کنید.',
     },
 });
 
@@ -31,11 +31,13 @@ defineProps<{
 </script>
 
 <template>
-    <Head title="Log in" />
+    <Head title="ورود" />
 
     <div
         v-if="status"
-        class="mb-4 text-center text-sm font-medium text-green-600"
+        dir="rtl"
+        class="mb-4 text-right text-sm font-medium text-green-600"
+        role="status"
     >
         {{ status }}
     </div>
@@ -48,11 +50,12 @@ defineProps<{
         v-bind="store.form()"
         :reset-on-success="['password']"
         v-slot="{ errors, processing }"
-        class="flex flex-col gap-6"
+        dir="rtl"
+        class="flex flex-col gap-6 text-right"
     >
         <div class="grid gap-6">
             <div class="grid gap-2">
-                <Label for="email">Email address</Label>
+                <Label for="email">آدرس ایمیل</Label>
                 <Input
                     id="email"
                     type="email"
@@ -61,21 +64,24 @@ defineProps<{
                     v-focus
                     :tabindex="1"
                     autocomplete="email"
-                    placeholder="email@example.com"
+                    placeholder="name@example.com"
+                    dir="ltr"
+                    class="text-left"
+                    :disabled="processing"
                 />
                 <InputError :message="errors.email" />
             </div>
 
             <div class="grid gap-2">
-                <div class="flex items-center justify-between">
-                    <Label for="password">Password</Label>
+                <div class="flex items-center justify-between gap-3">
+                    <Label for="password">رمز عبور</Label>
                     <TextLink
                         v-if="canResetPassword"
                         :href="request()"
-                        class="text-sm"
+                        class="text-sm underline underline-offset-4"
                         :tabindex="5"
                     >
-                        Forgot your password?
+                        رمز عبور خود را فراموش کرده‌اید؟
                     </TextLink>
                 </div>
                 <PasswordInput
@@ -84,15 +90,15 @@ defineProps<{
                     required
                     :tabindex="2"
                     autocomplete="current-password"
-                    placeholder="Password"
+                    placeholder="رمز عبور خود را وارد کنید"
                 />
                 <InputError :message="errors.password" />
             </div>
 
-            <div class="flex items-center justify-between">
-                <Label for="remember" class="flex items-center space-x-3">
+            <div class="flex items-center justify-start">
+                <Label for="remember" class="flex items-center gap-3">
                     <Checkbox id="remember" name="remember" :tabindex="3" />
-                    <span>Remember me</span>
+                    <span>مرا به خاطر بسپار</span>
                 </Label>
             </div>
 
@@ -104,14 +110,16 @@ defineProps<{
                 data-test="login-button"
             >
                 <Spinner v-if="processing" />
-                Log in
+                {{ processing ? 'در حال ورود...' : 'ورود به حساب کاربری' }}
             </Button>
         </div>
 
         <!-- @chisel-registration -->
         <div class="text-center text-sm text-muted-foreground">
-            Don't have an account?
-            <TextLink :href="register()" :tabindex="5">Sign up</TextLink>
+            حساب کاربری ندارید؟
+            <TextLink :href="register()" :tabindex="6" class="underline underline-offset-4">
+                ثبت‌نام
+            </TextLink>
         </div>
         <!-- @end-chisel-registration -->
     </Form>

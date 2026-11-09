@@ -71,6 +71,39 @@ class BusinessOnboardingTest extends TestCase
         ]);
     }
 
+    public function test_user_with_business_is_redirected_from_onboarding(): void
+    {
+        $user = User::factory()->create([
+            'email_verified_at' => now(),
+        ]);
+
+        $business = Business::query()->create([
+            'name' => 'Existing Business',
+            'slug' => 'existing-business',
+        ]);
+
+        $business->members()->create([
+            'user_id' => $user->getKey(),
+            'role' => BusinessRole::Owner,
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('onboarding'))
+            ->assertRedirect(route('dashboard'));
+
+        $this->actingAs($user)
+            ->post(route('onboarding'), [
+                'name' => 'Duplicate Business',
+            ])
+            ->assertRedirect(route('dashboard'));
+
+        $this->assertDatabaseCount('businesses', 1);
+        $this->assertDatabaseCount('business_members', 1);
+        $this->assertDatabaseMissing('businesses', [
+            'name' => 'Duplicate Business',
+        ]);
+    }
+
     public function test_business_name_is_required(): void
     {
         $user = User::factory()->create([

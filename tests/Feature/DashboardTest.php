@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Actions\Business\CreateBusinessAction;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -13,15 +14,22 @@ class DashboardTest extends TestCase
     public function test_guests_are_redirected_to_the_login_page()
     {
         $response = $this->get(route('dashboard'));
+
         $response->assertRedirect(route('login'));
     }
 
-    public function test_authenticated_users_can_visit_the_dashboard()
+    public function test_authenticated_users_with_a_business_can_visit_the_dashboard()
     {
         $user = User::factory()->create();
+
+        app(CreateBusinessAction::class)->execute($user, [
+            'name' => 'Test Business',
+        ]);
+
         $this->actingAs($user);
 
         $response = $this->get(route('dashboard'));
+
         $response->assertOk();
     }
 }

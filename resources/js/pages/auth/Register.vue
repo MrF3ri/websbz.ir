@@ -16,24 +16,25 @@ defineProps<{
 
 defineOptions({
     layout: {
-        title: 'Create an account',
-        description: 'Enter your details below to create your account',
+        title: 'ایجاد حساب کاربری',
+        description: 'برای ساخت حساب کاربری، اطلاعات زیر را وارد کنید.',
     },
 });
 </script>
 
 <template>
-    <Head title="Register" />
+    <Head title="ثبت‌نام" />
 
     <Form
         v-bind="store.form()"
         :reset-on-success="['password', 'password_confirmation']"
         v-slot="{ errors, processing }"
-        class="flex flex-col gap-6"
+        dir="rtl"
+        class="flex flex-col gap-6 text-right"
     >
         <div class="grid gap-6">
             <div class="grid gap-2">
-                <Label for="name">Name</Label>
+                <Label for="name">نام و نام خانوادگی</Label>
                 <Input
                     id="name"
                     type="text"
@@ -42,13 +43,15 @@ defineOptions({
                     :tabindex="1"
                     autocomplete="name"
                     name="name"
-                    placeholder="Full name"
+                    placeholder="نام و نام خانوادگی خود را وارد کنید"
+                    class="text-right"
+                    :disabled="processing"
                 />
                 <InputError :message="errors.name" />
             </div>
 
             <div class="grid gap-2">
-                <Label for="email">Email address</Label>
+                <Label for="email">آدرس ایمیل</Label>
                 <Input
                     id="email"
                     type="email"
@@ -56,34 +59,37 @@ defineOptions({
                     :tabindex="2"
                     autocomplete="email"
                     name="email"
-                    placeholder="email@example.com"
+                    placeholder="name@example.com"
+                    dir="ltr"
+                    class="text-left"
+                    :disabled="processing"
                 />
                 <InputError :message="errors.email" />
             </div>
 
             <div class="grid gap-2">
-                <Label for="password">Password</Label>
+                <Label for="password">رمز عبور</Label>
                 <PasswordInput
                     id="password"
                     required
                     :tabindex="3"
                     autocomplete="new-password"
                     name="password"
-                    placeholder="Password"
+                    placeholder="رمز عبور خود را وارد کنید"
                     :passwordrules="passwordRules"
                 />
                 <InputError :message="errors.password" />
             </div>
 
             <div class="grid gap-2">
-                <Label for="password_confirmation">Confirm password</Label>
+                <Label for="password_confirmation">تکرار رمز عبور</Label>
                 <PasswordInput
                     id="password_confirmation"
                     required
                     :tabindex="4"
                     autocomplete="new-password"
                     name="password_confirmation"
-                    placeholder="Confirm password"
+                    placeholder="رمز عبور را دوباره وارد کنید"
                     :passwordrules="passwordRules"
                 />
                 <InputError :message="errors.password_confirmation" />
@@ -92,23 +98,24 @@ defineOptions({
             <Button
                 type="submit"
                 class="mt-2 w-full"
-                tabindex="5"
+                :tabindex="5"
                 :disabled="processing"
                 data-test="register-user-button"
             >
                 <Spinner v-if="processing" />
-                Create account
+                {{ processing ? 'در حال ثبت‌نام...' : 'ثبت‌نام' }}
             </Button>
         </div>
 
         <div class="text-center text-sm text-muted-foreground">
-            Already have an account?
+            قبلاً ثبت‌نام کرده‌اید؟
             <TextLink
                 :href="login()"
                 class="underline underline-offset-4"
                 :tabindex="6"
-                >Log in</TextLink
             >
+                ورود به حساب کاربری
+            </TextLink>
         </div>
     </Form>
 </template>
