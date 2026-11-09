@@ -37,6 +37,10 @@ class AuthenticationFlowTest extends TestCase
         $user = User::query()->where('email', 'new-user@example.com')->firstOrFail();
         $user->forceFill(['email_verified_at' => now()])->save();
 
+        // Refresh the authenticated guard's cached user instance as well;
+        // otherwise it may still see the pre-verification model loaded at registration.
+        $this->actingAs($user->fresh());
+
         $this->get(route('dashboard'))
             ->assertRedirect(route('onboarding'));
     }
