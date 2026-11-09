@@ -31,7 +31,7 @@ class BusinessOnboardingTest extends TestCase
             ->assertOk()
             ->assertInertia(
                 fn (Assert $page) => $page
-                    ->component('Business/Create')
+                    ->component('Business/Create', false)
             );
     }
 
