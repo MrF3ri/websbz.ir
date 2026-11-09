@@ -7,7 +7,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Laravel\Fortify\Features;
-use Laravel\Fortify\Fortify;
 use Tests\TestCase;
 
 class AuthenticationFlowTest extends TestCase
