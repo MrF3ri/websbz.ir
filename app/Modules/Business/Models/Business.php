@@ -4,7 +4,9 @@ namespace App\Modules\Business\Models;
 
 use App\Enums\BusinessStatus;
 use App\Models\User;
+use App\Modules\Subscription\Models\Subscription;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -27,6 +29,7 @@ use Illuminate\Support\Str;
  */
 class Business extends Model
 {
+    /** @use HasFactory<Factory<Business>> */
     use HasFactory;
 
     /**
@@ -87,6 +90,16 @@ class Business extends Model
             ->using(BusinessMember::class)
             ->withPivot(['id', 'role'])
             ->withTimestamps();
+    }
+
+    /**
+     * Get the business subscriptions.
+     *
+     * @return HasMany<Subscription, $this>
+     */
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(Subscription::class);
     }
 
     /**
