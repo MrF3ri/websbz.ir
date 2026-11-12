@@ -40,22 +40,47 @@ class Subscription extends Model
     {
         static::creating(function (Subscription $subscription): void {
             if ($subscription->features_snapshot === null) {
-                $plan = Plan::query()
-                    ->with('features')
-                    ->findOrFail($subscription->plan_id);
+                $subscription->capturePlanSnapshot();
+            } else {
+                $subscription->refreshPlanVersion();
+            }
+        });
 
-                $subscription->features_snapshot = $plan->features
-                    ->mapWithKeys(fn (PlanFeature $feature): array => [
-                        $feature->feature_key => $feature->value,
-                    ])
-                    ->all();
+        static::updating(function (Subscription $subscription): void {
+            if ($subscription->isDirty('plan_id')) {
+                // An upgrade or downgrade establishes a new contractual snapshot.
+                $subscription->capturePlanSnapshot();
+
+                return;
             }
 
-            $subscription->plan_version ??= hash(
-                'sha256',
-                json_encode($subscription->features_snapshot, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES),
-            );
+            if ($subscription->isDirty('features_snapshot')) {
+                $subscription->refreshPlanVersion();
+            }
         });
+    }
+
+    private function capturePlanSnapshot(): void
+    {
+        $plan = Plan::query()
+            ->with('features')
+            ->findOrFail($this->plan_id);
+
+        $this->features_snapshot = $plan->features
+            ->mapWithKeys(fn (PlanFeature $feature): array => [
+                $feature->feature_key => $feature->value,
+            ])
+            ->all();
+
+        $this->refreshPlanVersion();
+    }
+
+    private function refreshPlanVersion(): void
+    {
+        $this->plan_version = hash(
+            'sha256',
+            json_encode($this->features_snapshot, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES),
+        );
     }
 
     /** @return BelongsTo<Business, $this> */
