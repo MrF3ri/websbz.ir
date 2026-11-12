@@ -6,6 +6,7 @@ use App\Enums\BusinessStatus;
 use App\Models\User;
 use App\Modules\Subscription\Models\Subscription;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -28,6 +29,7 @@ use Illuminate\Support\Str;
  */
 class Business extends Model
 {
+    /** @use HasFactory<Factory<Business>> */
     use HasFactory;
 
     /**
