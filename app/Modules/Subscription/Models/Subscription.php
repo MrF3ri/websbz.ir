@@ -5,12 +5,13 @@ namespace App\Modules\Subscription\Models;
 use App\Modules\Business\Models\Business;
 use App\Modules\Subscription\Enums\SubscriptionStatus;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property int $id
  * @property int $business_id
  * @property int $plan_id
- * @property \App\Modules\Subscription\Enums\SubscriptionStatus $status
+ * @property SubscriptionStatus $status
  * @property \Illuminate\Support\Carbon|null $trial_ends_at
  * @property \Illuminate\Support\Carbon|null $current_period_starts_at
  * @property \Illuminate\Support\Carbon|null $current_period_ends_at
@@ -29,14 +30,14 @@ class Subscription extends Model
         'current_period_ends_at',
     ];
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Modules\Business\Models\Business, $this> */
-    public function business(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    /** @return BelongsTo<Business, $this> */
+    public function business(): BelongsTo
     {
         return $this->belongsTo(Business::class);
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Modules\Subscription\Models\Plan, $this> */
-    public function plan(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    /** @return BelongsTo<Plan, $this> */
+    public function plan(): BelongsTo
     {
         return $this->belongsTo(Plan::class);
     }
