@@ -1,13 +1,13 @@
 <?php
 
-namespace App\\Modules\\Subscription\\Models;
+namespace App\Modules\Subscription\Models;
 
-use App\\Modules\\Business\\Models\\Business;
-use App\\Modules\\Subscription\\Enums\\SubscriptionStatus;
-use Illuminate\\Database\\Eloquent\\Builder;
-use Illuminate\\Database\\Eloquent\\Model;
-use Illuminate\\Database\\Eloquent\\Relations\\BelongsTo;
-use Illuminate\\Support\\Carbon;
+use App\Modules\Business\Models\Business;
+use App\Modules\Subscription\Enums\SubscriptionStatus;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
