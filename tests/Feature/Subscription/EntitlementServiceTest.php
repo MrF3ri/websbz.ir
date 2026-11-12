@@ -64,6 +64,23 @@ class EntitlementServiceTest extends TestCase
         $this->assertNotEmpty($subscription->plan_version);
     }
 
+    public function test_plan_change_replaces_the_snapshot_and_its_version(): void
+    {
+        $business = $this->createBusiness();
+        $subscription = $this->attachSubscription($business, 'economic');
+        $originalVersion = $subscription->plan_version;
+        $topPlan = Plan::query()->where('code', 'top')->firstOrFail();
+
+        $subscription->update(['plan_id' => $topPlan->getKey()]);
+        $subscription->refresh();
+
+        $snapshot = $subscription->features_snapshot ?? [];
+
+        $this->assertTrue($snapshot['custom_domain'] ?? false);
+        $this->assertSame(-1, $snapshot['max_categories'] ?? null);
+        $this->assertNotSame($originalVersion, $subscription->plan_version);
+    }
+
     public function test_undefined_snapshot_feature_returns_null_limit_and_false_boolean(): void
     {
         $business = $this->createBusiness();
