@@ -11,7 +11,7 @@ class TenancyServiceProvider extends ServiceProvider
     {
         $this->app->scoped(
             CurrentBusiness::class,
-            fn (): CurrentBusiness => new CurrentBusiness()
+            fn (): CurrentBusiness => new CurrentBusiness
         );
     }
 }
