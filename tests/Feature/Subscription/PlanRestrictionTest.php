@@ -11,6 +11,7 @@ use Carbon\CarbonImmutable;
 use Database\Seeders\PlanSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Route;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Tests\TestCase;
 
@@ -99,7 +100,7 @@ class PlanRestrictionTest extends TestCase
 
         // This temporary route verifies Laravel's HTTP exception rendering only.
         // Consumer-module integration must be tested against real application routes.
-        \\Illuminate\\Support\\Facades\\Route::post('/dummy-enforcement', static function () use ($business, $enforcement) {
+        Route::post('/dummy-enforcement', static function () use ($business, $enforcement) {
             // The economic plan's product limit is 20; the current count is at capacity.
             $enforcement->requireLimit($business, 'max_products', 20);
 
