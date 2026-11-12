@@ -36,6 +36,28 @@ class Subscription extends Model
         'current_period_ends_at',
     ];
 
+    protected static function booted(): void
+    {
+        static::creating(function (Subscription $subscription): void {
+            if ($subscription->features_snapshot === null) {
+                $plan = Plan::query()
+                    ->with('features')
+                    ->findOrFail($subscription->plan_id);
+
+                $subscription->features_snapshot = $plan->features
+                    ->mapWithKeys(fn (PlanFeature $feature): array => [
+                        $feature->feature_key => $feature->value,
+                    ])
+                    ->all();
+            }
+
+            $subscription->plan_version ??= hash(
+                'sha256',
+                json_encode($subscription->features_snapshot, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES),
+            );
+        });
+    }
+
     /** @return BelongsTo<Business, $this> */
     public function business(): BelongsTo
     {
