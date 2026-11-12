@@ -4,19 +4,21 @@ namespace App\Modules\Subscription\Models;
 
 use App\Modules\Business\Models\Business;
 use App\Modules\Subscription\Enums\SubscriptionStatus;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
  * @property int $business_id
  * @property int $plan_id
  * @property SubscriptionStatus $status
- * @property \Illuminate\Support\Carbon|null $trial_ends_at
- * @property \Illuminate\Support\Carbon|null $current_period_starts_at
- * @property \Illuminate\Support\Carbon|null $current_period_ends_at
+ * @property Carbon|null $trial_ends_at
+ * @property Carbon|null $current_period_starts_at
+ * @property Carbon|null $current_period_ends_at
  *
- * @method static \Illuminate\Database\Eloquent\Builder<static> query()
+ * @method static Builder<static> query()
  */
 class Subscription extends Model
 {
