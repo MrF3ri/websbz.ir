@@ -4,9 +4,7 @@ namespace App\Modules\Subscription\Models;
 
 use App\Modules\Business\Models\Business;
 use App\Modules\Subscription\Enums\SubscriptionStatus;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property int $id
@@ -32,13 +30,13 @@ class Subscription extends Model
     ];
 
     /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Modules\Business\Models\Business, $this> */
-    public function business(): BelongsTo
+    public function business(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Business::class);
     }
 
     /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Modules\Subscription\Models\Plan, $this> */
-    public function plan(): BelongsTo
+    public function plan(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Plan::class);
     }
