@@ -1,11 +1,11 @@
 <?php
 
-namespace App\\Modules\\Subscription\\Services;
+namespace App\Modules\Subscription\Services;
 
-use App\\Modules\\Business\\Models\\Business;
-use App\\Modules\\Subscription\\Enums\\SubscriptionStatus;
-use App\\Modules\\Subscription\\Models\\Subscription;
-use Illuminate\\Support\\Carbon;
+use App\Modules\Business\Models\Business;
+use App\Modules\Subscription\Enums\SubscriptionStatus;
+use App\Modules\Subscription\Models\Subscription;
+use Illuminate\Support\Carbon;
 
 class EntitlementService
 {
