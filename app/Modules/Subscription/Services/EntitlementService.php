@@ -18,6 +18,14 @@ class EntitlementService
     ) {}
 
     /**
+     * Determine whether this service is bound to the supplied business.
+     */
+    public function isForBusiness(Business $business): bool
+    {
+        return $this->business->is($business);
+    }
+
+    /**
      * Determine whether the active subscription snapshot enables a boolean feature.
      */
     public function hasFeature(string $featureKey): bool
