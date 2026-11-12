@@ -82,16 +82,17 @@ class EntitlementService
     {
         $now = Carbon::now();
 
+        // Missing billing boundaries must never grant access indefinitely.
         if (
-            $subscription->current_period_starts_at !== null
-            && $subscription->current_period_starts_at->isAfter($now)
+            $subscription->current_period_starts_at === null
+            || $subscription->current_period_ends_at === null
         ) {
             return false;
         }
 
         if (
-            $subscription->current_period_ends_at !== null
-            && $subscription->current_period_ends_at->isPast()
+            $subscription->current_period_starts_at->isAfter($now)
+            || $subscription->current_period_ends_at->isPast()
         ) {
             return false;
         }

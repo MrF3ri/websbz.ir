@@ -14,8 +14,8 @@ return new class extends Migration
             $table->foreignId('plan_id')->constrained()->restrictOnDelete();
             $table->string('status');
             $table->dateTime('trial_ends_at')->nullable();
-            $table->dateTime('current_period_starts_at')->nullable();
-            $table->dateTime('current_period_ends_at')->nullable();
+            $table->dateTime('current_period_starts_at');
+            $table->dateTime('current_period_ends_at');
             $table->timestamps();
 
             $table->index(['business_id', 'id']);
