@@ -58,8 +58,9 @@ class EntitlementServiceTest extends TestCase
         $business = $this->createBusiness();
         $subscription = $this->attachSubscription($business, 'economic');
         $subscription->refresh();
+        $snapshot = $subscription->features_snapshot ?? [];
 
-        $this->assertSame(20, $subscription->features_snapshot['max_products']);
+        $this->assertSame(20, $snapshot['max_products'] ?? null);
         $this->assertNotEmpty($subscription->plan_version);
     }
 
@@ -112,7 +113,7 @@ class EntitlementServiceTest extends TestCase
     public function test_expired_subscription_does_not_grant_entitlements(): void
     {
         $business = $this->createBusiness();
-        $this->attachSubscription($business, 'top', periodEndsAt: now()->subSecond());
+        $this->attachSubscription($business, 'top', periodEndsAt: CarbonImmutable::now()->subSecond());
 
         $this->assertFalse((new EntitlementService($business))->hasFeature('custom_domain'));
     }
@@ -120,7 +121,7 @@ class EntitlementServiceTest extends TestCase
     public function test_subscription_that_has_not_started_does_not_grant_entitlements(): void
     {
         $business = $this->createBusiness();
-        $this->attachSubscription($business, 'top', periodStartsAt: now()->addSecond());
+        $this->attachSubscription($business, 'top', periodStartsAt: CarbonImmutable::now()->addSecond());
 
         $this->assertFalse((new EntitlementService($business))->hasFeature('custom_domain'));
     }
