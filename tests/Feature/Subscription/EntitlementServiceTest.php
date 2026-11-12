@@ -53,6 +53,15 @@ class EntitlementServiceTest extends TestCase
         $this->assertNull($entitlements->getLimit('max_products'));
     }
 
+    public function test_subscription_creation_captures_a_versioned_plan_snapshot(): void
+    {
+        $business = $this->createBusiness();
+        $subscription = $this->attachSubscription($business, 'economic')->fresh();
+
+        $this->assertSame(20, $subscription->features_snapshot['max_products']);
+        $this->assertNotEmpty($subscription->plan_version);
+    }
+
     public function test_undefined_snapshot_feature_returns_null_limit_and_false_boolean(): void
     {
         $business = $this->createBusiness();
@@ -202,18 +211,11 @@ class EntitlementServiceTest extends TestCase
             ->where('code', $planCode)
             ->firstOrFail();
 
-        $featuresSnapshot = $snapshot ?? $plan->features
-            ->mapWithKeys(fn (PlanFeature $feature): array => [
-                $feature->feature_key => $feature->value,
-            ])
-            ->all();
-
         return Subscription::query()->create([
             'business_id' => $business->getKey(),
             'plan_id' => $plan->getKey(),
             'status' => $status,
-            'features_snapshot' => $featuresSnapshot,
-            'plan_version' => PlanSeeder::PLAN_VERSION,
+            'features_snapshot' => $snapshot,
             'trial_ends_at' => $trialEndsAt,
             'current_period_starts_at' => $periodStartsAt ?? CarbonImmutable::now()->subDay(),
             'current_period_ends_at' => $periodEndsAt ?? CarbonImmutable::now()->addMonth(),
