@@ -9,7 +9,7 @@ use App\Modules\Subscription\Models\Subscription;
 use App\Modules\Subscription\Services\EntitlementService;
 use Database\Seeders\PlanSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Carbon;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -163,9 +163,9 @@ class EntitlementServiceTest extends TestCase
         Business $business,
         string $planCode,
         SubscriptionStatus $status = SubscriptionStatus::Active,
-        ?Carbon $periodStartsAt = null,
-        ?Carbon $periodEndsAt = null,
-        ?Carbon $trialEndsAt = null,
+        ?CarbonImmutable $periodStartsAt = null,
+        ?CarbonImmutable $periodEndsAt = null,
+        ?CarbonImmutable $trialEndsAt = null,
     ): Subscription {
         $plan = Plan::query()
             ->where('code', $planCode)
