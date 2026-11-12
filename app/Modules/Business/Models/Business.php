@@ -30,7 +30,11 @@ class Business extends Model
 {
     use HasFactory;
 
-    /** @var list<string> */
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
     protected $fillable = [
         'name',
         'slug',
@@ -42,11 +46,18 @@ class Business extends Model
         'postal_code',
     ];
 
-    /** @var array<string, mixed> */
+    /**
+     * The model's default attribute values.
+     *
+     * @var array<string, mixed>
+     */
     protected $attributes = [
         'status' => BusinessStatus::Active->value,
     ];
 
+    /**
+     * Bootstrap the model and register its creation hooks.
+     */
     protected static function booted(): void
     {
         static::creating(function (self $business): void {
@@ -56,13 +67,21 @@ class Business extends Model
         });
     }
 
-    /** @return HasMany<BusinessMember, $this> */
+    /**
+     * Get the business membership records.
+     *
+     * @return HasMany<BusinessMember, $this>
+     */
     public function members(): HasMany
     {
         return $this->hasMany(BusinessMember::class);
     }
 
-    /** @return BelongsToMany<User, $this, BusinessMember> */
+    /**
+     * Get the users belonging to the business.
+     *
+     * @return BelongsToMany<User, $this, BusinessMember>
+     */
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'business_members')
@@ -71,13 +90,21 @@ class Business extends Model
             ->withTimestamps();
     }
 
-    /** @return HasMany<Subscription, $this> */
+    /**
+     * Get the business subscriptions.
+     *
+     * @return HasMany<Subscription, $this>
+     */
     public function subscriptions(): HasMany
     {
         return $this->hasMany(Subscription::class);
     }
 
-    /** @return array<string, string> */
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
     protected function casts(): array
     {
         return [
