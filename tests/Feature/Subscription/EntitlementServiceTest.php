@@ -219,7 +219,7 @@ class EntitlementServiceTest extends TestCase
     }
 
     /**
-     * @param array<string, mixed>|null $snapshot
+     * @param  array<string, mixed>|null  $snapshot
      */
     private function attachSubscription(
         Business $business,
