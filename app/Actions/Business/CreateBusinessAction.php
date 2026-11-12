@@ -19,7 +19,7 @@ class CreateBusinessAction
      */
     public function execute(User $user, array $data): Business
     {
-        $name = trim($data['name'] ?? '');
+        $name = trim($data['name']);
 
         if ($name === '') {
             throw ValidationException::withMessages([
