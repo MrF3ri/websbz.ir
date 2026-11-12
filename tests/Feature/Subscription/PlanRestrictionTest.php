@@ -10,6 +10,7 @@ use App\Modules\Subscription\Services\EntitlementService;
 use Carbon\CarbonImmutable;
 use Database\Seeders\PlanSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Tests\TestCase;
@@ -90,6 +91,23 @@ class PlanRestrictionTest extends TestCase
         $this->expectException(AccessDeniedHttpException::class);
 
         $this->enforcementFor($business)->requireLimit($business, 'max_products', 20);
+    }
+
+    public function test_enforcement_service_throws_403_in_http_context(): void
+    {
+        $business = $this->createBusinessWithPlan('economic');
+        $enforcement = $this->enforcementFor($business);
+
+        // This temporary route verifies Laravel's HTTP exception rendering only.
+        // Consumer-module integration must be tested against real application routes.
+        Route::post('/dummy-enforcement', static function () use ($business, $enforcement) {
+            // The economic plan's product limit is 20; the current count is at capacity.
+            $enforcement->requireLimit($business, 'max_products', 20);
+
+            return response()->json(['message' => 'Product Created']);
+        });
+
+        $this->postJson('/dummy-enforcement')->assertForbidden();
     }
 
     private function createBusinessWithPlan(string $planCode): Business
