@@ -33,7 +33,10 @@ class BusinessOnboardingController
             return to_route('dashboard');
         }
 
-        $action->execute($user, $request->validated());
+        /** @var array{name: string} $data */
+        $data = $request->validated();
+
+        $action->execute($user, $data);
 
         return to_route('dashboard')->with(
             'success',
