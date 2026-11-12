@@ -12,12 +12,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $id
  * @property int $business_id
  * @property int $plan_id
- * @property SubscriptionStatus $status
+ * @property \App\Modules\Subscription\Enums\SubscriptionStatus $status
  * @property \Illuminate\Support\Carbon|null $trial_ends_at
  * @property \Illuminate\Support\Carbon|null $current_period_starts_at
  * @property \Illuminate\Support\Carbon|null $current_period_ends_at
  *
- * @method static Builder<static> query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static> query()
  */
 class Subscription extends Model
 {
@@ -31,13 +31,13 @@ class Subscription extends Model
         'current_period_ends_at',
     ];
 
-    /** @return BelongsTo<Business, $this> */
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Modules\Business\Models\Business, $this> */
     public function business(): BelongsTo
     {
         return $this->belongsTo(Business::class);
     }
 
-    /** @return BelongsTo<Plan, $this> */
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Modules\Subscription\Models\Plan, $this> */
     public function plan(): BelongsTo
     {
         return $this->belongsTo(Plan::class);
