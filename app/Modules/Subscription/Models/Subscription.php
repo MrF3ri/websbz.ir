@@ -1,19 +1,21 @@
 <?php
 
-namespace App\Modules\Subscription\Models;
+namespace App\\Modules\\Subscription\\Models;
 
-use App\Modules\Business\Models\Business;
-use App\Modules\Subscription\Enums\SubscriptionStatus;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Carbon;
+use App\\Modules\\Business\\Models\\Business;
+use App\\Modules\\Subscription\\Enums\\SubscriptionStatus;
+use Illuminate\\Database\\Eloquent\\Builder;
+use Illuminate\\Database\\Eloquent\\Model;
+use Illuminate\\Database\\Eloquent\\Relations\\BelongsTo;
+use Illuminate\\Support\\Carbon;
 
 /**
  * @property int $id
  * @property int $business_id
  * @property int $plan_id
  * @property SubscriptionStatus $status
+ * @property array<string, mixed>|null $features_snapshot
+ * @property string|null $plan_version
  * @property Carbon|null $trial_ends_at
  * @property Carbon|null $current_period_starts_at
  * @property Carbon|null $current_period_ends_at
@@ -27,6 +29,8 @@ class Subscription extends Model
         'business_id',
         'plan_id',
         'status',
+        'features_snapshot',
+        'plan_version',
         'trial_ends_at',
         'current_period_starts_at',
         'current_period_ends_at',
@@ -49,6 +53,7 @@ class Subscription extends Model
     {
         return [
             'status' => SubscriptionStatus::class,
+            'features_snapshot' => 'array',
             'trial_ends_at' => 'datetime',
             'current_period_starts_at' => 'datetime',
             'current_period_ends_at' => 'datetime',
