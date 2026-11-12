@@ -1,18 +1,18 @@
 <?php
 
-namespace Tests\\Feature\\Subscription;
+namespace Tests\Feature\Subscription;
 
-use App\\Modules\\Business\\Models\\Business;
-use App\\Modules\\Subscription\\Enums\\SubscriptionStatus;
-use App\\Modules\\Subscription\\Models\\Plan;
-use App\\Modules\\Subscription\\Models\\PlanFeature;
-use App\\Modules\\Subscription\\Models\\Subscription;
-use App\\Modules\\Subscription\\Services\\EntitlementService;
-use Carbon\\CarbonImmutable;
-use Database\\Seeders\\PlanSeeder;
-use Illuminate\\Foundation\\Testing\\RefreshDatabase;
-use Illuminate\\Support\\Str;
-use Tests\\TestCase;
+use App\Modules\Business\Models\Business;
+use App\Modules\Subscription\Enums\SubscriptionStatus;
+use App\Modules\Subscription\Models\Plan;
+use App\Modules\Subscription\Models\PlanFeature;
+use App\Modules\Subscription\Models\Subscription;
+use App\Modules\Subscription\Services\EntitlementService;
+use Carbon\CarbonImmutable;
+use Database\Seeders\PlanSeeder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
+use Tests\TestCase;
 
 class EntitlementServiceTest extends TestCase
 {
@@ -56,7 +56,8 @@ class EntitlementServiceTest extends TestCase
     public function test_subscription_creation_captures_a_versioned_plan_snapshot(): void
     {
         $business = $this->createBusiness();
-        $subscription = $this->attachSubscription($business, 'economic')->fresh();
+        $subscription = $this->attachSubscription($business, 'economic');
+        $subscription->refresh();
 
         $this->assertSame(20, $subscription->features_snapshot['max_products']);
         $this->assertNotEmpty($subscription->plan_version);
@@ -68,12 +69,16 @@ class EntitlementServiceTest extends TestCase
         $this->attachSubscription(
             $business,
             'economic',
-            snapshot: ['max_products' => 20],
+            snapshot: [
+                'max_products' => 20,
+                'explicitly_undefined' => null,
+            ],
         );
 
         $entitlements = new EntitlementService($business);
 
         $this->assertNull($entitlements->getLimit('not_configured'));
+        $this->assertNull($entitlements->getLimit('explicitly_undefined'));
         $this->assertFalse($entitlements->hasFeature('not_configured'));
     }
 
