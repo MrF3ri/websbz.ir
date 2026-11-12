@@ -26,6 +26,13 @@ export default defineConfig({
         }),
     ],
     server: {
+        host: process.env.VITE_DEV_SERVER_HOST ?? 'localhost',
+        ...(process.env.VITE_DEV_SERVER_ORIGIN
+            ? { origin: process.env.VITE_DEV_SERVER_ORIGIN }
+            : {}),
+        ...(process.env.VITE_HMR_HOST
+            ? { hmr: { host: process.env.VITE_HMR_HOST } }
+            : {}),
         watch: {
             ignored: [
                 '**/.agents/**',

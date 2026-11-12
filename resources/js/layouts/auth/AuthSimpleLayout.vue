@@ -10,34 +10,47 @@ defineProps<{
 </script>
 
 <template>
-    <div
-        class="flex min-h-svh flex-col items-center justify-center gap-6 bg-background p-6 md:p-10"
+    <main
+        dir="rtl"
+        class="relative flex min-h-svh flex-col items-center justify-center overflow-hidden bg-muted/40 px-4 py-10 sm:px-6 lg:px-8"
     >
-        <div class="w-full max-w-sm">
-            <div class="flex flex-col gap-8">
-                <div class="flex flex-col items-center gap-4">
-                    <Link
-                        :href="home()"
-                        class="flex flex-col items-center gap-2 font-medium"
-                    >
-                        <div
-                            class="mb-1 flex h-9 w-9 items-center justify-center rounded-md"
-                        >
-                            <AppLogoIcon
-                                class="size-9 fill-current text-[var(--foreground)] dark:text-white"
-                            />
-                        </div>
-                        <span class="sr-only">{{ title }}</span>
-                    </Link>
-                    <div class="space-y-2 text-center">
-                        <h1 class="text-xl font-medium">{{ title }}</h1>
-                        <p class="text-center text-sm text-muted-foreground">
-                            {{ description }}
-                        </p>
-                    </div>
+        <div
+            aria-hidden="true"
+            class="pointer-events-none absolute inset-x-0 top-0 h-72 bg-gradient-to-b from-primary/10 via-primary/5 to-transparent"
+        />
+
+        <div class="relative z-10 w-full max-w-md">
+            <div class="mb-7 flex flex-col items-center gap-3 text-center">
+                <Link
+                    :href="home()"
+                    class="flex size-14 items-center justify-center rounded-2xl border border-border/70 bg-background shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                    aria-label="صفحه اصلی"
+                >
+                    <AppLogoIcon class="size-9 fill-current text-foreground" />
+                </Link>
+
+                <div class="space-y-2">
+                    <p class="text-xs font-semibold tracking-[0.18em] text-primary">
+                        WEB SBZ
+                    </p>
+                    <h1 class="text-2xl font-bold tracking-tight text-foreground">
+                        {{ title }}
+                    </h1>
+                    <p class="mx-auto max-w-sm text-sm leading-7 text-muted-foreground">
+                        {{ description }}
+                    </p>
                 </div>
-                <slot />
             </div>
+
+            <section
+                class="rounded-2xl border border-border/70 bg-card p-5 shadow-xl shadow-black/[0.03] sm:p-7"
+            >
+                <slot />
+            </section>
+
+            <p class="mt-6 text-center text-xs text-muted-foreground">
+                © {{ new Date().getFullYear() }} وب‌سبز. تمامی حقوق محفوظ است.
+            </p>
         </div>
-    </div>
+    </main>
 </template>

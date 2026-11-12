@@ -55,7 +55,7 @@ const activeItemStyles =
 
 const mainNavItems: NavItem[] = [
     {
-        title: 'Dashboard',
+        title: 'داشبورد',
         href: dashboard(),
         icon: LayoutGrid,
     },
@@ -63,12 +63,12 @@ const mainNavItems: NavItem[] = [
 
 const rightNavItems: NavItem[] = [
     {
-        title: 'Repository',
+        title: 'مخزن کد',
         href: 'https://github.com/laravel/vue-starter-kit',
         icon: Folder,
     },
     {
-        title: 'Documentation',
+        title: 'مستندات',
         href: 'https://laravel.com/docs/starter-kits#vue',
         icon: BookOpen,
     },
@@ -76,68 +76,45 @@ const rightNavItems: NavItem[] = [
 </script>
 
 <template>
-    <div>
+    <div dir="rtl">
         <div class="border-b border-sidebar-border/80">
-            <div class="mx-auto flex h-16 items-center px-4 md:max-w-7xl">
-                <!-- Mobile Menu -->
+            <div class="mx-auto flex h-16 items-center gap-3 px-4 md:max-w-7xl">
                 <div class="lg:hidden">
                     <Sheet>
                         <SheetTrigger :as-child="true">
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                class="mr-2 h-9 w-9"
-                            >
-                                <Menu class="h-5 w-5" />
+                            <Button variant="ghost" size="icon" class="h-9 w-9">
+                                <Menu class="size-5" />
+                                <span class="sr-only">باز کردن منو</span>
                             </Button>
                         </SheetTrigger>
-                        <SheetContent side="left" class="w-[300px] p-6">
-                            <SheetTitle class="sr-only"
-                                >Navigation menu</SheetTitle
-                            >
-                            <SheetHeader class="flex justify-start text-left">
-                                <AppLogoIcon
-                                    class="size-6 fill-current text-black dark:text-white"
-                                />
+                        <SheetContent side="right" class="w-[300px] p-6">
+                            <SheetTitle class="sr-only">منوی اصلی</SheetTitle>
+                            <SheetHeader class="flex justify-start text-right">
+                                <AppLogoIcon class="size-6 fill-current text-black dark:text-white" />
                             </SheetHeader>
-                            <div
-                                class="flex h-full flex-1 flex-col justify-between space-y-4 py-6"
-                            >
-                                <nav class="-mx-3 space-y-1">
+                            <div class="flex h-full flex-1 flex-col justify-between space-y-4 py-6">
+                                <nav class="space-y-1">
                                     <Link
                                         v-for="item in mainNavItems"
                                         :key="item.title"
                                         :href="item.href"
-                                        class="flex items-center gap-x-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent"
-                                        :class="
-                                            whenCurrentUrl(
-                                                item.href,
-                                                activeItemStyles,
-                                            )
-                                        "
+                                        class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent"
+                                        :class="whenCurrentUrl(item.href, activeItemStyles)"
                                     >
-                                        <component
-                                            v-if="item.icon"
-                                            :is="item.icon"
-                                            class="h-5 w-5"
-                                        />
+                                        <component v-if="item.icon" :is="item.icon" class="size-5 shrink-0" />
                                         {{ item.title }}
                                     </Link>
                                 </nav>
-                                <div class="flex flex-col space-y-4">
+                                <div class="flex flex-col gap-4">
                                     <a
                                         v-for="item in rightNavItems"
                                         :key="item.title"
                                         :href="toUrl(item.href)"
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        class="flex items-center space-x-2 text-sm font-medium"
+                                        class="flex items-center gap-2 text-sm font-medium"
                                     >
-                                        <component
-                                            v-if="item.icon"
-                                            :is="item.icon"
-                                            class="h-5 w-5"
-                                        />
+                                        <component v-if="item.icon" :is="item.icon" class="size-5" />
                                         <span>{{ item.title }}</span>
                                     </a>
                                 </div>
@@ -146,65 +123,47 @@ const rightNavItems: NavItem[] = [
                     </Sheet>
                 </div>
 
-                <Link :href="dashboard()" class="flex items-center gap-x-2">
+                <Link :href="dashboard()" class="flex items-center gap-2">
                     <AppLogo />
                 </Link>
 
-                <!-- Desktop Menu -->
-                <div class="hidden h-full lg:flex lg:flex-1">
-                    <NavigationMenu class="ml-10 flex h-full items-stretch">
-                        <NavigationMenuList
-                            class="flex h-full items-stretch space-x-2"
-                        >
+                <div class="hidden h-full flex-1 lg:flex">
+                    <NavigationMenu class="me-10 flex h-full items-stretch">
+                        <NavigationMenuList class="flex h-full items-stretch gap-2">
                             <NavigationMenuItem
-                                v-for="(item, index) in mainNavItems"
-                                :key="index"
+                                v-for="item in mainNavItems"
+                                :key="item.title"
                                 class="relative flex h-full items-center"
                             >
                                 <Link
                                     :class="[
                                         navigationMenuTriggerStyle(),
-                                        whenCurrentUrl(
-                                            item.href,
-                                            activeItemStyles,
-                                        ),
+                                        whenCurrentUrl(item.href, activeItemStyles),
                                         'h-9 cursor-pointer px-3',
                                     ]"
                                     :href="item.href"
                                 >
-                                    <component
-                                        v-if="item.icon"
-                                        :is="item.icon"
-                                        class="mr-2 h-4 w-4"
-                                    />
+                                    <component v-if="item.icon" :is="item.icon" class="me-2 size-4" />
                                     {{ item.title }}
                                 </Link>
                                 <div
                                     v-if="isCurrentUrl(item.href)"
-                                    class="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-black dark:bg-white"
-                                ></div>
+                                    class="absolute inset-x-0 bottom-0 h-0.5 translate-y-px bg-black dark:bg-white"
+                                />
                             </NavigationMenuItem>
                         </NavigationMenuList>
                     </NavigationMenu>
                 </div>
 
-                <div class="ml-auto flex items-center space-x-2">
-                    <div class="relative flex items-center space-x-1">
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            class="group h-9 w-9 cursor-pointer"
-                        >
-                            <Search
-                                class="size-5 opacity-80 group-hover:opacity-100"
-                            />
+                <div class="ms-auto flex items-center gap-2">
+                    <div class="relative flex items-center gap-1">
+                        <Button variant="ghost" size="icon" class="group size-9 cursor-pointer">
+                            <Search class="size-5 opacity-80 group-hover:opacity-100" />
+                            <span class="sr-only">جستجو</span>
                         </Button>
 
-                        <div class="hidden space-x-1 lg:flex">
-                            <template
-                                v-for="item in rightNavItems"
-                                :key="item.title"
-                            >
+                        <div class="hidden gap-1 lg:flex">
+                            <template v-for="item in rightNavItems" :key="item.title">
                                 <TooltipProvider :delay-duration="0">
                                     <Tooltip>
                                         <TooltipTrigger>
@@ -212,20 +171,11 @@ const rightNavItems: NavItem[] = [
                                                 variant="ghost"
                                                 size="icon"
                                                 as-child
-                                                class="group h-9 w-9 cursor-pointer"
+                                                class="group size-9 cursor-pointer"
                                             >
-                                                <a
-                                                    :href="toUrl(item.href)"
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                >
-                                                    <span class="sr-only">{{
-                                                        item.title
-                                                    }}</span>
-                                                    <component
-                                                        :is="item.icon"
-                                                        class="size-5 opacity-80 group-hover:opacity-100"
-                                                    />
+                                                <a :href="toUrl(item.href)" target="_blank" rel="noopener noreferrer">
+                                                    <span class="sr-only">{{ item.title }}</span>
+                                                    <component :is="item.icon" class="size-5 opacity-80 group-hover:opacity-100" />
                                                 </a>
                                             </Button>
                                         </TooltipTrigger>
@@ -245,23 +195,19 @@ const rightNavItems: NavItem[] = [
                                 size="icon"
                                 class="relative size-10 w-auto rounded-full p-1 focus-within:ring-2 focus-within:ring-primary"
                             >
-                                <Avatar
-                                    class="size-8 overflow-hidden rounded-full"
-                                >
+                                <Avatar class="size-8 overflow-hidden rounded-full">
                                     <AvatarImage
                                         v-if="auth.user.avatar"
                                         :src="auth.user.avatar"
                                         :alt="auth.user.name"
                                     />
-                                    <AvatarFallback
-                                        class="rounded-lg bg-neutral-200 font-semibold text-black dark:bg-neutral-700 dark:text-white"
-                                    >
+                                    <AvatarFallback class="rounded-lg bg-neutral-200 font-semibold text-black dark:bg-neutral-700 dark:text-white">
                                         {{ getInitials(auth.user?.name) }}
                                     </AvatarFallback>
                                 </Avatar>
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" class="w-56">
+                        <DropdownMenuContent align="start" class="w-56">
                             <UserMenuContent :user="auth.user" />
                         </DropdownMenuContent>
                     </DropdownMenu>
@@ -273,9 +219,7 @@ const rightNavItems: NavItem[] = [
             v-if="props.breadcrumbs.length > 1"
             class="flex w-full border-b border-sidebar-border/70"
         >
-            <div
-                class="mx-auto flex h-12 w-full items-center justify-start px-4 text-neutral-500 md:max-w-7xl"
-            >
+            <div class="mx-auto flex h-12 w-full items-center justify-start px-4 text-neutral-500 md:max-w-7xl">
                 <Breadcrumbs :breadcrumbs="breadcrumbs" />
             </div>
         </div>

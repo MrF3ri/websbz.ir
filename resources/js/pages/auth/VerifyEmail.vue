@@ -8,9 +8,8 @@ import { send } from '@/routes/verification';
 
 defineOptions({
     layout: {
-        title: 'Email verification',
-        description:
-            'Please verify your email address by clicking on the link we just emailed to you.',
+        title: 'تأیید آدرس ایمیل',
+        description: 'برای فعال‌سازی حساب کاربری، لینک ارسال‌شده به ایمیل خود را باز کنید.',
     },
 });
 
@@ -20,28 +19,47 @@ defineProps<{
 </script>
 
 <template>
-    <Head title="Email verification" />
+    <Head title="تأیید آدرس ایمیل" />
 
     <div
         v-if="status === 'verification-link-sent'"
-        class="mb-4 text-center text-sm font-medium text-green-600"
+        dir="rtl"
+        class="mb-5 rounded-lg border border-green-500/20 bg-green-500/10 px-4 py-3 text-right text-sm leading-6 text-green-700 dark:text-green-400"
+        role="status"
     >
-        A new verification link has been sent to the email address you provided
-        during registration.
+        لینک تأیید جدیدی به آدرس ایمیل شما ارسال شد. لطفاً صندوق ورودی خود را بررسی کنید.
+    </div>
+
+    <div
+        dir="rtl"
+        class="mb-6 rounded-lg bg-muted/60 px-4 py-4 text-right text-sm leading-7 text-muted-foreground"
+    >
+        <p>
+            برای ادامه استفاده از امکانات پلتفرم، ابتدا آدرس ایمیل خود را تأیید کنید.
+            اگر ایمیل را دریافت نکرده‌اید، می‌توانید دوباره درخواست ارسال لینک بدهید.
+        </p>
     </div>
 
     <Form
         v-bind="send.form()"
-        class="space-y-6 text-center"
+        class="space-y-5 text-center"
         v-slot="{ processing }"
     >
-        <Button :disabled="processing" variant="secondary">
+        <Button
+            type="submit"
+            class="w-full"
+            :disabled="processing"
+        >
             <Spinner v-if="processing" />
-            Resend verification email
+            {{ processing ? 'در حال ارسال...' : 'ارسال مجدد ایمیل تأیید' }}
         </Button>
 
-        <TextLink :href="logout()" as="button" class="mx-auto block text-sm">
-            Log out
+        <TextLink
+            :href="logout()"
+            as="button"
+            class="mx-auto block text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
+        >
+            خروج از حساب کاربری
         </TextLink>
     </Form>
 </template>

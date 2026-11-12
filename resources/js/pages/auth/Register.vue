@@ -10,9 +10,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { login } from '@/routes';
 import { store } from '@/routes/register';
 
-defineProps<{
-    passwordRules: string;
-}>();
+defineProps<{ passwordRules: string }>();
 
 defineOptions({
     layout: {
@@ -32,17 +30,17 @@ defineOptions({
         dir="rtl"
         class="flex flex-col gap-6 text-right"
     >
-        <div class="grid gap-6">
+        <div class="grid gap-5">
             <div class="grid gap-2">
                 <Label for="name">نام و نام خانوادگی</Label>
                 <Input
                     id="name"
+                    name="name"
                     type="text"
                     required
                     v-focus
                     :tabindex="1"
                     autocomplete="name"
-                    name="name"
                     placeholder="نام و نام خانوادگی خود را وارد کنید"
                     class="text-right"
                     :disabled="processing"
@@ -54,11 +52,11 @@ defineOptions({
                 <Label for="email">آدرس ایمیل</Label>
                 <Input
                     id="email"
+                    name="email"
                     type="email"
                     required
                     :tabindex="2"
                     autocomplete="email"
-                    name="email"
                     placeholder="name@example.com"
                     dir="ltr"
                     class="text-left"
@@ -71,12 +69,13 @@ defineOptions({
                 <Label for="password">رمز عبور</Label>
                 <PasswordInput
                     id="password"
+                    name="password"
                     required
                     :tabindex="3"
                     autocomplete="new-password"
-                    name="password"
                     placeholder="رمز عبور خود را وارد کنید"
                     :passwordrules="passwordRules"
+                    :disabled="processing"
                 />
                 <InputError :message="errors.password" />
             </div>
@@ -85,19 +84,20 @@ defineOptions({
                 <Label for="password_confirmation">تکرار رمز عبور</Label>
                 <PasswordInput
                     id="password_confirmation"
+                    name="password_confirmation"
                     required
                     :tabindex="4"
                     autocomplete="new-password"
-                    name="password_confirmation"
                     placeholder="رمز عبور را دوباره وارد کنید"
                     :passwordrules="passwordRules"
+                    :disabled="processing"
                 />
                 <InputError :message="errors.password_confirmation" />
             </div>
 
             <Button
                 type="submit"
-                class="mt-2 w-full"
+                class="mt-1 w-full"
                 :tabindex="5"
                 :disabled="processing"
                 data-test="register-user-button"
@@ -107,15 +107,15 @@ defineOptions({
             </Button>
         </div>
 
-        <div class="text-center text-sm text-muted-foreground">
+        <p class="text-center text-sm leading-6 text-muted-foreground">
             قبلاً ثبت‌نام کرده‌اید؟
             <TextLink
                 :href="login()"
-                class="underline underline-offset-4"
+                class="font-medium text-primary underline underline-offset-4"
                 :tabindex="6"
             >
                 ورود به حساب کاربری
             </TextLink>
-        </div>
+        </p>
     </Form>
 </template>
