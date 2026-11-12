@@ -92,6 +92,22 @@ class EntitlementServiceTest extends TestCase
         $this->assertFalse((new EntitlementService($business))->hasFeature('custom_domain'));
     }
 
+    public function test_expired_status_does_not_grant_entitlements(): void
+    {
+        $business = $this->createBusiness();
+        $this->attachSubscription($business, 'top', SubscriptionStatus::Expired);
+
+        $this->assertFalse((new EntitlementService($business))->hasFeature('custom_domain'));
+    }
+
+    public function test_trialing_subscription_without_trial_end_does_not_grant_entitlements(): void
+    {
+        $business = $this->createBusiness();
+        $this->attachSubscription($business, 'top', SubscriptionStatus::Trialing);
+
+        $this->assertFalse((new EntitlementService($business))->hasFeature('custom_domain'));
+    }
+
     public function test_inactive_plan_does_not_grant_entitlements(): void
     {
         $business = $this->createBusiness();
