@@ -1,15 +1,17 @@
 <?php
 
-namespace Database\Seeders;
+namespace Database\\Seeders;
 
-use App\Modules\Subscription\Models\Plan;
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+use App\\Modules\\Subscription\\Models\\Plan;
+use Illuminate\\Database\\Seeder;
+use Illuminate\\Support\\Facades\\DB;
 
 class PlanSeeder extends Seeder
 {
+    public const PLAN_VERSION = '1.0.0';
+
     /**
-     * Seed the three subscription plans and their exact feature definitions.
+     * Seed all approved plan features as a complete feature matrix.
      */
     public function run(): void
     {
@@ -24,6 +26,29 @@ class PlanSeeder extends Seeder
                     'max_product_images' => 0,
                     'max_branches' => 1,
                     'max_languages' => 1,
+                    'custom_domain' => false,
+                    'custom_design' => false,
+                    'product_discount' => false,
+                    'product_availability_toggle' => false,
+                    'product_video' => false,
+                    'product_reviews' => false,
+                    'product_likes' => false,
+                    'instagram_integration' => false,
+                    'excel_export' => false,
+                    'backup' => false,
+                    'notifications' => false,
+                    'initial_setup' => false,
+                    'map_location' => false,
+                    'social_links' => false,
+                    'whatsapp_link' => false,
+                    'business_logo' => false,
+                    'custom_colors' => false,
+                    'font_selection' => false,
+                    'dark_mode' => false,
+                    'product_labels' => false,
+                    'image_slider' => false,
+                    'advertising_banner' => false,
+                    'business_introduction' => false,
                 ],
             ],
             [
@@ -36,8 +61,29 @@ class PlanSeeder extends Seeder
                     'max_product_images' => 1,
                     'max_branches' => 1,
                     'max_languages' => 1,
+                    'custom_domain' => false,
+                    'custom_design' => false,
                     'product_discount' => true,
-                    'availability_control' => true,
+                    'product_availability_toggle' => true,
+                    'product_video' => false,
+                    'product_reviews' => false,
+                    'product_likes' => false,
+                    'instagram_integration' => false,
+                    'excel_export' => false,
+                    'backup' => false,
+                    'notifications' => false,
+                    'initial_setup' => false,
+                    'map_location' => true,
+                    'social_links' => true,
+                    'whatsapp_link' => true,
+                    'business_logo' => true,
+                    'custom_colors' => true,
+                    'font_selection' => true,
+                    'dark_mode' => true,
+                    'product_labels' => true,
+                    'image_slider' => true,
+                    'advertising_banner' => true,
+                    'business_introduction' => true,
                 ],
             ],
             [
@@ -51,7 +97,28 @@ class PlanSeeder extends Seeder
                     'max_branches' => 2,
                     'max_languages' => 3,
                     'custom_domain' => true,
+                    'custom_design' => true,
+                    'product_discount' => true,
+                    'product_availability_toggle' => true,
                     'product_video' => true,
+                    'product_reviews' => true,
+                    'product_likes' => true,
+                    'instagram_integration' => true,
+                    'excel_export' => true,
+                    'backup' => true,
+                    'notifications' => true,
+                    'initial_setup' => true,
+                    'map_location' => true,
+                    'social_links' => true,
+                    'whatsapp_link' => true,
+                    'business_logo' => true,
+                    'custom_colors' => true,
+                    'font_selection' => true,
+                    'dark_mode' => true,
+                    'product_labels' => true,
+                    'image_slider' => true,
+                    'advertising_banner' => true,
+                    'business_introduction' => true,
                 ],
             ],
         ];
