@@ -47,8 +47,8 @@ class EntitlementService
 
         $limit = $value + 0;
 
-        // -1 is the specification's sentinel for an unlimited allowance.
-        if ($limit === -1) {
+        // Both integer and floating-point -1 values represent unlimited.
+        if ($limit === -1 || $limit === -1.0) {
             return null;
         }
 
