@@ -1,88 +1,78 @@
 <?php
 
-namespace App\Modules\Subscription\Services;
+namespace App\\Modules\\Subscription\\Services;
 
-use App\Modules\Business\Models\Business;
-use App\Modules\Subscription\Enums\SubscriptionStatus;
-use App\Modules\Subscription\Models\Plan;
-use App\Modules\Subscription\Models\Subscription;
-use Illuminate\Support\Carbon;
+use App\\Modules\\Business\\Models\\Business;
+use App\\Modules\\Subscription\\Enums\\SubscriptionStatus;
+use App\\Modules\\Subscription\\Models\\Subscription;
+use Illuminate\\Support\\Carbon;
 
 class EntitlementService
 {
     private bool $subscriptionResolved = false;
 
-    private ?Subscription $currentSubscription = null;
+    private ?Subscription $activeSubscription = null;
 
     public function __construct(
         private readonly Business $business,
     ) {}
 
     /**
-     * Determine whether the current plan enables a boolean feature.
+     * Determine whether the active subscription snapshot enables a boolean feature.
      */
     public function hasFeature(string $featureKey): bool
     {
-        $value = $this->currentPlan()
-            ?->features
-            ->firstWhere('feature_key', $featureKey)
-            ?->value;
+        $value = $this->activeSubscription()?->features_snapshot[$featureKey] ?? null;
 
         return $value === true;
     }
 
     /**
-     * Return a numeric feature limit, or null when it is unlimited/not defined.
+     * Return a numeric limit. -1 means unlimited; null means unavailable or undefined.
      */
     public function getLimit(string $featureKey): int|float|null
     {
-        $value = $this->currentPlan()
-            ?->features
-            ->firstWhere('feature_key', $featureKey)
-            ?->value;
+        $value = $this->activeSubscription()?->features_snapshot[$featureKey] ?? null;
 
-        if (! is_numeric($value)) {
+        if (! is_int($value) && ! is_float($value)) {
             return null;
         }
 
-        $limit = $value + 0;
-
-        // Both integer and floating-point -1 values represent unlimited.
-        if ($limit === -1 || $limit === -1.0) {
-            return null;
-        }
-
-        return $limit;
+        return $value;
     }
 
-    private function currentPlan(): ?Plan
+    private function activeSubscription(): ?Subscription
     {
-        if (! $this->subscriptionResolved) {
-            $this->currentSubscription = $this->business
-                ->subscriptions()
-                ->with('plan.features')
-                ->latest('id')
-                ->first();
-
-            $this->subscriptionResolved = true;
+        if ($this->subscriptionResolved) {
+            return $this->activeSubscription;
         }
 
-        $subscription = $this->currentSubscription;
+        $this->activeSubscription = $this->business
+            ->subscriptions()
+            ->with('plan:id,is_active')
+            ->latest('id')
+            ->first();
 
-        if (! $subscription || ! $this->isValid($subscription)) {
-            return null;
+        $this->subscriptionResolved = true;
+
+        $subscription = $this->activeSubscription;
+
+        if (
+            ! $subscription
+            || ! $this->isValid($subscription)
+            || ! $subscription->plan?->is_active
+            || ! is_array($subscription->features_snapshot)
+        ) {
+            $this->activeSubscription = null;
         }
 
-        $plan = $subscription->plan;
-
-        return $plan instanceof Plan && $plan->is_active ? $plan : null;
+        return $this->activeSubscription;
     }
 
     private function isValid(Subscription $subscription): bool
     {
         $now = Carbon::now();
 
-        // Missing billing boundaries must never grant access indefinitely.
         if (
             $subscription->current_period_starts_at === null
             || $subscription->current_period_ends_at === null
