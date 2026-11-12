@@ -7,9 +7,9 @@ use App\Modules\Subscription\Enums\SubscriptionStatus;
 use App\Modules\Subscription\Models\Plan;
 use App\Modules\Subscription\Models\Subscription;
 use App\Modules\Subscription\Services\EntitlementService;
+use Carbon\CarbonImmutable;
 use Database\Seeders\PlanSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Carbon\CarbonImmutable;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
