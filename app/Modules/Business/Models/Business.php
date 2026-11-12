@@ -4,6 +4,7 @@ namespace App\Modules\Business\Models;
 
 use App\Enums\BusinessStatus;
 use App\Models\User;
+use App\Modules\Subscription\Models\Subscription;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -29,11 +30,7 @@ class Business extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
+    /** @var list<string> */
     protected $fillable = [
         'name',
         'slug',
@@ -45,18 +42,11 @@ class Business extends Model
         'postal_code',
     ];
 
-    /**
-     * The model's default attribute values.
-     *
-     * @var array<string, mixed>
-     */
+    /** @var array<string, mixed> */
     protected $attributes = [
         'status' => BusinessStatus::Active->value,
     ];
 
-    /**
-     * Bootstrap the model and register its creation hooks.
-     */
     protected static function booted(): void
     {
         static::creating(function (self $business): void {
@@ -66,21 +56,13 @@ class Business extends Model
         });
     }
 
-    /**
-     * Get the business membership records.
-     *
-     * @return HasMany<BusinessMember, $this>
-     */
+    /** @return HasMany<BusinessMember, $this> */
     public function members(): HasMany
     {
         return $this->hasMany(BusinessMember::class);
     }
 
-    /**
-     * Get the users belonging to the business.
-     *
-     * @return BelongsToMany<User, $this, BusinessMember>
-     */
+    /** @return BelongsToMany<User, $this, BusinessMember> */
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'business_members')
@@ -89,11 +71,13 @@ class Business extends Model
             ->withTimestamps();
     }
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
+    /** @return HasMany<Subscription, $this> */
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(Subscription::class);
+    }
+
+    /** @return array<string, string> */
     protected function casts(): array
     {
         return [
