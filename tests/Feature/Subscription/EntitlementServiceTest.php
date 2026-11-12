@@ -1,17 +1,18 @@
 <?php
 
-namespace Tests\Feature\Subscription;
+namespace Tests\\Feature\\Subscription;
 
-use App\Modules\Business\Models\Business;
-use App\Modules\Subscription\Enums\SubscriptionStatus;
-use App\Modules\Subscription\Models\Plan;
-use App\Modules\Subscription\Models\Subscription;
-use App\Modules\Subscription\Services\EntitlementService;
-use Carbon\CarbonImmutable;
-use Database\Seeders\PlanSeeder;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Str;
-use Tests\TestCase;
+use App\\Modules\\Business\\Models\\Business;
+use App\\Modules\\Subscription\\Enums\\SubscriptionStatus;
+use App\\Modules\\Subscription\\Models\\Plan;
+use App\\Modules\\Subscription\\Models\\PlanFeature;
+use App\\Modules\\Subscription\\Models\\Subscription;
+use App\\Modules\\Subscription\\Services\\EntitlementService;
+use Carbon\\CarbonImmutable;
+use Database\\Seeders\\PlanSeeder;
+use Illuminate\\Foundation\\Testing\\RefreshDatabase;
+use Illuminate\\Support\\Str;
+use Tests\\TestCase;
 
 class EntitlementServiceTest extends TestCase
 {
@@ -24,7 +25,7 @@ class EntitlementServiceTest extends TestCase
         $this->seed(PlanSeeder::class);
     }
 
-    public function test_economic_plan_disables_custom_domain_and_limits_products_to_twenty(): void
+    public function test_economic_snapshot_disables_custom_domain_and_limits_products_to_twenty(): void
     {
         $business = $this->createBusiness();
         $this->attachSubscription($business, 'economic');
@@ -35,7 +36,7 @@ class EntitlementServiceTest extends TestCase
         $this->assertSame(20, $entitlements->getLimit('max_products'));
     }
 
-    public function test_top_plan_enables_custom_domain(): void
+    public function test_top_snapshot_enables_custom_domain(): void
     {
         $business = $this->createBusiness();
         $this->attachSubscription($business, 'top');
@@ -52,14 +53,52 @@ class EntitlementServiceTest extends TestCase
         $this->assertNull($entitlements->getLimit('max_products'));
     }
 
-    public function test_expired_subscription_does_not_grant_entitlements(): void
+    public function test_undefined_snapshot_feature_returns_null_limit_and_false_boolean(): void
     {
         $business = $this->createBusiness();
         $this->attachSubscription(
             $business,
-            'top',
-            periodEndsAt: now()->subSecond(),
+            'economic',
+            snapshot: ['max_products' => 20],
         );
+
+        $entitlements = new EntitlementService($business);
+
+        $this->assertNull($entitlements->getLimit('not_configured'));
+        $this->assertFalse($entitlements->hasFeature('not_configured'));
+    }
+
+    public function test_minus_one_snapshot_limit_is_returned_as_unlimited(): void
+    {
+        $business = $this->createBusiness();
+        $this->attachSubscription(
+            $business,
+            'professional',
+            snapshot: ['max_products' => -1],
+        );
+
+        $this->assertSame(-1, (new EntitlementService($business))->getLimit('max_products'));
+    }
+
+    public function test_existing_subscription_uses_snapshot_after_live_plan_features_change(): void
+    {
+        $business = $this->createBusiness();
+        $subscription = $this->attachSubscription($business, 'economic');
+
+        PlanFeature::query()
+            ->where('plan_id', $subscription->plan_id)
+            ->where('feature_key', 'max_products')
+            ->update(['value' => json_encode(999, JSON_THROW_ON_ERROR)]);
+
+        $entitlements = new EntitlementService($business);
+
+        $this->assertSame(20, $entitlements->getLimit('max_products'));
+    }
+
+    public function test_expired_subscription_does_not_grant_entitlements(): void
+    {
+        $business = $this->createBusiness();
+        $this->attachSubscription($business, 'top', periodEndsAt: now()->subSecond());
 
         $this->assertFalse((new EntitlementService($business))->hasFeature('custom_domain'));
     }
@@ -67,11 +106,7 @@ class EntitlementServiceTest extends TestCase
     public function test_subscription_that_has_not_started_does_not_grant_entitlements(): void
     {
         $business = $this->createBusiness();
-        $this->attachSubscription(
-            $business,
-            'top',
-            periodStartsAt: now()->addSecond(),
-        );
+        $this->attachSubscription($business, 'top', periodStartsAt: now()->addSecond());
 
         $this->assertFalse((new EntitlementService($business))->hasFeature('custom_domain'));
     }
@@ -124,7 +159,7 @@ class EntitlementServiceTest extends TestCase
             $business,
             'top',
             SubscriptionStatus::Trialing,
-            trialEndsAt: now()->addDay(),
+            trialEndsAt: CarbonImmutable::now()->addDay(),
         );
 
         $this->assertTrue((new EntitlementService($business))->hasFeature('custom_domain'));
@@ -137,18 +172,10 @@ class EntitlementServiceTest extends TestCase
             $business,
             'top',
             SubscriptionStatus::Trialing,
-            trialEndsAt: now()->subSecond(),
+            trialEndsAt: CarbonImmutable::now()->subSecond(),
         );
 
         $this->assertFalse((new EntitlementService($business))->hasFeature('custom_domain'));
-    }
-
-    public function test_minus_one_plan_limit_is_returned_as_unlimited_null(): void
-    {
-        $business = $this->createBusiness();
-        $this->attachSubscription($business, 'professional');
-
-        $this->assertNull((new EntitlementService($business))->getLimit('max_products'));
     }
 
     private function createBusiness(): Business
@@ -159,6 +186,9 @@ class EntitlementServiceTest extends TestCase
         ]);
     }
 
+    /**
+     * @param array<string, mixed>|null $snapshot
+     */
     private function attachSubscription(
         Business $business,
         string $planCode,
@@ -166,18 +196,27 @@ class EntitlementServiceTest extends TestCase
         ?CarbonImmutable $periodStartsAt = null,
         ?CarbonImmutable $periodEndsAt = null,
         ?CarbonImmutable $trialEndsAt = null,
+        ?array $snapshot = null,
     ): Subscription {
         $plan = Plan::query()
             ->where('code', $planCode)
             ->firstOrFail();
 
+        $featuresSnapshot = $snapshot ?? $plan->features
+            ->mapWithKeys(fn (PlanFeature $feature): array => [
+                $feature->feature_key => $feature->value,
+            ])
+            ->all();
+
         return Subscription::query()->create([
             'business_id' => $business->getKey(),
             'plan_id' => $plan->getKey(),
             'status' => $status,
+            'features_snapshot' => $featuresSnapshot,
+            'plan_version' => PlanSeeder::PLAN_VERSION,
             'trial_ends_at' => $trialEndsAt,
-            'current_period_starts_at' => $periodStartsAt ?? now()->subDay(),
-            'current_period_ends_at' => $periodEndsAt ?? now()->addMonth(),
+            'current_period_starts_at' => $periodStartsAt ?? CarbonImmutable::now()->subDay(),
+            'current_period_ends_at' => $periodEndsAt ?? CarbonImmutable::now()->addMonth(),
         ]);
     }
 }
