@@ -1,15 +1,13 @@
 <?php
 
-namespace Database\\Seeders;
+namespace Database\Seeders;
 
-use App\\Modules\\Subscription\\Models\\Plan;
-use Illuminate\\Database\\Seeder;
-use Illuminate\\Support\\Facades\\DB;
+use App\Modules\Subscription\Models\Plan;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class PlanSeeder extends Seeder
 {
-    public const PLAN_VERSION = '1.0.0';
-
     /**
      * Seed all approved plan features as a complete feature matrix.
      */
