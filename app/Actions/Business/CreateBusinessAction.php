@@ -5,6 +5,7 @@ namespace App\Actions\Business;
 use App\Enums\BusinessRole;
 use App\Models\User;
 use App\Modules\Business\Models\Business;
+use App\Modules\Menu\Actions\EnsurePrimaryMenuAction;
 use App\Modules\Subscription\Actions\StartTrialAction;
 use App\Modules\Subscription\Models\Plan;
 use Illuminate\Database\QueryException;
@@ -16,6 +17,7 @@ class CreateBusinessAction
 {
     public function __construct(
         private readonly StartTrialAction $startTrialAction,
+        private readonly EnsurePrimaryMenuAction $ensurePrimaryMenuAction,
     ) {}
 
     /**
@@ -57,7 +59,8 @@ class CreateBusinessAction
                         'role' => BusinessRole::Owner,
                     ]);
 
-                    // StartTrialAction runs inside this transaction; failures roll back all three records.
+                    // Keep primary menu, membership and trial creation atomic.
+                    $this->ensurePrimaryMenuAction->execute($business);
                     $this->startTrialAction->execute($business, $plan);
 
                     return $business;
