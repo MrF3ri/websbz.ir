@@ -1,0 +1,109 @@
+<?php
+
+use App\\Models\\User;
+use App\\Modules\\Subscription\\Actions\\ReviewManualPaymentAction;
+use App\\Modules\\Subscription\\Models\\Payment;
+use Illuminate\\Support\\Facades\\DB;
+
+require dirname(__DIR__).'/vendor/autoload.php';
+
+/** @var \\Illuminate\\Foundation\\Application $app */
+$app = require dirname(__DIR__).'/bootstrap/app.php';
+$app->make(\\Illuminate\\Contracts\\Console\\Kernel::class)->bootstrap();
+
+if (! app()->environment('testing')) {
+    fwrite(STDERR, "This worker is only available in the testing environment.\n");
+    exit(2);
+}
+
+[
+    $paymentId,
+    $reviewerId,
+    $signalDirectory,
+    $workerId,
+    $holdAfterLock,
+] = array_pad(array_slice($argv, 1), 5, null);
+
+$paymentId = (int) $paymentId;
+$reviewerId = (int) $reviewerId;
+$holdAfterLock = $holdAfterLock === '1';
+
+if (! is_dir((string) $signalDirectory)) {
+    fwrite(STDERR, "Invalid worker signal directory.\n");
+    exit(2);
+}
+
+DB::connection()->selectOne(
+    "select set_config('application_name', ?, false)",
+    ['subscription-worker-'.$workerId],
+);
+
+file_put_contents($signalDirectory.'/'.$workerId.'.started', 'started');
+
+$paymentLockObserved = false;
+
+DB::listen(function (\\Illuminate\\Database\\Events\\QueryExecuted $query) use (
+    &$paymentLockObserved,
+    $signalDirectory,
+    $workerId,
+    $holdAfterLock,
+): void {
+    $sql = strtolower($query->sql);
+
+    if (
+        $paymentLockObserved
+        || ! str_contains($sql, 'for update')
+        || ! preg_match('/\\bfrom\\s+["`]?payments["`]?/', $sql)
+    ) {
+        return;
+    }
+
+    $paymentLockObserved = true;
+    file_put_contents($signalDirectory.'/'.$workerId.'.locked', 'locked');
+
+    if (! $holdAfterLock) {
+        return;
+    }
+
+    $gate = fopen($signalDirectory.'/gate', 'c+');
+
+    if ($gate === false) {
+        throw new \\RuntimeException('Unable to open the concurrency gate.');
+    }
+
+    try {
+        if (! flock($gate, LOCK_EX)) {
+            throw new \\RuntimeException('Unable to wait on the concurrency gate.');
+        }
+
+        flock($gate, LOCK_UN);
+    } finally {
+        fclose($gate);
+    }
+});
+
+$result = ['status' => 'error', 'message' => 'Worker did not execute.'];
+
+try {
+    $payment = Payment::query()->findOrFail($paymentId);
+    $reviewer = User::query()->findOrFail($reviewerId);
+    $approved = app(ReviewManualPaymentAction::class)->approve($payment, $reviewer);
+
+    $result = [
+        'status' => $approved->status->value,
+        'payment_id' => $approved->getKey(),
+    ];
+} catch (\\Throwable $exception) {
+    $result = [
+        'status' => 'error',
+        'exception' => $exception::class,
+        'message' => $exception->getMessage(),
+    ];
+}
+
+file_put_contents(
+    $signalDirectory.'/'.$workerId.'.result',
+    json_encode($result, JSON_THROW_ON_ERROR),
+);
+
+exit($result['status'] === 'error' ? 1 : 0);
