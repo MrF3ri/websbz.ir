@@ -41,6 +41,11 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
 
+    public function isPlatformAdmin(): bool
+    {
+        return (bool) $this->getAttribute('is_platform_admin');
+    }
+
     protected static function booted(): void
     {
         static::creating(function (self $user): void {
