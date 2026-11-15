@@ -10,6 +10,7 @@ use Illuminate\Support\Carbon;
 /**
  * @property int $id
  * @property int $subscription_id
+ * @property int $target_plan_id
  * @property int $amount
  * @property PaymentStatus $status
  * @property string|null $gateway_reference
@@ -20,6 +21,7 @@ class Payment extends Model
     /** @var list<string> */
     protected $fillable = [
         'subscription_id',
+        'target_plan_id',
         'amount',
         'status',
         'gateway_reference',
@@ -30,6 +32,12 @@ class Payment extends Model
     public function subscription(): BelongsTo
     {
         return $this->belongsTo(Subscription::class);
+    }
+
+    /** @return BelongsTo<Plan, $this> */
+    public function targetPlan(): BelongsTo
+    {
+        return $this->belongsTo(Plan::class, 'target_plan_id');
     }
 
     /** @return array<string, string> */
