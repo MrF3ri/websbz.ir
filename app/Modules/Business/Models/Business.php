@@ -5,6 +5,7 @@ namespace App\Modules\Business\Models;
 use App\Enums\BusinessStatus;
 use App\Models\User;
 use App\Modules\Subscription\Models\Subscription;
+use Database\Factories\BusinessFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -56,6 +57,16 @@ class Business extends Model
     protected $attributes = [
         'status' => BusinessStatus::Active->value,
     ];
+
+    /**
+     * Resolve the factory outside the default App\\Models namespace.
+     *
+     * @return Factory<Business>
+     */
+    protected static function newFactory(): Factory
+    {
+        return BusinessFactory::new();
+    }
 
     /**
      * Bootstrap the model and register its creation hooks.
