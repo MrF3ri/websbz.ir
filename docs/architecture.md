@@ -33,7 +33,7 @@ Quota counts are computed server-side. Quota checks and writes must be atomic an
 
 The approved first provider is **manual card-to-card**, implemented alongside the payment gateway abstraction. Platform card details are editable platform settings, never hardcoded. The business owner submits a receipt and unique bank tracking number; the single Platform Admin reviews and approves/rejects it. Admin decisions are authenticated, audited in `subscription_events`, idempotent, and performed under a DB row lock. Receipts are stored on the private local disk, not the public disk.
 
-As of the current `main` baseline, the Platform Admin has a private receipt-download route. The business-owner receipt-download route and tenant-ownership check are proposed in PR #25 and are not part of `main` until that PR is merged. Do not treat the business-owner receipt access criterion as complete before then.
+As of the current `main` baseline, both the Platform Admin and the owning business have private receipt-download routes. The business-owner route verifies payment ownership through the subscription and current business context; PR #25 adds a cross-tenant IDOR regression test.
 
 Online gateway initiation/callback Actions remain in the code behind `PaymentGatewayInterface`; they are not a substitute for the approved manual provider and must not be treated as a production-connected online gateway.
 
@@ -45,7 +45,7 @@ Database storage, APIs, Inertia props, and date logic use Gregorian ISO 8601 UTC
 
 ## Test strategy
 
-The default fast suite uses SQLite in-memory. SQLite does not prove PostgreSQL row-locking or concurrency. A required PostgreSQL CI job runs the full PHPUnit suite. Locking/concurrency and composite-FK behavior must be tested against PostgreSQL. Tenant IDOR tests cover direct HTTP access and major tenant-owned resources. Keep unit, feature, entitlement, payment lifecycle, and tenant-isolation coverage distinct.
+The default fast suite uses SQLite in-memory. SQLite does not prove PostgreSQL row-locking or concurrency. A required PostgreSQL CI job runs the full PHPUnit suite. Locking/concurrency and composite-FK behavior must be tested against PostgreSQL. PR #27 adds deterministic multi-process PostgreSQL tests for simultaneous product/category quota writes, rollback behavior, and independent-business locks. Tenant IDOR tests cover direct HTTP access and major tenant-owned resources. Keep unit, feature, entitlement, payment lifecycle, and tenant-isolation coverage distinct.
 
 Current CI includes SQLite quality/test checks, a PostgreSQL test job, and production image/Compose validation. Green CI does not prove a live deployment or production readiness.
 
@@ -62,6 +62,6 @@ Verified repository implementation includes:
 - Public menu publication/unpublication, guest rendering, and browser-side downloadable QR generation.
 - Manual card-to-card billing: editable platform card settings, private receipt upload, unique bank tracking number, Platform Admin review, approval/rejection, transactional subscription renewal/plan snapshot update, idempotency, row locks, and subscription event history.
 
-Known remaining work is tracked in `docs/roadmap.md` and `docs/phase-7/README.md`. In particular, Phase 7 still needs explicit lifecycle coverage/behavior for expiration and any approved cancellation, grace-period, and downgrade semantics; the business-owner receipt access change is pending PR #25. PostgreSQL concurrency tests for simultaneous quota-bound catalog writes are also a separate verification gap.
+Known remaining work is tracked in `docs/roadmap.md` and `docs/phase-7/README.md`. Phase 7 still needs explicit persisted expiration transition/access behavior and PostgreSQL coverage for delayed/concurrent payment review and renewal boundaries, plus owner end-to-end acceptance of manual billing. PR #28 classifies plan changes as upgraded, downgraded, or renewed; PR #25 completes business-owner receipt access; PR #27 adds PostgreSQL catalog quota-concurrency coverage. Cancellation and paid grace periods are not defined as Phase 7 requirements in the approved specification.
 
 The repository has not been deployed to a real VPS. DNS, TLS, SMTP, production secrets, persistent-volume backup/restore, deployment, rollback, monitoring, and live acceptance remain owner-controlled release work.
