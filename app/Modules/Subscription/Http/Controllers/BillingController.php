@@ -69,6 +69,9 @@ class BillingController
                     'bank_tracking_number' => $payment->bank_tracking_number,
                     'submitted_at' => $payment->submitted_at?->toISOString(),
                     'rejection_reason' => $payment->rejection_reason,
+                    'receipt_url' => is_string($payment->receipt_path) && $payment->receipt_path !== ''
+                        ? route('billing.payments.receipt', $payment)
+                        : null,
                 ])
                 ->values(),
         ]);

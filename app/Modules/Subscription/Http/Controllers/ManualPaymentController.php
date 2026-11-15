@@ -5,6 +5,7 @@ namespace App\Modules\Subscription\Http\Controllers;
 use App\Modules\Business\Models\Business;
 use App\Modules\Platform\Services\PlatformSettingsService;
 use App\Modules\Subscription\Actions\SubmitManualPaymentAction;
+use App\Modules\Subscription\Models\Payment;
 use App\Modules\Subscription\Models\Plan;
 use App\Modules\Subscription\Models\Subscription;
 use App\Modules\Tenancy\Services\CurrentBusiness;
@@ -15,6 +16,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
 
 class ManualPaymentController
@@ -96,5 +98,28 @@ class ManualPaymentController
         }
 
         return back()->with('success', 'رسید پرداخت ثبت شد و پس از بررسی مدیر نتیجه اعلام می‌شود.');
+    }
+
+    public function receipt(
+        Payment $payment,
+        CurrentBusiness $currentBusiness,
+    ): StreamedResponse {
+        $business = $currentBusiness->get();
+        abort_unless($business instanceof Business, 404);
+        Gate::authorize('update', $business);
+
+        abort_unless(
+            $payment->subscription()
+                ->where('business_id', $business->getKey())
+                ->exists()
+                && is_string($payment->receipt_path)
+                && $payment->receipt_path !== '',
+            404,
+        );
+
+        return Storage::disk('local')->download(
+            $payment->receipt_path,
+            'payment-receipt-'.$payment->getKey().'.'.pathinfo($payment->receipt_path, PATHINFO_EXTENSION),
+        );
     }
 }
