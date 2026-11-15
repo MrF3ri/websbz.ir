@@ -89,7 +89,8 @@ class ReviewManualPaymentAction
                     )
                     ->all();
 
-            $previousPlanId = $subscription->plan_id;
+            $previousPlan = $subscription->plan()->firstOrFail();
+            $previousPlanId = $previousPlan->getKey();
             $periodBase = $now;
 
             foreach ([$subscription->trial_ends_at, $subscription->current_period_ends_at] as $candidate) {
@@ -134,10 +135,14 @@ class ReviewManualPaymentAction
                 ],
             ]);
 
+            $changeEvent = match (true) {
+                $previousPlanId === $targetPlan->getKey() => SubscriptionEventType::Renewed,
+                $targetPlan->monthly_price < $previousPlan->monthly_price => SubscriptionEventType::Downgraded,
+                default => SubscriptionEventType::Upgraded,
+            };
+
             $subscription->events()->create([
-                'event_type' => $previousPlanId === $targetPlan->getKey()
-                    ? SubscriptionEventType::Renewed
-                    : SubscriptionEventType::Upgraded,
+                'event_type' => $changeEvent,
                 'metadata' => [
                     'payment_id' => $lockedPayment->getKey(),
                     'previous_plan_id' => $previousPlanId,
