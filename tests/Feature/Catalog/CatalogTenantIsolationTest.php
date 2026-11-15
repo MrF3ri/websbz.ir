@@ -179,7 +179,7 @@ class CatalogTenantIsolationTest extends TestCase
         $business = Business::factory()->create();
 
         $first = app(EnsurePrimaryMenuAction::class)->execute($business);
-        $second = app(\App\Modules\Menu\Actions\EnsurePrimaryMenuAction::class)->execute($business);
+        $second = app(EnsurePrimaryMenuAction::class)->execute($business);
 
         $this->assertSame($first->getKey(), $second->getKey());
         $this->assertSame('main', $first->slug);

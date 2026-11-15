@@ -10,10 +10,16 @@ use App\Modules\Tenancy\Services\CurrentBusiness;
 
 class CategoryPolicy
 {
+    private readonly CatalogAuthorization $authorization;
+
+    private readonly CurrentBusiness $currentBusiness;
+
     public function __construct(
-        private readonly CatalogAuthorization $authorization,
-        private readonly CurrentBusiness $currentBusiness,
+        CatalogAuthorization $authorization,
+        CurrentBusiness $currentBusiness,
     ) {
+        $this->authorization = $authorization;
+        $this->currentBusiness = $currentBusiness;
     }
 
     public function viewAny(User $user): bool
