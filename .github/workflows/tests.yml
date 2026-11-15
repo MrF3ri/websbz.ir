@@ -38,6 +38,9 @@ jobs:
       - name: Run CI Checks
         run: composer ci:check
 
+      - name: Build Docker application image
+        run: docker build --target app --tag websbz-baseline:ci .
+
   postgresql:
     name: Full suite (PostgreSQL)
     runs-on: ubuntu-latest

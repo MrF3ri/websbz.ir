@@ -5,7 +5,8 @@ FROM php:8.5-fpm-bookworm AS app
 RUN apt-get update && apt-get install -y --no-install-recommends \
         git unzip libicu-dev libzip-dev libonig-dev libpq-dev \
     && docker-php-ext-install -j"$(nproc)" \
-        pdo_pgsql mbstring intl zip bcmath opcache \
+        pdo_pgsql mbstring intl zip bcmath \
+    && php -r 'if (! extension_loaded("Zend OPcache")) { fwrite(STDERR, "PHP 8.5 image must provide built-in Zend OPcache.\\n"); exit(1); }' \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
