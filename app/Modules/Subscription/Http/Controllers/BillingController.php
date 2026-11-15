@@ -3,6 +3,7 @@
 namespace App\Modules\Subscription\Http\Controllers;
 
 use App\Modules\Platform\Services\PlatformSettingsService;
+use App\Modules\Subscription\Enums\PaymentStatus;
 use App\Modules\Subscription\Models\Payment;
 use App\Modules\Subscription\Models\Plan;
 use App\Modules\Tenancy\Services\CurrentBusiness;
@@ -52,6 +53,7 @@ class BillingController
             ])->values(),
             'cardDetails' => $platformSettings->cardDetails(),
             'hasCardDetails' => $platformSettings->hasCardDetails(),
+            'hasPendingReview' => $subscription->payments()->where('status', PaymentStatus::PendingReview)->exists(),
             'payments' => $subscription->payments()
                 ->with('targetPlan')
                 ->latest('id')
