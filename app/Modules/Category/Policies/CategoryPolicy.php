@@ -13,7 +13,8 @@ class CategoryPolicy
     public function __construct(
         private readonly CatalogAuthorization $authorization,
         private readonly CurrentBusiness $currentBusiness,
-    ) {}
+    ) {
+    }
 
     public function viewAny(User $user): bool
     {

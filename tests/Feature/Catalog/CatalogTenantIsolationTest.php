@@ -6,6 +6,7 @@ use App\Enums\BusinessRole;
 use App\Models\User;
 use App\Modules\Business\Models\Business;
 use App\Modules\Category\Models\Category;
+use App\Modules\Menu\Actions\EnsurePrimaryMenuAction;
 use App\Modules\Tenancy\Services\CurrentBusiness;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Gate;
@@ -177,7 +178,7 @@ class CatalogTenantIsolationTest extends TestCase
     {
         $business = Business::factory()->create();
 
-        $first = app(\App\Modules\Menu\Actions\EnsurePrimaryMenuAction::class)->execute($business);
+        $first = app(EnsurePrimaryMenuAction::class)->execute($business);
         $second = app(\App\Modules\Menu\Actions\EnsurePrimaryMenuAction::class)->execute($business);
 
         $this->assertSame($first->getKey(), $second->getKey());

@@ -173,7 +173,7 @@ class ProductController
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     private function enforceOptionalFeatures(Business $business, array $data): void
     {
