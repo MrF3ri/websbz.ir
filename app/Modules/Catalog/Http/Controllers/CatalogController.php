@@ -72,6 +72,7 @@ class CatalogController
                 'public_id' => $menu->public_id,
                 'title' => $menu->title,
                 'status' => $menu->status->value,
+                'default_locale' => $menu->default_locale,
             ],
             'categories' => $categories->map(fn (Category $category): array => [
                 'public_id' => $category->public_id,
