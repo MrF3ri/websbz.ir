@@ -22,11 +22,12 @@ if (! app()->environment('testing')) {
     $signalDirectory,
     $workerId,
     $holdAfterLock,
-] = array_pad(array_slice($argv, 1), 5, null);
+    $mode,
+] = array_pad(array_slice($argv, 1), 6, null);
 
 $paymentId = (int) $paymentId;
 $reviewerId = (int) $reviewerId;
-$holdAfterLock = $holdAfterLock === '1';
+$holdAfterLock = $holdAfterLock === '1';\n$mode = $mode ?? 'review';
 
 if (! is_dir((string) $signalDirectory)) {
     fwrite(STDERR, "Invalid worker signal directory.\n");
@@ -85,13 +86,31 @@ DB::listen(function (\Illuminate\Database\Events\QueryExecuted $query) use (
 $result = ['status' => 'error', 'message' => 'Worker did not execute.'];
 
 try {
-    $payment = Payment::query()->findOrFail($paymentId);
-    $reviewer = User::query()->findOrFail($reviewerId);
-    $approved = app(ReviewManualPaymentAction::class)->approve($payment, $reviewer);
+    if ($mode === 'callback') {
+        app()->instance(PaymentGatewayInterface::class, new class implements PaymentGatewayInterface {
+            public function initiatePayment(Payment $payment): string
+            {
+                return 'https://gateway.test/checkout';
+            }
+
+            public function verifyPayment(string $gatewayReference): GatewayVerificationResult
+            {
+                return GatewayVerificationResult::SUCCESS;
+            }
+        });
+
+        $processed = app(ProcessPaymentCallbackAction::class)->execute(
+            Payment::query()->findOrFail($paymentId)->gateway_reference,
+        );
+    } else {
+        $payment = Payment::query()->findOrFail($paymentId);
+        $reviewer = User::query()->findOrFail($reviewerId);
+        $processed = app(ReviewManualPaymentAction::class)->approve($payment, $reviewer);
+    }
 
     $result = [
-        'status' => $approved->status->value,
-        'payment_id' => $approved->getKey(),
+        'status' => $processed->status->value,
+        'payment_id' => $processed->getKey(),
     ];
 } catch (\Throwable $exception) {
     $result = [
