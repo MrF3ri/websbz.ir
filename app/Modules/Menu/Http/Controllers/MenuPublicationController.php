@@ -22,7 +22,7 @@ class MenuPublicationController
         Gate::authorize('viewAny', Product::class);
 
         $business = $currentBusiness->get();
-        abort_unless($business !== null, 404);
+        abort_unless($business instanceof Business, 404);
 
         $menu = $ensurePrimaryMenu->execute($business);
         $publishMenu->execute($menu);
