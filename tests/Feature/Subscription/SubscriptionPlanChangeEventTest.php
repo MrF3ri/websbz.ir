@@ -10,7 +10,6 @@ use App\Modules\Subscription\Contracts\PaymentGatewayInterface;
 use App\Modules\Subscription\Enums\GatewayVerificationResult;
 use App\Modules\Subscription\Enums\PaymentStatus;
 use App\Modules\Subscription\Enums\SubscriptionEventType;
-use App\Modules\Subscription\Models\Payment;
 use App\Modules\Subscription\Models\Plan;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;
