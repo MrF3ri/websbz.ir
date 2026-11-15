@@ -5,6 +5,7 @@ namespace Tests\Feature\Business;
 use App\Models\User;
 use App\Modules\Business\Models\Business;
 use App\Modules\Subscription\Actions\StartTrialAction;
+use App\Modules\Subscription\Models\Plan;
 use Database\Seeders\PlanSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -63,7 +64,7 @@ class OnboardingTrialTest extends TestCase
 
     public function test_invalid_or_inactive_plan_code_fails_validation_without_creating_records(): void
     {
-        \App\Modules\Subscription\Models\Plan::query()
+        Plan::query()
             ->where('code', 'economic')
             ->update(['is_active' => false]);
 

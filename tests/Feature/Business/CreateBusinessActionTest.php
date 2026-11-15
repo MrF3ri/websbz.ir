@@ -69,7 +69,7 @@ class CreateBusinessActionTest extends TestCase
         }
 
         $this->assertDatabaseMissing('businesses', ['slug' => 'rollback-cafe']);
-        $this->assertDatabaseCount('businesses', 1);
+        $this->assertDatabaseCount('businesses', 0);
         $this->assertDatabaseCount('business_members', 0);
         $this->assertDatabaseCount('subscriptions', 0);
     }

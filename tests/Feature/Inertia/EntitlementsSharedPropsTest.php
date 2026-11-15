@@ -4,7 +4,6 @@ namespace Tests\Feature\Inertia;
 
 use App\Enums\BusinessRole;
 use App\Models\User;
-use App\Modules\Business\Models\Business;
 use Database\Seeders\PlanSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;

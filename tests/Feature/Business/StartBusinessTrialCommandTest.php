@@ -4,6 +4,7 @@ namespace Tests\Feature\Business;
 
 use App\Modules\Business\Models\Business;
 use App\Modules\Subscription\Actions\StartTrialAction;
+use App\Modules\Subscription\Models\Plan;
 use Database\Seeders\PlanSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Symfony\Component\Console\Command\Command;
@@ -39,7 +40,7 @@ class StartBusinessTrialCommandTest extends TestCase
         $business = Business::factory()->create(['slug' => 'subscribed-cafe']);
         app(StartTrialAction::class)->execute(
             $business,
-            \App\Modules\Subscription\Models\Plan::query()->where('code', 'economic')->firstOrFail(),
+            Plan::query()->where('code', 'economic')->firstOrFail(),
         );
 
         $this->artisan('subscription:start-trial', [
@@ -50,7 +51,7 @@ class StartBusinessTrialCommandTest extends TestCase
         $this->assertDatabaseCount('subscriptions', 1);
         $this->assertDatabaseHas('subscriptions', [
             'business_id' => $business->getKey(),
-            'plan_id' => \App\Modules\Subscription\Models\Plan::query()->where('code', 'economic')->value('id'),
+            'plan_id' => Plan::query()->where('code', 'economic')->value('id'),
         ]);
     }
 }
