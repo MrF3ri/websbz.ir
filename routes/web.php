@@ -2,6 +2,9 @@
 
 use App\Modules\Business\Http\Controllers\BusinessOnboardingController;
 use App\Modules\Business\Http\Controllers\BusinessSettingsController;
+use App\Modules\Catalog\Http\Controllers\CatalogController;
+use App\Modules\Category\Http\Controllers\CategoryController;
+use App\Modules\Product\Http\Controllers\ProductController;
 use App\Modules\Tenancy\Http\Middleware\TenantMiddleware;
 use Illuminate\Support\Facades\Route;
 
@@ -23,6 +26,27 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::put('/business/settings', [BusinessSettingsController::class, 'update'])
             ->name('business.settings.update');
+
+        Route::get('/catalog', [CatalogController::class, 'index'])
+            ->name('catalog.index');
+
+        Route::post('/catalog/categories', [CategoryController::class, 'store'])
+            ->name('catalog.categories.store');
+        Route::put('/catalog/categories/reorder', [CategoryController::class, 'reorder'])
+            ->name('catalog.categories.reorder');
+        Route::put('/catalog/categories/{categoryPublicId}', [CategoryController::class, 'update'])
+            ->name('catalog.categories.update');
+        Route::delete('/catalog/categories/{categoryPublicId}', [CategoryController::class, 'destroy'])
+            ->name('catalog.categories.destroy');
+
+        Route::post('/catalog/products', [ProductController::class, 'store'])
+            ->name('catalog.products.store');
+        Route::put('/catalog/categories/{categoryPublicId}/products/reorder', [ProductController::class, 'reorder'])
+            ->name('catalog.products.reorder');
+        Route::put('/catalog/products/{productPublicId}', [ProductController::class, 'update'])
+            ->name('catalog.products.update');
+        Route::delete('/catalog/products/{productPublicId}', [ProductController::class, 'destroy'])
+            ->name('catalog.products.destroy');
     });
 });
 
