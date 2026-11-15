@@ -3,6 +3,7 @@
 namespace App\Modules\Subscription\Http\Controllers;
 
 use App\Modules\Platform\Services\PlatformSettingsService;
+use App\Modules\Subscription\Models\Payment;
 use App\Modules\Subscription\Models\Plan;
 use App\Modules\Tenancy\Services\CurrentBusiness;
 use Illuminate\Http\RedirectResponse;
@@ -56,7 +57,7 @@ class BillingController
                 ->latest('id')
                 ->limit(10)
                 ->get()
-                ->map(fn ($payment): array => [
+                ->map(fn (Payment $payment): array => [
                     'id' => $payment->getKey(),
                     'amount' => $payment->amount,
                     'status' => $payment->status->value,
