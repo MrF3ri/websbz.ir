@@ -3,6 +3,7 @@
 namespace Tests\Feature\Subscription;
 
 use App\Modules\Business\Models\Business;
+use App\Modules\Subscription\Actions\ExpireSubscriptionsAction;
 use App\Modules\Subscription\Actions\InitiatePaymentAction;
 use App\Modules\Subscription\Actions\ProcessPaymentCallbackAction;
 use App\Modules\Subscription\Actions\StartTrialAction;
@@ -62,6 +63,71 @@ class SubscriptionLifecycleTest extends TestCase
             'subscription_id' => $subscription->getKey(),
             'event_type' => SubscriptionEventType::TrialStarted->value,
         ]);
+    }
+
+    public function test_expired_trial_is_persisted_once_with_trial_ended_and_expired_events(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-11-12 10:00:00', 'UTC'));
+
+        $business = $this->createBusiness();
+        $plan = $this->createPlan('starter', 1000, ['menu_limit' => 10]);
+        $subscription = app(StartTrialAction::class)->execute($business, $plan);
+        $trialEndsAt = $subscription->trial_ends_at;
+
+        self::assertNotNull($trialEndsAt);
+        Carbon::setTestNow($trialEndsAt->copy()->addSecond());
+
+        $action = app(ExpireSubscriptionsAction::class);
+
+        $this->assertSame(1, $action->execute());
+        $this->assertSame(SubscriptionStatus::Expired, $subscription->fresh()->status);
+        $this->assertSame(
+            1,
+            $subscription->events()->where('event_type', SubscriptionEventType::TrialEnded->value)->count(),
+        );
+        $this->assertSame(
+            1,
+            $subscription->events()->where('event_type', SubscriptionEventType::Expired->value)->count(),
+        );
+        $this->assertTrue($business->exists);
+        $this->assertSame(0, $action->execute());
+        $this->assertSame(
+            1,
+            $subscription->events()->where('event_type', SubscriptionEventType::Expired->value)->count(),
+        );
+    }
+
+    public function test_expired_paid_subscription_transitions_without_trial_event_and_future_trial_is_untouched(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-11-12 10:00:00', 'UTC'));
+
+        $expiredBusiness = $this->createBusiness();
+        $plan = $this->createPlan('starter', 1000, ['menu_limit' => 10]);
+        $expiredSubscription = app(StartTrialAction::class)->execute($expiredBusiness, $plan);
+        $expiredSubscription->update([
+            'status' => SubscriptionStatus::Active,
+            'current_period_starts_at' => Carbon::now()->subMonth(),
+            'current_period_ends_at' => Carbon::now()->subSecond(),
+        ]);
+
+        $futureBusiness = Business::query()->create([
+            'name' => 'Future Trial Business',
+            'slug' => 'future-trial-'.uniqid(),
+        ]);
+        $futureSubscription = app(StartTrialAction::class)->execute($futureBusiness, $plan);
+
+        $this->assertSame(1, app(ExpireSubscriptionsAction::class)->execute());
+
+        $this->assertSame(SubscriptionStatus::Expired, $expiredSubscription->fresh()->status);
+        $this->assertSame(
+            0,
+            $expiredSubscription->events()->where('event_type', SubscriptionEventType::TrialEnded->value)->count(),
+        );
+        $this->assertSame(
+            1,
+            $expiredSubscription->events()->where('event_type', SubscriptionEventType::Expired->value)->count(),
+        );
+        $this->assertSame(SubscriptionStatus::Trialing, $futureSubscription->fresh()->status);
     }
 
     public function test_initiate_payment_persists_target_plan_and_pending_status(): void
