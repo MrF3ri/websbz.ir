@@ -107,5 +107,6 @@ class OnboardingTrialTest extends TestCase
         $this->assertDatabaseCount('businesses', 0);
         $this->assertDatabaseCount('business_members', 0);
         $this->assertDatabaseCount('subscriptions', 0);
+        $this->assertDatabaseCount('menus', 0);
     }
 }
