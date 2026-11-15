@@ -19,6 +19,7 @@ type Payment = {
     bank_tracking_number: string | null;
     submitted_at: string | null;
     rejection_reason: string | null;
+    receipt_url: string | null;
 };
 
 const props = defineProps<{
@@ -196,7 +197,10 @@ function submitPayment(): void {
                             </p>
                             <p v-if="payment.rejection_reason" class="mt-1 text-sm text-destructive">{{ payment.rejection_reason }}</p>
                         </div>
-                        <span class="w-fit rounded-full bg-muted px-3 py-1 text-xs">{{ paymentStatusLabel(payment.status) }}</span>
+                        <div class="flex items-center gap-3">
+                            <a v-if="payment.receipt_url" :href="payment.receipt_url" class="text-sm font-medium text-primary underline underline-offset-4">دانلود رسید</a>
+                            <span class="w-fit rounded-full bg-muted px-3 py-1 text-xs">{{ paymentStatusLabel(payment.status) }}</span>
+                        </div>
                     </article>
                 </div>
             </section>
