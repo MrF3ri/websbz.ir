@@ -10,6 +10,8 @@ use App\Modules\Product\Actions\CreateProductAction;
 use App\Modules\Product\Http\Requests\ReorderProductsRequest;
 use App\Modules\Product\Http\Requests\SaveProductRequest;
 use App\Modules\Product\Models\Product;
+use App\Modules\Subscription\Services\EnforcementService;
+use App\Modules\Subscription\Services\EntitlementService;
 use App\Modules\Tenancy\Services\CurrentBusiness;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
@@ -154,9 +156,7 @@ class ProductController
      */
     private function enforceOptionalFeatures(Business $business, array $data): void
     {
-        $enforcement = new \App\Modules\Subscription\Services\EnforcementService(
-            new \App\Modules\Subscription\Services\EntitlementService($business),
-        );
+        $enforcement = new EnforcementService(new EntitlementService($business));
 
         if (($data['discount_price'] ?? null) !== null) {
             $enforcement->requireFeature($business, 'product_discount');
