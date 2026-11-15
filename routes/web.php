@@ -5,8 +5,12 @@ use App\Modules\Business\Http\Controllers\BusinessSettingsController;
 use App\Modules\Catalog\Http\Controllers\CatalogController;
 use App\Modules\Category\Http\Controllers\CategoryController;
 use App\Modules\Menu\Http\Controllers\MenuPublicationController;
+use App\Modules\Platform\Http\Controllers\AdminPaymentController;
+use App\Modules\Platform\Http\Controllers\PlatformSettingsController;
 use App\Modules\Product\Http\Controllers\ProductController;
 use App\Modules\PublicMenu\Http\Controllers\PublicMenuController;
+use App\Modules\Subscription\Http\Controllers\BillingController;
+use App\Modules\Subscription\Http\Controllers\ManualPaymentController;
 use App\Modules\Tenancy\Http\Middleware\TenantMiddleware;
 use Illuminate\Support\Facades\Route;
 
@@ -14,6 +18,18 @@ Route::inertia('/', 'Welcome')->name('home');
 
 Route::get('/menu/{businessSlug}/{menuSlug}', [PublicMenuController::class, 'show'])
     ->name('public.menu.show');
+
+Route::middleware(['auth', 'verified', 'can:platform-admin'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+        Route::get('/payments', [AdminPaymentController::class, 'index'])->name('payments.index');
+        Route::get('/payments/{payment}/receipt', [AdminPaymentController::class, 'receipt'])->name('payments.receipt');
+        Route::post('/payments/{payment}/approve', [AdminPaymentController::class, 'approve'])->name('payments.approve');
+        Route::post('/payments/{payment}/reject', [AdminPaymentController::class, 'reject'])->name('payments.reject');
+        Route::get('/settings', [PlatformSettingsController::class, 'edit'])->name('settings.edit');
+        Route::put('/settings', [PlatformSettingsController::class, 'update'])->name('settings.update');
+    });
 
 Route::middleware(['auth', 'verified'])->group(function () {
     // Onboarding must remain outside TenantMiddleware to avoid redirect loops.
@@ -25,6 +41,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::middleware([TenantMiddleware::class])->group(function () {
         Route::inertia('dashboard', 'Dashboard')->name('dashboard');
+
+        Route::get('/billing', [BillingController::class, 'index'])->name('billing.index');
+        Route::post('/billing/payments', [ManualPaymentController::class, 'store'])->name('billing.payments.store');
 
         Route::get('/business/settings', [BusinessSettingsController::class, 'edit'])
             ->name('business.settings.edit');
