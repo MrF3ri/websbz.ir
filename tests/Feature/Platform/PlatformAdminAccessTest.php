@@ -3,13 +3,13 @@
 namespace Tests\Feature\Platform;
 
 use App\Models\User;
+use App\Modules\Platform\Services\PlatformSettingsService;
 use App\Modules\Subscription\Enums\PaymentStatus;
 use App\Modules\Subscription\Models\Plan;
-use App\Modules\Platform\Services\PlatformSettingsService;
-use Illuminate\Support\Facades\Storage;
-use Tests\Concerns\InteractsWithBusinesses;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Storage;
+use Tests\Concerns\InteractsWithBusinesses;
 use Tests\TestCase;
 
 class PlatformAdminAccessTest extends TestCase
@@ -31,7 +31,6 @@ class PlatformAdminAccessTest extends TestCase
             ->get(route('admin.payments.index'))
             ->assertOk();
     }
-
 
     public function test_platform_admin_can_update_card_details_and_download_private_receipt(): void
     {
