@@ -52,9 +52,9 @@ class PublicMenuController
                 'slug' => $menu->slug,
                 'locale' => $menu->default_locale,
             ],
-            'categories' => $categories->map(fn ($category): array => [
+            'categories' => $categories->map(fn (Category $category): array => [
                 'name' => $category->name,
-                'products' => $category->products->map(fn ($product): array => [
+                'products' => $category->products->map(fn (Product $product): array => [
                     'name' => $product->name,
                     'description' => $product->description,
                     'price' => $product->base_price,
