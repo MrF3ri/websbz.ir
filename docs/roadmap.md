@@ -1,53 +1,50 @@
-# Roadmap
+# Roadmap and delivery status
 
-This roadmap follows ERRATA dated 2026-11-15. Phase numbering is unchanged: Phase 7 is Subscription Lifecycle & Billing; Phase 8 is Menu & Catalog.
+Last reviewed: 2026-11-15
 
-## Baseline-A — Documentation, Docker, PostgreSQL CI
-- Publish the verbatim master specification including ERRATA.
-- Establish architecture documentation and ADRs 0001–0008.
-- Add a reproducible PHP 8.5 + PostgreSQL Docker development environment.
-- Retain fast SQLite CI and add a full PostgreSQL PHPUnit job.
-- Run PHPStan with a 1G memory limit; retain Pint, vue-tsc, and Vite build checks.
-- Mark the old Phase 7 handoff README outdated and link this roadmap.
+This roadmap preserves the phase numbering in `docs/master-spec.md` and its ERRATA. Historical audit statements describe the repository at the time of that audit; the current status below reflects the changes merged afterward.
 
-## Baseline-B — Stabilization before feature phases
-- Add `BusinessFactory`.
-- Add cross-tenant IDOR tests for tenant-owned routes and resources.
-- Add `users.public_id` as a ULID (never an authorization mechanism).
-- Share safe entitlement information with Vue through Inertia shared props.
-- Add Jalali date helpers + tests. Keep Gregorian ISO 8601 UTC in storage, APIs, Inertia props, and logic; Jalali conversion belongs only at the presentation edge (ADR 0008).
-- Onboarding starts a 72h trial on the selected plan (ERRATA 11).
-- Replace hardcoded `form.post('/onboarding')` with the generated route helper.
-- Replace dashboard placeholder statistics with real data when corresponding domain data exists.
+## Completed and merged
 
-## Phase 8 — Menu and Catalog
-Implement Menu and Catalog modules incrementally: one primary menu per business, categories/products, stable sorting, validation, integer Toman amounts, publication status, pagination/search where appropriate, and backend entitlement enforcement. Enforce same-menu relationships and tenant integrity with composite foreign keys (ADR 0005). Add tenant isolation and CRUD tests. Do not implement branches, media, public menu, or QR ahead of their scheduled phases.
+- **Baseline A:** Docker development topology, PostgreSQL CI, architecture documentation, and ADR foundation.
+- **Baseline B:** tenant factories and isolation tests, `users.public_id` ULID, selected-plan onboarding, 72-hour trial, safe Inertia entitlement props, and Jalali presentation helpers.
+- **Phase 7 — MVP manual billing path:** editable platform bank-card settings, private receipt upload, unique bank tracking number, single Platform Admin, authenticated approve/reject flow, payment-time plan feature snapshot, transactional subscription activation/renewal, idempotent review, and audit events.
+- **Phase 8 — Menu and Catalog:** primary menu, category/product CRUD, sorting, search/filter/pagination, tenant authorization, entitlement limits, and same-menu composite foreign keys.
+- **Phase 13 — Public Menu:** stable guest URL, publication/unpublication, and public visibility filters.
+- **Phase 14 — QR:** local browser-side QR generation and downloadable SVG; no external QR service receives the menu URL.
 
-## Finish Phase 7 — Subscription Lifecycle & Billing
-After Baseline stabilization and Phase 8, complete the existing partial Phase 7 implementation:
-- Trial creation is exactly 72 hours on the plan selected during onboarding, with a snapshot of that plan.
-- Complete activation, monthly period calculation, renewal, expiration, upgrade/downgrade, and post-expiration behavior without deleting customer data.
-- Implement manual card-to-card behind `PaymentGatewayInterface`: platform card details in admin-editable settings; owner uploads receipt and unique bank tracking number; receipt stored privately; only owning business and Platform Admin can access it.
-- Platform Admin (single owner, not a BusinessRole) reviews and approves/rejects payments. Approval is authenticated, audited in `subscription_events`, idempotent, and protected by a DB row lock. States: `pending_review`, `approved`, `rejected`.
-- Keep online gateways as future providers; server-to-server verification applies to online gateways, while manual approval is the trusted control for the manual provider.
-- Add routes, controllers, validation, UI, access policies, scheduling, and comprehensive tests in Phase 7 work.
+The above work is merged to `main` through PRs #12, #16, #17, #18, #19, #20, and #21. Each feature PR passed the configured SQLite and PostgreSQL CI jobs before merge.
 
-## Later phases
-- Phase 9 — Branch Management and Mixed Product Settings.
-- Phase 10 — Media and Product Image Management.
-- Phase 11 — Menu Customization and Visual Templates (template-count entitlements are introduced here, not earlier).
-- Phase 12 — Localization and Translation Management.
-- Phase 13 — Public Menu and Customer Experience.
-- Phase 14 — QR Code Generation and URL Management.
-- Phase 15 — Top Plan Advanced Features (video, reviews/ratings, likes, Instagram API integration, Excel export, backup/restore, notifications/customer communication, initial setup service).
-- Phase 16 — Custom Domains and HTTPS.
-- Phase 17 — Social Links, Contact and Location.
-- Phase 18 — Notifications, Audit Logs and Operational Events.
-- Phase 19 — Testing and Quality Assurance.
-- Phase 20 — Performance and Scalability.
-- Phase 21 — Security Hardening.
-- Phase 22 — Production Infrastructure and Deployment.
-- Phase 23 — CI/CD and Release Management.
-- Phase 24 — Documentation and Final Product Readiness.
+## Current release objective
 
-Do not label the product production-ready until critical acceptance criteria are met.
+Prepare a reproducible production image and deployment runbook, validate the production Compose topology, then perform an owner-controlled deployment to a real server. A green CI pipeline does not by itself mean the product is deployed or production-ready.
+
+Current work in progress:
+- Production-only PHP 8.5 image with Node 22 asset build and no Composer dev dependencies.
+- Production Compose topology with private PostgreSQL, Nginx, persistent private storage, queue worker, and scheduler.
+- Explicit trusted reverse-proxy configuration, secure cookie defaults, and deployment/backup/rollback runbook.
+- Production-image build and Compose configuration validation in CI.
+
+## Deferred product phases
+
+These are intentionally not blockers for the first usable MVP unless the business launch requires them:
+
+- **Phase 9:** Branch management and mixed product settings.
+- **Phase 10:** Media and product image management.
+- **Phase 11:** Menu customization and visual templates; template-count entitlements start here.
+- **Phase 12:** Localization and translation management.
+- **Phase 15:** Top-plan advanced features (video, reviews/ratings, likes, Instagram API, Excel export, backup/restore, notifications/customer communication, initial setup service).
+- **Phase 16:** Custom domains and HTTPS per tenant.
+- **Phase 17:** Social links, contact, and location integrations.
+- **Phase 18:** Expanded notifications, audit logs, and operational events.
+
+## Remaining release gates
+
+- **Phase 19 — QA:** run end-to-end acceptance tests on a clean PostgreSQL deployment, including payment receipt privacy and admin approval.
+- **Phase 20 — Performance:** inspect catalog pagination/query plans and public menu cache behavior under representative load.
+- **Phase 21 — Security:** complete dependency review, authorization review, upload validation review, rate limits, and production secret review.
+- **Phase 22 — Production infrastructure:** validate image build and Compose config, provision host, DNS, TLS, SMTP, persistent volumes, and backups.
+- **Phase 23 — CI/CD:** publish immutable images, deploy with reviewed migrations, and verify rollback procedure.
+- **Phase 24 — Final readiness:** operational documentation, owner runbook, monitoring/alerts, restore drill, and launch acceptance.
+
+Do not mark the product production-ready until the remaining release gates are completed on the actual deployment target.
