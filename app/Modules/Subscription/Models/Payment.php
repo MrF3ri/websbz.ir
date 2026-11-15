@@ -2,10 +2,10 @@
 
 namespace App\Modules\Subscription\Models;
 
+use App\Models\User;
 use App\Modules\Subscription\Enums\PaymentStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Models\User;
 use Illuminate\Support\Carbon;
 
 /**
