@@ -16,19 +16,19 @@ class TenantMiddleware
 
     public function handle(Request $request, Closure $next): Response
     {
+        // Clear first, including guest and onboarding redirects, to prevent scope leakage.
+        $this->currentBusiness->clear();
+
         $user = $request->user();
 
         if (! $user instanceof User) {
             return redirect()->guest(route('login'));
         }
 
-        $this->currentBusiness->clear();
-
         $activeBusinessId = $request->session()->get('active_business_id');
         $business = null;
 
         if ($activeBusinessId !== null) {
-            // The relationship scopes this lookup to businesses the user belongs to.
             $business = $user->businesses()
                 ->whereKey($activeBusinessId)
                 ->first();
@@ -39,7 +39,10 @@ class TenantMiddleware
         }
 
         if ($business === null) {
-            $business = $user->businesses()->first();
+            // A stable fallback is required for users with multiple memberships.
+            $business = $user->businesses()
+                ->orderBy('businesses.id')
+                ->first();
         }
 
         if ($business === null) {
@@ -47,7 +50,6 @@ class TenantMiddleware
         }
 
         $this->currentBusiness->set($business);
-
         $request->session()->put('active_business_id', $business->getKey());
 
         return $next($request);
