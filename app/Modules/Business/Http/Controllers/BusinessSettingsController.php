@@ -34,13 +34,10 @@ class BusinessSettingsController
         ]);
     }
 
-    public function update(
-        UpdateBusinessSettingsRequest $request
-    ): RedirectResponse {
+    public function update(UpdateBusinessSettingsRequest $request): RedirectResponse
+    {
+        // Update authorization is owned by the Form Request; do not duplicate the Policy check.
         $business = $this->resolveCurrentBusiness();
-
-        Gate::authorize('update', $business);
-
         $business->update($request->validated());
 
         return to_route('business.settings.edit')->with(
