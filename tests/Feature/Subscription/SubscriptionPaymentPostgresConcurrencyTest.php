@@ -69,6 +69,64 @@ class SubscriptionPaymentPostgresConcurrencyTest extends TestCase
         );
     }
 
+    public function test_concurrent_successful_callbacks_finalize_and_extend_the_subscription_once(): void
+    {
+        $owner = User::factory()->create();
+        $business = $this->createBusinessFor($owner);
+        $subscription = $this->giveBusinessTrialSubscription($business, 'economic');
+        $trialEndsAt = $subscription->trial_ends_at;
+        self::assertNotNull($trialEndsAt);
+        $plan = Plan::query()->where('code', 'professional')->firstOrFail();
+        $payment = $subscription->payments()->create([
+            'target_plan_id' => $plan->getKey(),
+            'amount' => $plan->monthly_price,
+            'status' => PaymentStatus::Pending,
+            'gateway_reference' => 'CONCURRENT-CALLBACK-001',
+        ]);
+
+        $admin = User::factory()->create();
+        [$first, $second] = $this->runConcurrentCallbacks($payment, $admin);
+
+        $this->assertSame(PaymentStatus::Successful->value, $first['status']);
+        $this->assertSame(PaymentStatus::Successful->value, $second['status']);
+        $this->assertSame(PaymentStatus::Successful, $payment->fresh()->status);
+        $this->assertSame(SubscriptionStatus::Active, $subscription->fresh()->status);
+        $this->assertSame($plan->getKey(), $subscription->fresh()->plan_id);
+        $this->assertSame($trialEndsAt->copy()->addMonth()->timestamp, $subscription->fresh()->current_period_ends_at?->timestamp);
+        $this->assertSame(1, $subscription->events()->where('event_type', SubscriptionEventType::PaymentApproved->value)->count());
+        $this->assertSame(1, $subscription->events()->where('event_type', SubscriptionEventType::Upgraded->value)->count());
+    }
+
+    /**
+     * @return array{0: array{status: string}, 1: array{status: string}}
+     */
+    private function runConcurrentCallbacks(Payment $payment, User $admin): array
+    {
+        $directory = $this->makeSignalDirectory();
+        $gate = $this->lockGate($directory);
+        $first = null;
+        $second = null;
+
+        try {
+            $first = $this->startWorker($payment, $admin, $directory, 'first-callback', true, 'callback');
+            $this->waitForFile($directory.'/first-callback.locked');
+
+            $second = $this->startWorker($payment, $admin, $directory, 'second-callback', false, 'callback');
+            $this->waitForDatabaseLockWait('second-callback');
+            $this->releaseGate($gate);
+
+            return [
+                $this->awaitWorker($first, $directory, 'first-callback'),
+                $this->awaitWorker($second, $directory, 'second-callback'),
+            ];
+        } finally {
+            $this->releaseGate($gate);
+            $this->stopWorker($first);
+            $this->stopWorker($second);
+            $this->removeSignalDirectory($directory);
+        }
+    }
+
     /**
      * @return array{0: array{status: string}, 1: array{status: string}}
      */
@@ -108,6 +166,7 @@ class SubscriptionPaymentPostgresConcurrencyTest extends TestCase
         string $directory,
         string $workerId,
         bool $holdAfterLock,
+        string $mode = 'review',
     ): array {
         $command = [
             PHP_BINARY,
@@ -117,6 +176,7 @@ class SubscriptionPaymentPostgresConcurrencyTest extends TestCase
             $directory,
             $workerId,
             $holdAfterLock ? '1' : '0',
+            $mode,
         ];
 
         $database = config('database.connections.pgsql');
