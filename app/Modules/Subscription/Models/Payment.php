@@ -2,6 +2,7 @@
 
 namespace App\Modules\Subscription\Models;
 
+use App\Models\User;
 use App\Modules\Subscription\Enums\PaymentStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,9 +12,16 @@ use Illuminate\Support\Carbon;
  * @property int $id
  * @property int $subscription_id
  * @property int $target_plan_id
+ * @property array<string, mixed>|null $target_features_snapshot
  * @property int $amount
  * @property PaymentStatus $status
  * @property string|null $gateway_reference
+ * @property string|null $bank_tracking_number
+ * @property string|null $receipt_path
+ * @property Carbon|null $submitted_at
+ * @property Carbon|null $reviewed_at
+ * @property int|null $reviewed_by
+ * @property string|null $rejection_reason
  * @property Carbon|null $paid_at
  */
 class Payment extends Model
@@ -22,9 +30,16 @@ class Payment extends Model
     protected $fillable = [
         'subscription_id',
         'target_plan_id',
+        'target_features_snapshot',
         'amount',
         'status',
         'gateway_reference',
+        'bank_tracking_number',
+        'receipt_path',
+        'submitted_at',
+        'reviewed_at',
+        'reviewed_by',
+        'rejection_reason',
         'paid_at',
     ];
 
@@ -32,6 +47,12 @@ class Payment extends Model
     public function subscription(): BelongsTo
     {
         return $this->belongsTo(Subscription::class);
+    }
+
+    /** @return BelongsTo<User, $this> */
+    public function reviewer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'reviewed_by');
     }
 
     /** @return BelongsTo<Plan, $this> */
@@ -46,7 +67,10 @@ class Payment extends Model
         return [
             'amount' => 'integer',
             'status' => PaymentStatus::class,
+            'target_features_snapshot' => 'array',
             'paid_at' => 'datetime',
+            'submitted_at' => 'datetime',
+            'reviewed_at' => 'datetime',
         ];
     }
 }
