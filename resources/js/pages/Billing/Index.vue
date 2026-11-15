@@ -139,7 +139,7 @@ function submitPayment(): void {
                 <h2 class="font-semibold text-foreground">ثبت رسید پرداخت</h2>
                 <p class="mt-1 text-sm text-muted-foreground">پس از ثبت، پرداخت توسط مدیر بررسی می‌شود. اشتراک فقط پس از تأیید تمدید خواهد شد.</p>
 
-                <div v-if="hasPendingReview" class="mt-4 rounded-lg bg-muted p-3 text-sm text-muted-foreground">
+                <div v-if="props.hasPendingReview" class="mt-4 rounded-lg bg-muted p-3 text-sm text-muted-foreground">
                     یک پرداخت در انتظار بررسی دارید. تا اعلام نتیجه، درخواست جدید ثبت نکنید.
                 </div>
 
@@ -169,7 +169,7 @@ function submitPayment(): void {
                     <p v-if="form.errors.payment" class="text-sm text-destructive sm:col-span-2">{{ form.errors.payment }}</p>
 
                     <div class="sm:col-span-2">
-                        <Button type="submit" :disabled="form.processing || !hasCardDetails || hasPendingReview">
+                        <Button type="submit" :disabled="form.processing || !hasCardDetails || props.hasPendingReview">
                             {{ form.processing ? 'در حال ثبت...' : 'ثبت رسید برای بررسی' }}
                         </Button>
                     </div>
