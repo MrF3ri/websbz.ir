@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Modules\Business\Models\Business;
 use App\Modules\Business\Models\BusinessMember;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Event;
 use RuntimeException;
 use Tests\Concerns\InteractsWithBusinesses;
 use Tests\TestCase;
@@ -35,17 +36,19 @@ class CreateBusinessActionTest extends TestCase
     public function test_membership_failure_rolls_back_business_creation_without_an_orphan(): void
     {
         $user = User::factory()->create();
+        $event = 'eloquent.creating: '.BusinessMember::class;
 
-        BusinessMember::creating(function (): void {
+        Event::listen($event, function (): void {
             throw new RuntimeException('Simulated membership persistence failure.');
         });
 
         try {
-            $this->expectException(RuntimeException::class);
             app(CreateBusinessAction::class)->execute($user, ['name' => 'Rollback Cafe']);
+            $this->fail('The simulated membership failure should be thrown.');
+        } catch (RuntimeException $exception) {
+            $this->assertSame('Simulated membership persistence failure.', $exception->getMessage());
         } finally {
-            BusinessMember::flushEventListeners();
-            BusinessMember::boot();
+            Event::forget($event);
         }
 
         $this->assertDatabaseMissing('businesses', ['slug' => 'rollback-cafe']);
