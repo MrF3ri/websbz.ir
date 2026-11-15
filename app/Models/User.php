@@ -22,6 +22,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 /**
  * @property int $id
  * @property string $public_id
+ * @property bool $is_platform_admin
  * @property string $name
  * @property string $email
  * @property Carbon|null $email_verified_at
@@ -34,7 +35,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property Carbon|null $updated_at
  */
 #[Fillable(['name', 'email', 'password'])]
-#[Hidden(['public_id', 'password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
+#[Hidden(['public_id', 'is_platform_admin', 'password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
 {
     /** @use HasFactory<UserFactory> */
@@ -75,6 +76,7 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
     {
         return [
             'email_verified_at' => 'datetime',
+            'is_platform_admin' => 'boolean',
             'password' => 'hashed',
             /* @chisel-2fa */
             'two_factor_confirmed_at' => 'datetime',
