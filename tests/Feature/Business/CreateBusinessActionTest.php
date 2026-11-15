@@ -45,6 +45,10 @@ class CreateBusinessActionTest extends TestCase
             'business_id' => $business->getKey(),
             'status' => 'trialing',
         ]);
+        $this->assertDatabaseHas('menus', [
+            'business_id' => $business->getKey(),
+            'slug' => 'main',
+        ]);
     }
 
     public function test_membership_failure_rolls_back_business_creation_without_an_orphan(): void
@@ -72,5 +76,6 @@ class CreateBusinessActionTest extends TestCase
         $this->assertDatabaseCount('businesses', 0);
         $this->assertDatabaseCount('business_members', 0);
         $this->assertDatabaseCount('subscriptions', 0);
+        $this->assertDatabaseCount('menus', 0);
     }
 }
