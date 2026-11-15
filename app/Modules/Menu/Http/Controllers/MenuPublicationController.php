@@ -2,6 +2,7 @@
 
 namespace App\Modules\Menu\Http\Controllers;
 
+use App\Modules\Business\Models\Business;
 use App\Modules\Category\Models\Category;
 use App\Modules\Menu\Actions\EnsurePrimaryMenuAction;
 use App\Modules\Menu\Actions\PublishMenuAction;
@@ -37,7 +38,7 @@ class MenuPublicationController
         Gate::authorize('viewAny', Category::class);
 
         $business = $currentBusiness->get();
-        abort_unless($business !== null, 404);
+        abort_unless($business instanceof Business, 404);
 
         $menu = $ensurePrimaryMenu->execute($business);
         $menu->update(['status' => MenuStatus::Draft]);
