@@ -44,6 +44,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::get('/billing', [BillingController::class, 'index'])->name('billing.index');
         Route::post('/billing/payments', [ManualPaymentController::class, 'store'])->name('billing.payments.store');
+        Route::get('/billing/payments/{payment}/receipt', [ManualPaymentController::class, 'receipt'])
+            ->name('billing.payments.receipt');
 
         Route::get('/business/settings', [BusinessSettingsController::class, 'edit'])
             ->name('business.settings.edit');
