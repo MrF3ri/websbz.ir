@@ -85,11 +85,11 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Install PHP dependencies
-        run: composer install --no-interaction --prefer-dist --no-progress
-
-      - name: Install Node dependencies
-        run: npm ci
+      # Run the same application setup used by the SQLite job. Besides dependencies,
+      # this generates Wayfinder declarations required by vue-tsc and builds the assets.
+      # The PostgreSQL connection is supplied by the job-level environment above.
+      - name: Setup Application
+        run: composer setup
 
       - name: Run frontend type checks
         run: npm run check
