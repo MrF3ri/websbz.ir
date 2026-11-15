@@ -1,30 +1,50 @@
-> **STATUS: OUTDATED — NOT AN IMPLEMENTATION RECORD**
->
-> This handoff document describes planned work, not verified repository functionality. Use [`docs/roadmap.md`](../roadmap.md) as the current execution order and [`docs/master-spec.md`](../master-spec.md) as approved requirements.
->
-> The following claims in the original handoff are **not implemented** in the repository baseline: onboarding plan selection and automatic 72-hour trial start; complete subscription lifecycle (paid grace period, cancellation, renewal, expiration, upgrade/downgrade actions); manual card-to-card payment with receipt upload and Platform Admin approval; subscription access middleware and public-menu access policy; Jalali date conversion/presentation helpers; Billing/CRM routes and Vue pages; corresponding complete lifecycle/payment tests. Existing Phase 7 work is partial: Payment/SubscriptionEvent models, StartTrial/InitiatePayment/ProcessPaymentCallback actions, and related migrations/tests exist, but there are no billing routes/UI or manual-review workflow.
->
-> The final paragraph below saying only a handoff document exists is also stale: partial Phase 7 source code has since been committed. This README is retained for historical context only.
-
 # Phase 7 — Subscription Lifecycle & Billing
 
-This branch was created from `main` at `f0032661a0936348d04081f827e8b9b41c86b774`.
+## Current status
 
-The Phase 7 implementation patch was originally described as a downloadable archive in an accompanying ChatGPT response:
-`websbz-phase7-implementation.tar.gz`.
+**MVP manual card-to-card billing is implemented; Phase 7 is not yet fully complete.** This document is the current implementation record, not a historical handoff archive. The approved project requirements are in the ERRATA at the top of `docs/master-spec.md`.
 
-## Patch contents (historical handoff claims)
+## Implemented on `main`
 
-- Business onboarding plan selection and 72-hour UTC trial creation
-- Subscription lifecycle, paid grace period, cancellation, renewal, upgrade and downgrade actions
-- Bank-transfer payment requests and CRM operator approval workflow
-- Append-only subscription event history
-- Subscription access middleware and public-menu access policy service
-- Jalali date conversion and Persian date presentation
-- Billing and CRM Vue pages, routes, migrations, tests and architecture notes
+- Onboarding requires a selected active plan; the server resolves the plan and creates the subscription.
+- `StartTrialAction` serializes trial creation per business, captures the persisted plan-feature snapshot, records a trial event, and sets the trial end to exactly 72 hours after start.
+- `EntitlementService` reads the subscription snapshot; `EnforcementService` makes feature/quota decisions.
+- Platform card details are stored in platform settings and edited through the Platform Admin area; card details are not hardcoded.
+- The business owner can submit a payment against an active server-selected plan, with a private receipt upload and a unique bank tracking number.
+- Receipt files are stored on the private `local` disk, not the public disk.
+- `SubmitManualPaymentAction` locks the subscription, prevents a second pending review, snapshots the target plan features and price, creates the `pending_review` payment, and records a subscription event.
+- `ReviewManualPaymentAction` locks the payment and subscription, handles approve/reject idempotently, records reviewer/review timestamps and event history, and on approval updates the plan snapshot and paid period in the same transaction.
+- Platform Admin payment review and receipt download routes/UI exist.
+- The gateway abstraction and legacy online-payment initiation/callback Actions remain in the code; the approved first provider is still manual card-to-card.
+- Feature tests cover 72-hour trial creation, plan snapshots, gateway callback behavior, manual payment submission, duplicate bank tracking number rejection, approval, rejection, and idempotency.
 
-## Apply
+## Recently completed changes
 
-The handoff instructions below are retained for historical context only. Do not apply the archive as a substitute for reviewing the current repository.
+- PR #25 (`fix/phase-7-business-receipt-access`) is merged. Business owners can download receipts from billing history through an authenticated tenant-scoped route; ownership is verified through the payment's subscription and current business. A cross-tenant receipt-access regression test covers denial of another business's receipt.
+- PR #27 adds deterministic PostgreSQL multi-process concurrency tests for catalog quota enforcement, rollback, and independent-business locking. These tests do not cover payment lifecycle races.
+- PR #28 (`fix/phase-7-lifecycle-completion`) is merged. Manual approval and verified gateway callback paths classify same-plan periods as `renewed`, lower-priced target plans as `downgraded`, and higher-priced target plans as `upgraded`, with downgrade regression tests.
 
-**Important:** This README is not an authoritative implementation status document. See `docs/roadmap.md`.
+## Remaining Phase 7 work
+
+Review the complete Phase 7 acceptance criteria in `docs/master-spec.md` and close the gaps deliberately:
+
+1. Implement and test the persisted expired-subscription transition and access behavior after trial/paid period end, preserving customer data.
+2. Review plan-change feature-snapshot and effective-access behavior against the Phase 7 acceptance criteria. PR #28 implements event classification and downgrade regression tests; confirm the full plan-change behavior rather than treating event classification alone as completion.
+3. Add PostgreSQL integration coverage for concurrent/delayed payment review and renewal edge cases; the catalog concurrency suite in PR #27 does not cover these payment scenarios.
+4. Verify the manual provider end-to-end through owner acceptance: submit receipt, review as Platform Admin, approve/reject, and confirm subscription access and period.
+5. Keep online gateway callbacks separate from the manual provider. Do not add or assume real gateway credentials.
+
+## Important invariants
+
+- Trial duration is exactly 72 hours for all three plans.
+- Prices and plan feature snapshots are resolved server-side; never trust submitted amounts or feature values.
+- Payment states for the manual provider are `pending_review`, `approved`, and `rejected`.
+- Bank tracking numbers are unique.
+- Receipt files remain private. Only the Platform Admin and the owning Business may access them.
+- Approval/rejection is authenticated, audited, idempotent, and performed under database row locks.
+- Subscription changes and payment finalization are transactional.
+- Dates are stored and transported as Gregorian ISO 8601 UTC; only presentation is Jalali in Asia/Tehran.
+
+## Verification
+
+The repository CI runs SQLite quality/test checks, the full PostgreSQL test suite, and production image/Compose validation. Use PostgreSQL for concurrency, row-lock, and database-constraint verification. A green workflow does not prove a live production deployment.

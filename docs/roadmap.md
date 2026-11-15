@@ -6,26 +6,48 @@ This roadmap preserves the phase numbering in `docs/master-spec.md` and its ERRA
 
 ## Completed and merged
 
-- **Baseline A:** Docker development topology, PostgreSQL CI, architecture documentation, and ADR foundation.
-- **Baseline B:** tenant factories and isolation tests, `users.public_id` ULID, selected-plan onboarding, 72-hour trial, safe Inertia entitlement props, and Jalali presentation helpers.
-- **Phase 7 — MVP manual billing path:** editable platform bank-card settings, private receipt upload, unique bank tracking number, single Platform Admin, authenticated approve/reject flow, payment-time plan feature snapshot, transactional subscription activation/renewal, idempotent review, and audit events.
+- **Baseline stabilization:** Docker development/production topology, PostgreSQL CI, BusinessFactory, tenancy IDOR coverage, `users.public_id`, selected-plan onboarding, 72-hour trial, safe Inertia entitlement props, Jalali presentation helpers, architecture documentation, and ADR foundation.
 - **Phase 8 — Menu and Catalog:** primary menu, category/product CRUD, sorting, search/filter/pagination, tenant authorization, entitlement limits, and same-menu composite foreign keys.
 - **Phase 13 — Public Menu:** stable guest URL, publication/unpublication, and public visibility filters.
 - **Phase 14 — QR:** local browser-side QR generation and downloadable SVG; no external QR service receives the menu URL.
 
 The above work is merged to `main` through PRs #12, #16, #17, #18, #19, #20, and #21. Each feature PR passed the configured SQLite and PostgreSQL CI jobs before merge.
 
+## Phase 7 — Subscription Lifecycle & Billing
+
+The MVP manual card-to-card path is implemented on `main`:
+
+- Plan selection during onboarding and a 72-hour trial with a persisted plan-feature snapshot.
+- Platform card details managed through platform settings.
+- Business payment submission with a private receipt, server-priced plan, and unique bank tracking number.
+- Platform Admin approval/rejection, audit events, row locking, and idempotent review.
+- Approval updates the subscription plan/snapshot and extends its paid period transactionally.
+- A legacy gateway abstraction and callback processing Actions remain available for future online providers.
+
+Remaining Phase 7 work (do not mark the phase fully complete yet):
+
+- Implement and test the persisted expiration transition and access behavior after trial/paid period end, while preserving customer data.
+- Review plan-change feature-snapshot/effective-access behavior against the Phase 7 acceptance criteria. PR #28 now classifies manual approval and verified callback outcomes as upgraded, downgraded, or renewed and adds downgrade regression tests.
+- Add PostgreSQL coverage for delayed/concurrent payment review and renewal boundaries; the existing PR #27 PostgreSQL concurrency suite covers catalog quota writes, not payment lifecycle races.
+- Complete owner end-to-end acceptance of manual billing: submit a receipt, review as Platform Admin, approve/reject, and verify subscription access and period.
+
+Merged supporting changes: PR #25 (tenant-scoped business-owner receipt download and IDOR test), PR #27 (deterministic PostgreSQL catalog concurrency tests), and PR #28 (plan-change event classification and regression tests).
+
+See `docs/phase-7/README.md` for the implementation boundary and handoff notes.
+
 ## Current release objective
 
-The production build and deployment topology are now prepared and CI-validated (PR #22). The remaining work is owner-controlled provisioning and verification on a real server. A green pipeline and a production image build do not by themselves mean the product is deployed or production-ready.
+The production build and deployment topology are prepared and CI-validated (PR #22). The remaining work is owner-controlled provisioning and verification on a real server. A green pipeline and a production image build do not by themselves mean the product is deployed or production-ready.
 
 Completed in the release-preparation layer:
+
 - Production-only PHP 8.5 image with Node 22 asset build and no Composer dev dependencies.
 - Production Compose topology with private PostgreSQL, Nginx, persistent private storage, queue worker, and scheduler.
 - Explicit trusted reverse-proxy configuration, secure cookie defaults, and deployment/backup/rollback runbook.
 - Production-image build and Compose configuration validation in CI.
 
 Next owner-dependent step:
+
 - Choose the VPS/hosting provider and region, connect the domain and DNS, supply SMTP details, provision TLS, and run the deployment checklist in `docs/deployment.md`.
 
 ## Deferred product phases
