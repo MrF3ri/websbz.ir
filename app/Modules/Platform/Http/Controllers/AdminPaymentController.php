@@ -52,7 +52,7 @@ class AdminPaymentController
         ReviewManualPaymentAction $reviewPayment,
     ): RedirectResponse {
         $user = $request->user();
-        abort_unless($user instanceof User && $user->is_platform_admin, 403);
+        abort_unless($user instanceof User && $user->isPlatformAdmin(), 403);
 
         $reviewPayment->approve($payment, $user);
 
