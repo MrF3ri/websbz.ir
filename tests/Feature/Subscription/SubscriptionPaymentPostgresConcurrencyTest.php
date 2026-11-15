@@ -3,8 +3,8 @@
 namespace Tests\Feature\Subscription;
 
 use App\Models\User;
-use App\Modules\Subscription\Actions\SubmitManualPaymentAction;
 use App\Modules\Subscription\Actions\ReviewManualPaymentAction;
+use App\Modules\Subscription\Actions\SubmitManualPaymentAction;
 use App\Modules\Subscription\Enums\PaymentStatus;
 use App\Modules\Subscription\Enums\SubscriptionEventType;
 use App\Modules\Subscription\Enums\SubscriptionStatus;
@@ -71,7 +71,7 @@ class SubscriptionPaymentPostgresConcurrencyTest extends TestCase
     }
 
     /**
-     * @return array{0: array{status: string, payment_id?: int}, 1: array{status: string, payment_id?: int}}
+     * @return array{0: array{status: string}, 1: array{status: string}}
      */
     private function runConcurrentApprovals(Payment $payment, User $admin): array
     {
@@ -159,7 +159,7 @@ class SubscriptionPaymentPostgresConcurrencyTest extends TestCase
 
     /**
      * @param  array{process: resource, stderr: string}  $worker
-     * @return array{status: string, payment_id?: int}
+     * @return array{status: string}
      */
     private function awaitWorker(array $worker, string $directory, string $workerId): array
     {
@@ -170,7 +170,7 @@ class SubscriptionPaymentPostgresConcurrencyTest extends TestCase
                 $result = json_decode((string) file_get_contents($resultPath), true, 512, JSON_THROW_ON_ERROR);
                 $exitCode = proc_close($worker['process']);
 
-                if (! is_array($result) || ! isset($result['status'])) {
+                if (! is_array($result) || ! is_string($result['status'] ?? null)) {
                     $this->fail("Worker [{$workerId}] returned an invalid result.");
                 }
 
@@ -178,7 +178,7 @@ class SubscriptionPaymentPostgresConcurrencyTest extends TestCase
                     $this->fail("Worker [{$workerId}] returned an error with a successful exit code.");
                 }
 
-                return $result;
+                return ['status' => $result['status']];
             }
 
             $status = proc_get_status($worker['process']);
