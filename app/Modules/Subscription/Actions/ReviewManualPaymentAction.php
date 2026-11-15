@@ -82,11 +82,12 @@ class ReviewManualPaymentAction
                 ->firstOrFail();
 
             /** @var array<string, mixed> $featuresSnapshot */
-            $featuresSnapshot = $targetPlan->features
-                ->mapWithKeys(
-                    fn (PlanFeature $feature): array => [$feature->feature_key => $feature->value],
-                )
-                ->all();
+            $featuresSnapshot = $lockedPayment->target_features_snapshot
+                ?? $targetPlan->features
+                    ->mapWithKeys(
+                        fn (PlanFeature $feature): array => [$feature->feature_key => $feature->value],
+                    )
+                    ->all();
 
             $previousPlanId = $subscription->plan_id;
             $periodBase = $now;
