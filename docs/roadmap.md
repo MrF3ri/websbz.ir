@@ -27,7 +27,7 @@ The MVP manual card-to-card path is implemented on `main`:
 Remaining Phase 7 work (do not mark the phase fully complete yet):
 
 - Merge and verify PR #25, which adds tenant-scoped business-owner receipt download and an IDOR regression test. Until merged, only the Platform Admin receipt download is available on `main`.
-- Complete the lifecycle audit against the Phase 7 acceptance criteria: explicit expiration behavior/state transitions, and approved product decisions plus implementation/tests for cancellation, grace period, and downgrade semantics where required.
+- Complete the lifecycle audit against the Phase 7 acceptance criteria: explicit expiration behavior/state transitions and downgrade semantics/tests as required by Phase 7.
 - Verify delayed/duplicate payment processing and renewal boundaries against PostgreSQL, not SQLite alone.
 
 See `docs/phase-7/README.md` for the implementation boundary and handoff notes.
