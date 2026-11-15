@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Console\Command;
 
 class GrantPlatformAdminCommand extends Command
@@ -13,30 +14,35 @@ class GrantPlatformAdminCommand extends Command
 
     public function handle(): int
     {
-        $user = User::query()
-            ->where('email', (string) $this->argument('email'))
-            ->first();
+        return DB::transaction(function (): int {
+            // Lock existing user rows so concurrent grant commands serialize.
+            User::query()->orderBy('id')->lockForUpdate()->get(['id']);
 
-        if ($user === null) {
-            $this->error('No user found with that email address.');
+            $user = User::query()
+                ->where('email', (string) $this->argument('email'))
+                ->first();
 
-            return self::FAILURE;
-        }
+            if ($user === null) {
+                $this->error('No user found with that email address.');
 
-        $existingAdmin = User::query()
-            ->where('is_platform_admin', true)
-            ->first();
+                return self::FAILURE;
+            }
 
-        if ($existingAdmin !== null && $existingAdmin->isNot($user)) {
-            $this->error('A platform administrator is already configured.');
+            $existingAdmin = User::query()
+                ->where('is_platform_admin', true)
+                ->first();
 
-            return self::FAILURE;
-        }
+            if ($existingAdmin !== null && $existingAdmin->isNot($user)) {
+                $this->error('A platform administrator is already configured.');
 
-        $user->forceFill(['is_platform_admin' => true])->save();
+                return self::FAILURE;
+            }
 
-        $this->info('Platform administrator access granted.');
+            $user->forceFill(['is_platform_admin' => true])->save();
 
-        return self::SUCCESS;
+            $this->info('Platform administrator access granted.');
+
+            return self::SUCCESS;
+        }, attempts: 3);
     }
 }
