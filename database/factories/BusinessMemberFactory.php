@@ -3,9 +3,9 @@
 namespace Database\Factories;
 
 use App\Enums\BusinessRole;
+use App\Models\User;
 use App\Modules\Business\Models\Business;
 use App\Modules\Business\Models\BusinessMember;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
