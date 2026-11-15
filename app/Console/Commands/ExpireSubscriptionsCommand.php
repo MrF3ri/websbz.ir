@@ -1,9 +1,9 @@
 <?php
 
-namespace App\\Console\\Commands;
+namespace App\Console\Commands;
 
-use App\\Modules\\Subscription\\Actions\\ExpireSubscriptionsAction;
-use Illuminate\\Console\\Command;
+use App\Modules\Subscription\Actions\ExpireSubscriptionsAction;
+use Illuminate\Console\Command;
 
 class ExpireSubscriptionsCommand extends Command
 {
