@@ -1,12 +1,12 @@
 <?php
 
-namespace Tests\\Feature\\Menu;
+namespace Tests\Feature\Menu;
 
-use App\\Modules\\Menu\\Enums\\MenuStatus;
-use App\\Modules\\Product\\Enums\\ProductStatus;
-use Illuminate\\Foundation\\Testing\\RefreshDatabase;
-use Tests\\Concerns\\InteractsWithCatalog;
-use Tests\\TestCase;
+use App\Modules\Menu\Enums\MenuStatus;
+use App\Modules\Product\Enums\ProductStatus;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Concerns\InteractsWithCatalog;
+use Tests\TestCase;
 
 class MenuPublicationTest extends TestCase
 {
