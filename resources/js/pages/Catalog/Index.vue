@@ -563,7 +563,8 @@ function goToPage(pageNumber: number): void {
                             <Label for="product-discount">قیمت با تخفیف (تومان)</Label>
                             <Input
                                 id="product-discount"
-                                v-model.number="productForm.discount_price"
+                                :model-value="productForm.discount_price ?? ''"
+                                @update:model-value="(value) => { productForm.discount_price = value === '' ? null : Number(value) }"
                                 type="number"
                                 min="0"
                                 step="1"
