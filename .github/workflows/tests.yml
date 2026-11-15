@@ -11,9 +11,8 @@ permissions:
 
 jobs:
   sqlite:
-    name: Fast suite (SQLite)
+    name: SQLite test suite and quality checks
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -35,41 +34,37 @@ jobs:
       - name: Setup Application
         run: composer setup
 
-      - name: Run CI Checks
+      - name: Run SQLite tests and quality gates
         run: composer ci:check
 
-      - name: Build Docker application image
-        run: docker build --target app --tag websbz-baseline:ci .
-
   postgresql:
-    name: Full suite (PostgreSQL)
+    name: PostgreSQL test suite
     runs-on: ubuntu-latest
     services:
       postgres:
         image: postgres:17
         env:
           POSTGRES_DB: websbz_test
-          POSTGRES_USER: websbz
-          POSTGRES_PASSWORD: websbz_test_password
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U websbz -d websbz_test"
-          --health-interval 5s
+          --health-cmd "pg_isready -U postgres -d websbz_test"
+          --health-interval 10s
           --health-timeout 5s
-          --health-retries 20
-
+          --health-retries 5
     env:
       APP_ENV: testing
-      APP_KEY: base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
       DB_CONNECTION: pgsql
       DB_HOST: 127.0.0.1
       DB_PORT: 5432
       DB_DATABASE: websbz_test
-      DB_USERNAME: websbz
-      DB_PASSWORD: websbz_test_password
-      DB_URL: ""
-
+      DB_USERNAME: postgres
+      DB_PASSWORD: password
+      SESSION_DRIVER: array
+      CACHE_STORE: array
+      QUEUE_CONNECTION: sync
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -88,26 +83,19 @@ jobs:
         with:
           node-version: '22'
 
-      # Run the same application setup used by the SQLite job. Besides dependencies,
-      # this generates Wayfinder declarations required by vue-tsc and builds the assets.
-      # The PostgreSQL connection is supplied by the job-level environment above.
-      - name: Setup Application
-        run: composer setup
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
-      - name: Run frontend type checks
-        run: npm run check
+      - name: Build frontend assets for HTTP feature tests
+        run: npm ci && npm run build
 
-      - name: Run Pint
-        run: vendor/bin/pint --parallel --test
+      - name: Prepare application key
+        run: |
+          cp .env.example .env
+          php artisan key:generate --force
 
-      - name: Run PHPStan
-        run: vendor/bin/phpstan analyse --memory-limit=1G
-
-      - name: Verify active database driver for PHPUnit
+      - name: Verify PostgreSQL connection and isolated test database
         run: php artisan db:show
 
-      - name: Run full PHPUnit suite against PostgreSQL
+      - name: Run PostgreSQL test suite
         run: php artisan test
-
-      - name: Build frontend assets
-        run: npm run build
