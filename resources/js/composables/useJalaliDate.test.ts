@@ -8,7 +8,7 @@ describe('useJalaliDate', () => {
         ['2025-03-20T00:00:00Z', '۱۴۰۳/۱۲/۳۰'],
         ['2025-03-21T00:00:00Z', '۱۴۰۴/۰۱/۰۱'],
         ['2026-03-21T00:00:00Z', '۱۴۰۵/۰۱/۰۱'],
-    ])('formats %s using the Persian calendar', (value, expected) => {
+    ])('formats %s using the Persian calendar', (value: string, expected: string) => {
         expect(formatDate(value)).toBe(expected);
     });
 

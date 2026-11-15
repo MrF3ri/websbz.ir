@@ -4,6 +4,10 @@ namespace App\Providers;
 
 use App\Modules\Business\Models\Business;
 use App\Modules\Business\Policies\BusinessPolicy;
+use App\Modules\Category\Models\Category;
+use App\Modules\Category\Policies\CategoryPolicy;
+use App\Modules\Product\Models\Product;
+use App\Modules\Product\Policies\ProductPolicy;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -13,27 +17,20 @@ use Illuminate\Validation\Rules\Password;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
         //
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
         $this->configureDefaults();
 
         Gate::policy(Business::class, BusinessPolicy::class);
+        Gate::policy(Category::class, CategoryPolicy::class);
+        Gate::policy(Product::class, ProductPolicy::class);
     }
 
-    /**
-     * Configure default behaviors for production-ready applications.
-     */
     protected function configureDefaults(): void
     {
         Date::use(CarbonImmutable::class);

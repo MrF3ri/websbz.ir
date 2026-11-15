@@ -4,6 +4,7 @@ namespace App\Modules\Business\Models;
 
 use App\Enums\BusinessStatus;
 use App\Models\User;
+use App\Modules\Menu\Models\Menu;
 use App\Modules\Subscription\Models\Subscription;
 use Database\Factories\BusinessFactory;
 use Illuminate\Database\Eloquent\Builder;
@@ -12,6 +13,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Str;
 
 /**
@@ -101,6 +103,16 @@ class Business extends Model
             ->using(BusinessMember::class)
             ->withPivot(['id', 'role'])
             ->withTimestamps();
+    }
+
+    /**
+     * Get the primary menu.
+     *
+     * @return HasOne<Menu, $this>
+     */
+    public function menu(): HasOne
+    {
+        return $this->hasOne(Menu::class);
     }
 
     /**

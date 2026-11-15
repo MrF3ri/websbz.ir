@@ -78,6 +78,10 @@ class BusinessOnboardingTest extends TestCase
             'business_id' => $business->id,
             'status' => 'trialing',
         ]);
+        $this->assertDatabaseHas('menus', [
+            'business_id' => $business->id,
+            'slug' => 'main',
+        ]);
     }
 
     public function test_user_with_business_is_redirected_from_onboarding(): void
