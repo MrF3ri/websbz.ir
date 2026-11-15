@@ -103,6 +103,9 @@ jobs:
       - name: Run PHPStan
         run: vendor/bin/phpstan analyse --memory-limit=1G
 
+      - name: Verify active database driver for PHPUnit
+        run: php artisan db:show
+
       - name: Run full PHPUnit suite against PostgreSQL
         run: php artisan test
 
