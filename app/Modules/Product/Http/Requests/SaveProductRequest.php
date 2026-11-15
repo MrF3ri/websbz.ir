@@ -14,6 +14,13 @@ class SaveProductRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('is_available')) {
+            $this->merge(['is_available' => $this->boolean('is_available')]);
+        }
+    }
+
     /** @return array<string, list<mixed>> */
     public function rules(): array
     {

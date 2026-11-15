@@ -29,7 +29,9 @@ class CategoryPolicy
 
     public function view(User $user, Category $category): bool
     {
-        return $this->authorization->allows($user, $category->menu->business);
+        $business = $category->menu?->business;
+
+        return $business instanceof Business && $this->authorization->allows($user, $business);
     }
 
     public function update(User $user, Category $category): bool

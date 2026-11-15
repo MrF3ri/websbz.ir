@@ -16,6 +16,7 @@ use Illuminate\Support\Str;
  * @property string $name
  * @property int $sort_order
  * @property bool $is_active
+ * @property int $products_count
  */
 class Category extends Model
 {

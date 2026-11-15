@@ -5,7 +5,6 @@ namespace App\Modules\Catalog\Http\Controllers;
 use App\Modules\Business\Models\Business;
 use App\Modules\Category\Models\Category;
 use App\Modules\Menu\Actions\EnsurePrimaryMenuAction;
-use App\Modules\Menu\Models\Menu;
 use App\Modules\Product\Enums\ProductStatus;
 use App\Modules\Product\Models\Product;
 use App\Modules\Tenancy\Services\CurrentBusiness;
@@ -81,18 +80,23 @@ class CatalogController
                 'is_active' => $category->is_active,
                 'products_count' => $category->products_count,
             ])->values(),
-            'products' => $products->through(fn (Product $product): array => [
-                'public_id' => $product->public_id,
-                'category_public_id' => $product->category->public_id,
-                'category_name' => $product->category->name,
-                'name' => $product->name,
-                'description' => $product->description,
-                'base_price' => $product->base_price,
-                'discount_price' => $product->discount_price,
-                'is_available' => $product->is_available,
-                'status' => $product->status->value,
-                'sort_order' => $product->sort_order,
-            ]),
+            'products' => $products->through(function (Product $product): array {
+                $category = $product->category;
+                abort_unless($category instanceof Category, 404);
+
+                return [
+                    'public_id' => $product->public_id,
+                    'category_public_id' => $category->public_id,
+                    'category_name' => $category->name,
+                    'name' => $product->name,
+                    'description' => $product->description,
+                    'base_price' => $product->base_price,
+                    'discount_price' => $product->discount_price,
+                    'is_available' => $product->is_available,
+                    'status' => $product->status->value,
+                    'sort_order' => $product->sort_order,
+                ];
+            }),
             'usage' => [
                 'categories' => $menu->categories()->count(),
                 'products' => $menu->products()->count(),

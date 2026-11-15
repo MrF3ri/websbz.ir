@@ -29,7 +29,9 @@ class ProductPolicy
 
     public function view(User $user, Product $product): bool
     {
-        return $this->authorization->allows($user, $product->menu->business);
+        $business = $product->menu?->business;
+
+        return $business instanceof Business && $this->authorization->allows($user, $business);
     }
 
     public function update(User $user, Product $product): bool

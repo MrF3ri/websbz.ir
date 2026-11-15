@@ -12,6 +12,13 @@ class SaveCategoryRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('is_active')) {
+            $this->merge(['is_active' => $this->boolean('is_active')]);
+        }
+    }
+
     /** @return array<string, list<mixed>> */
     public function rules(): array
     {
