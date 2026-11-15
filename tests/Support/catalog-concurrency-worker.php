@@ -64,7 +64,7 @@ DB::listen(function (QueryExecuted $query) use (
     if (
         $menuLockObserved
         || ! str_contains($sql, 'for update')
-        || ! preg_match('/\bfrom\s+["`]?menus["`]?\b/', $sql)
+        || ! preg_match('/\bfrom\s+["`]?menus["`]?/', $sql)
     ) {
         return;
     }
