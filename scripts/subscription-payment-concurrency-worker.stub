@@ -1,7 +1,10 @@
 <?php
 
 use App\Models\User;
+use App\Modules\Subscription\Actions\ProcessPaymentCallbackAction;
 use App\Modules\Subscription\Actions\ReviewManualPaymentAction;
+use App\Modules\Subscription\Contracts\PaymentGatewayInterface;
+use App\Modules\Subscription\Enums\GatewayVerificationResult;
 use App\Modules\Subscription\Models\Payment;
 use Illuminate\Support\Facades\DB;
 
@@ -22,11 +25,13 @@ if (! app()->environment('testing')) {
     $signalDirectory,
     $workerId,
     $holdAfterLock,
-] = array_pad(array_slice($argv, 1), 5, null);
+    $mode,
+] = array_pad(array_slice($argv, 1), 6, null);
 
 $paymentId = (int) $paymentId;
 $reviewerId = (int) $reviewerId;
 $holdAfterLock = $holdAfterLock === '1';
+$mode = $mode ?? 'review';
 
 if (! is_dir((string) $signalDirectory)) {
     fwrite(STDERR, "Invalid worker signal directory.\n");
@@ -47,13 +52,15 @@ DB::listen(function (\Illuminate\Database\Events\QueryExecuted $query) use (
     $signalDirectory,
     $workerId,
     $holdAfterLock,
+    $mode,
 ): void {
     $sql = strtolower($query->sql);
+    $lockedTable = $mode === 'expire' ? 'subscriptions' : 'payments';
 
     if (
         $paymentLockObserved
         || ! str_contains($sql, 'for update')
-        || ! preg_match('/\bfrom\s+["`]?payments["`]?/', $sql)
+        || ! preg_match('/\\bfrom\\s+["`]?'.preg_quote($lockedTable, '/').'["`]?/', $sql)
     ) {
         return;
     }
@@ -85,13 +92,40 @@ DB::listen(function (\Illuminate\Database\Events\QueryExecuted $query) use (
 $result = ['status' => 'error', 'message' => 'Worker did not execute.'];
 
 try {
-    $payment = Payment::query()->findOrFail($paymentId);
-    $reviewer = User::query()->findOrFail($reviewerId);
-    $approved = app(ReviewManualPaymentAction::class)->approve($payment, $reviewer);
+    if ($mode === 'expire') {
+        $expiredCount = app(\App\Modules\Subscription\Actions\ExpireSubscriptionsAction::class)->execute();
+        $processedStatus = 'expired:'.$expiredCount;
+        $processedId = $paymentId;
+    } elseif ($mode === 'callback') {
+        app()->instance(PaymentGatewayInterface::class, new class implements PaymentGatewayInterface {
+            public function initiatePayment(Payment $payment): string
+            {
+                return 'https://gateway.test/checkout';
+            }
+
+            public function verifyPayment(string $gatewayReference): GatewayVerificationResult
+            {
+                return GatewayVerificationResult::SUCCESS;
+            }
+        });
+
+        $processed = app(ProcessPaymentCallbackAction::class)->execute(
+            Payment::query()->findOrFail($paymentId)->gateway_reference,
+        );
+    } else {
+        $payment = Payment::query()->findOrFail($paymentId);
+        $reviewer = User::query()->findOrFail($reviewerId);
+        $processed = app(ReviewManualPaymentAction::class)->approve($payment, $reviewer);
+    }
+
+    if (! isset($processedStatus)) {
+        $processedStatus = $processed->status->value;
+        $processedId = $processed->getKey();
+    }
 
     $result = [
-        'status' => $approved->status->value,
-        'payment_id' => $approved->getKey(),
+        'status' => $processedStatus,
+        'payment_id' => $processedId,
     ];
 } catch (\Throwable $exception) {
     $result = [

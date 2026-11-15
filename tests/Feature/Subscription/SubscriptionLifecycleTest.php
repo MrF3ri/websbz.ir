@@ -253,6 +253,88 @@ class SubscriptionLifecycleTest extends TestCase
         $this->assertSame($targetPlan->getKey(), $payment->fresh()->target_plan_id);
     }
 
+    public function test_delayed_successful_callback_after_trial_expiration_starts_a_fresh_paid_period_and_is_idempotent(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-11-12 10:00:00', 'UTC'));
+
+        $business = $this->createBusiness();
+        $plan = $this->createPlan('starter', 1000, ['menu_limit' => 10]);
+        $subscription = app(StartTrialAction::class)->execute($business, $plan);
+        $trialEndsAt = $subscription->trial_ends_at;
+        $payment = $subscription->payments()->create([
+            'target_plan_id' => $plan->getKey(),
+            'amount' => $plan->monthly_price,
+            'status' => PaymentStatus::Pending,
+            'gateway_reference' => 'delayed-success-reference',
+        ]);
+
+        self::assertNotNull($trialEndsAt);
+        Carbon::setTestNow($trialEndsAt->copy()->addDays(2));
+        app(ExpireSubscriptionsAction::class)->execute();
+
+        $paidAt = Carbon::now();
+        $gateway = Mockery::mock(PaymentGatewayInterface::class);
+        $gateway->shouldReceive('verifyPayment')
+            ->once()
+            ->with('delayed-success-reference')
+            ->andReturn(GatewayVerificationResult::SUCCESS);
+        $this->app->instance(PaymentGatewayInterface::class, $gateway);
+
+        $action = app(ProcessPaymentCallbackAction::class);
+        $processed = $action->execute('delayed-success-reference');
+        $action->execute('delayed-success-reference');
+
+        $freshSubscription = $subscription->fresh();
+
+        $this->assertSame(PaymentStatus::Successful, $processed->status);
+        $this->assertSame(SubscriptionStatus::Active, $freshSubscription->status);
+        $this->assertSame($paidAt->timestamp, $freshSubscription->current_period_starts_at?->timestamp);
+        $this->assertSame($paidAt->copy()->addMonth()->timestamp, $freshSubscription->current_period_ends_at?->timestamp);
+        $this->assertSame(1, $subscription->events()->where('event_type', SubscriptionEventType::PaymentApproved->value)->count());
+        $this->assertSame(1, $subscription->events()->where('event_type', SubscriptionEventType::Expired->value)->count());
+        $this->assertSame(1, $subscription->events()->where('event_type', SubscriptionEventType::Renewed->value)->count());
+    }
+
+    public function test_callback_winning_after_expiration_scan_preflight_prevents_stale_expiration(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-11-12 10:00:00', 'UTC'));
+
+        $business = $this->createBusiness();
+        $plan = $this->createPlan('starter', 1000, ['menu_limit' => 10]);
+        $subscription = app(StartTrialAction::class)->execute($business, $plan);
+        $trialEndsAt = $subscription->trial_ends_at;
+        $payment = $subscription->payments()->create([
+            'target_plan_id' => $plan->getKey(),
+            'amount' => $plan->monthly_price,
+            'status' => PaymentStatus::Pending,
+            'gateway_reference' => 'callback-expiration-race-reference',
+        ]);
+
+        self::assertNotNull($trialEndsAt);
+        Carbon::setTestNow($trialEndsAt->copy()->addSecond());
+
+        $gateway = Mockery::mock(PaymentGatewayInterface::class);
+        $gateway->shouldReceive('verifyPayment')
+            ->once()
+            ->andReturn(GatewayVerificationResult::SUCCESS);
+        $this->app->instance(PaymentGatewayInterface::class, $gateway);
+
+        app(ProcessPaymentCallbackAction::class)->execute('callback-expiration-race-reference');
+
+        // The expiration query may have selected this row before the callback committed.
+        // Its locked recheck must observe Active and leave the renewed period untouched.
+        $this->assertSame(0, app(ExpireSubscriptionsAction::class)->execute());
+        $this->assertSame(PaymentStatus::Successful, $payment->fresh()->status);
+        $this->assertSame(SubscriptionStatus::Active, $subscription->fresh()->status);
+        $paidAt = $payment->fresh()->paid_at;
+        self::assertNotNull($paidAt);
+        $this->assertSame(
+            $paidAt->copy()->addMonth()->timestamp,
+            $subscription->fresh()->current_period_ends_at?->timestamp,
+        );
+        $this->assertSame(0, $subscription->events()->where('event_type', SubscriptionEventType::Expired->value)->count());
+    }
+
     /**
      * @param  array<string, bool|int|float|string|null>  $features
      */

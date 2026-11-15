@@ -69,6 +69,117 @@ class SubscriptionPaymentPostgresConcurrencyTest extends TestCase
         );
     }
 
+    public function test_concurrent_successful_callbacks_finalize_and_extend_the_subscription_once(): void
+    {
+        $owner = User::factory()->create();
+        $business = $this->createBusinessFor($owner);
+        $subscription = $this->giveBusinessTrialSubscription($business, 'economic');
+        $trialEndsAt = $subscription->trial_ends_at;
+        self::assertNotNull($trialEndsAt);
+        $plan = Plan::query()->where('code', 'professional')->firstOrFail();
+        $payment = $subscription->payments()->create([
+            'target_plan_id' => $plan->getKey(),
+            'amount' => $plan->monthly_price,
+            'status' => PaymentStatus::Pending,
+            'gateway_reference' => 'CONCURRENT-CALLBACK-001',
+        ]);
+
+        $admin = User::factory()->create();
+        [$first, $second] = $this->runConcurrentCallbacks($payment, $admin);
+
+        $this->assertSame(PaymentStatus::Successful->value, $first['status']);
+        $this->assertSame(PaymentStatus::Successful->value, $second['status']);
+        $this->assertSame(PaymentStatus::Successful, $payment->fresh()->status);
+        $this->assertSame(SubscriptionStatus::Active, $subscription->fresh()->status);
+        $this->assertSame($plan->getKey(), $subscription->fresh()->plan_id);
+        $this->assertSame($trialEndsAt->copy()->addMonth()->timestamp, $subscription->fresh()->current_period_ends_at?->timestamp);
+        $this->assertSame(1, $subscription->events()->where('event_type', SubscriptionEventType::PaymentApproved->value)->count());
+        $this->assertSame(1, $subscription->events()->where('event_type', SubscriptionEventType::Upgraded->value)->count());
+    }
+
+    public function test_expiration_and_successful_callback_serialize_on_subscription_lock(): void
+    {
+        $owner = User::factory()->create();
+        $business = $this->createBusinessFor($owner);
+        $subscription = $this->giveBusinessTrialSubscription($business, 'economic');
+        $trialEndsAt = $subscription->trial_ends_at;
+        self::assertNotNull($trialEndsAt);
+        $plan = Plan::query()->where('code', 'professional')->firstOrFail();
+        $payment = $subscription->payments()->create([
+            'target_plan_id' => $plan->getKey(),
+            'amount' => $plan->monthly_price,
+            'status' => PaymentStatus::Pending,
+            'gateway_reference' => 'EXPIRY-CALLBACK-RACE-001',
+        ]);
+
+        // Make the trial eligible for expiration before either process starts.
+        $subscription->forceFill(['trial_ends_at' => now()->subSecond(), 'current_period_ends_at' => now()->subSecond()])->saveQuietly();
+
+        $directory = $this->makeSignalDirectory();
+        $gate = $this->lockGate($directory);
+        $expiry = null;
+        $callback = null;
+
+        try {
+            $expiry = $this->startWorker($payment, $owner, $directory, 'expiry-wins', true, 'expire');
+            $this->waitForFile($directory.'/expiry-wins.locked');
+
+            $callback = $this->startWorker($payment, $owner, $directory, 'callback-waits', false, 'callback');
+            $this->waitForDatabaseLockWait('callback-waits');
+            $this->releaseGate($gate);
+
+            $expiryResult = $this->awaitWorker($expiry, $directory, 'expiry-wins');
+            $callbackResult = $this->awaitWorker($callback, $directory, 'callback-waits');
+
+            $this->assertSame('expired:1', $expiryResult['status']);
+            $this->assertSame(PaymentStatus::Successful->value, $callbackResult['status']);
+        } finally {
+            $this->releaseGate($gate);
+            $this->stopWorker($expiry);
+            $this->stopWorker($callback);
+            $this->removeSignalDirectory($directory);
+        }
+
+        $this->assertSame(SubscriptionStatus::Active, $subscription->fresh()->status);
+        $this->assertSame(PaymentStatus::Successful, $payment->fresh()->status);
+        $this->assertSame(1, $subscription->events()->where('event_type', SubscriptionEventType::Expired->value)->count());
+        $this->assertSame(1, $subscription->events()->where('event_type', SubscriptionEventType::PaymentApproved->value)->count());
+        $paidAt = $payment->fresh()->paid_at;
+        self::assertNotNull($paidAt);
+        $this->assertSame($paidAt->timestamp, $subscription->fresh()->current_period_starts_at?->timestamp);
+        $this->assertSame($paidAt->copy()->addMonth()->timestamp, $subscription->fresh()->current_period_ends_at?->timestamp);
+    }
+
+    /**
+     * @return array{0: array{status: string}, 1: array{status: string}}
+     */
+    private function runConcurrentCallbacks(Payment $payment, User $admin): array
+    {
+        $directory = $this->makeSignalDirectory();
+        $gate = $this->lockGate($directory);
+        $first = null;
+        $second = null;
+
+        try {
+            $first = $this->startWorker($payment, $admin, $directory, 'first-callback', true, 'callback');
+            $this->waitForFile($directory.'/first-callback.locked');
+
+            $second = $this->startWorker($payment, $admin, $directory, 'second-callback', false, 'callback');
+            $this->waitForDatabaseLockWait('second-callback');
+            $this->releaseGate($gate);
+
+            return [
+                $this->awaitWorker($first, $directory, 'first-callback'),
+                $this->awaitWorker($second, $directory, 'second-callback'),
+            ];
+        } finally {
+            $this->releaseGate($gate);
+            $this->stopWorker($first);
+            $this->stopWorker($second);
+            $this->removeSignalDirectory($directory);
+        }
+    }
+
     /**
      * @return array{0: array{status: string}, 1: array{status: string}}
      */
@@ -108,6 +219,7 @@ class SubscriptionPaymentPostgresConcurrencyTest extends TestCase
         string $directory,
         string $workerId,
         bool $holdAfterLock,
+        string $mode = 'review',
     ): array {
         $command = [
             PHP_BINARY,
@@ -117,6 +229,7 @@ class SubscriptionPaymentPostgresConcurrencyTest extends TestCase
             $directory,
             $workerId,
             $holdAfterLock ? '1' : '0',
+            $mode,
         ];
 
         $database = config('database.connections.pgsql');
@@ -144,7 +257,7 @@ class SubscriptionPaymentPostgresConcurrencyTest extends TestCase
         $pipes = [];
         $process = proc_open($command, $descriptors, $pipes, base_path(), $environment);
 
-        if (! is_resource($process)) {
+        if (is_resource($process) === false) {
             $this->fail("Unable to start PostgreSQL payment worker [{$workerId}].");
         }
 
@@ -169,7 +282,7 @@ class SubscriptionPaymentPostgresConcurrencyTest extends TestCase
                 $result = json_decode((string) file_get_contents($resultPath), true, 512, JSON_THROW_ON_ERROR);
                 $exitCode = proc_close($worker['process']);
 
-                if (! is_array($result) || ! isset($result['status'])) {
+                if (is_array($result) === false || isset($result['status']) === false) {
                     $this->fail("Worker [{$workerId}] returned an invalid result.");
                 }
 
@@ -182,7 +295,7 @@ class SubscriptionPaymentPostgresConcurrencyTest extends TestCase
 
             $status = proc_get_status($worker['process']);
 
-            if (! $status['running']) {
+            if ($status['running'] === false) {
                 $stderr = is_file($worker['stderr'])
                     ? (string) file_get_contents($worker['stderr'])
                     : '';
@@ -254,7 +367,7 @@ class SubscriptionPaymentPostgresConcurrencyTest extends TestCase
     {
         $gate = fopen($directory.'/gate', 'c+');
 
-        if ($gate === false || ! flock($gate, LOCK_EX | LOCK_NB)) {
+        if ($gate === false || flock($gate, LOCK_EX | LOCK_NB) === false) {
             $this->fail('Unable to acquire the PostgreSQL payment concurrency gate.');
         }
 
@@ -277,7 +390,7 @@ class SubscriptionPaymentPostgresConcurrencyTest extends TestCase
      */
     private function stopWorker(?array $worker): void
     {
-        if ($worker === null || ! is_resource($worker['process'])) {
+        if ($worker === null || is_resource($worker['process']) === false) {
             return;
         }
 
