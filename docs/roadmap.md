@@ -26,9 +26,12 @@ The MVP manual card-to-card path is implemented on `main`:
 
 Remaining Phase 7 work (do not mark the phase fully complete yet):
 
-- Merge and verify PR #25, which adds tenant-scoped business-owner receipt download and an IDOR regression test. Until merged, only the Platform Admin receipt download is available on `main`.
-- Complete the lifecycle audit against the Phase 7 acceptance criteria: explicit expiration behavior/state transitions and downgrade semantics/tests as required by Phase 7.
-- Verify delayed/duplicate payment processing and renewal boundaries against PostgreSQL, not SQLite alone.
+- Implement and test the persisted expiration transition and access behavior after trial/paid period end, while preserving customer data.
+- Review plan-change feature-snapshot/effective-access behavior against the Phase 7 acceptance criteria. PR #28 now classifies manual approval and verified callback outcomes as upgraded, downgraded, or renewed and adds downgrade regression tests.
+- Add PostgreSQL coverage for delayed/concurrent payment review and renewal boundaries; the existing PR #27 PostgreSQL concurrency suite covers catalog quota writes, not payment lifecycle races.
+- Complete owner end-to-end acceptance of manual billing: submit a receipt, review as Platform Admin, approve/reject, and verify subscription access and period.
+
+Merged supporting changes: PR #25 (tenant-scoped business-owner receipt download and IDOR test), PR #27 (deterministic PostgreSQL catalog concurrency tests), and PR #28 (plan-change event classification and regression tests).
 
 See `docs/phase-7/README.md` for the implementation boundary and handoff notes.
 
