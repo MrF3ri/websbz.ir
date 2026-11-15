@@ -14,6 +14,7 @@ The MVP will not integrate an online payment gateway. Subscription payments are 
 - A business submits the target plan, a unique bank tracking number, and a receipt file (JPEG, PNG, or PDF, up to 5 MB).
 - Receipts are stored on the private local disk and are never exposed through public storage URLs.
 - Payment amounts are read from the active plan record on the server; client-provided amounts are ignored.
+- The selected plan's feature snapshot is captured when the payment is submitted and is the snapshot granted after approval, even if the plan definition changes while review is pending.
 - New manual payments use `pending_review`, `approved`, and `rejected` states.
 - The bank tracking number has a database unique constraint.
 - The subscription row is locked when a payment is submitted and when an administrator reviews it.
