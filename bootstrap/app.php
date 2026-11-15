@@ -18,6 +18,22 @@ return Application::configure(basePath: dirname(__DIR__))
         __DIR__.'/../app/Console/Commands',
     ])
     ->withMiddleware(function (Middleware $middleware): void {
+        // Bootstrap runs before the config repository is registered, so this is an intentional env() exception.
+        /** @phpstan-ignore larastan.noEnvCallsOutsideOfConfig */
+        $trustedProxySetting = (string) env('TRUSTED_PROXIES', '');
+        $trustedProxies = array_values(array_filter(array_map(
+            'trim',
+            explode(',', $trustedProxySetting),
+        )));
+
+        $middleware->trustProxies(
+            at: $trustedProxies === [] ? null : $trustedProxies,
+            headers: Request::HEADER_X_FORWARDED_FOR
+                | Request::HEADER_X_FORWARDED_HOST
+                | Request::HEADER_X_FORWARDED_PORT
+                | Request::HEADER_X_FORWARDED_PROTO,
+        );
+
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
 
         $middleware->web(append: [
