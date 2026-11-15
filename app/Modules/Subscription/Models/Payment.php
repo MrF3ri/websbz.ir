@@ -12,6 +12,7 @@ use Illuminate\Support\Carbon;
  * @property int $id
  * @property int $subscription_id
  * @property int $target_plan_id
+ * @property array<string, mixed>|null $target_features_snapshot
  * @property int $amount
  * @property PaymentStatus $status
  * @property string|null $gateway_reference
@@ -29,6 +30,7 @@ class Payment extends Model
     protected $fillable = [
         'subscription_id',
         'target_plan_id',
+        'target_features_snapshot',
         'amount',
         'status',
         'gateway_reference',
@@ -65,6 +67,7 @@ class Payment extends Model
         return [
             'amount' => 'integer',
             'status' => PaymentStatus::class,
+            'target_features_snapshot' => 'array',
             'paid_at' => 'datetime',
             'submitted_at' => 'datetime',
             'reviewed_at' => 'datetime',
