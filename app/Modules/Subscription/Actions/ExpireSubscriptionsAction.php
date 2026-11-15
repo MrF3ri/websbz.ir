@@ -1,12 +1,12 @@
 <?php
 
-namespace App\\Modules\\Subscription\\Actions;
+namespace App\Modules\Subscription\Actions;
 
-use App\\Modules\\Subscription\\Enums\\SubscriptionEventType;
-use App\\Modules\\Subscription\\Enums\\SubscriptionStatus;
-use App\\Modules\\Subscription\\Models\\Subscription;
-use Illuminate\\Database\\Eloquent\\Builder;
-use Illuminate\\Support\\Facades\\DB;
+use App\Modules\Subscription\Enums\SubscriptionEventType;
+use App\Modules\Subscription\Enums\SubscriptionStatus;
+use App\Modules\Subscription\Models\Subscription;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 
 class ExpireSubscriptionsAction
 {
