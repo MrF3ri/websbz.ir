@@ -40,8 +40,14 @@ class CatalogController
 
         $productsQuery = $menu->products()
             ->with('category:id,public_id,name')
-            ->orderBy('sort_order')
-            ->orderBy('id');
+            ->orderBy(
+                Category::query()
+                    ->select('sort_order')
+                    ->whereColumn('categories.id', 'products.category_id')
+                    ->limit(1),
+            )
+            ->orderBy('products.sort_order')
+            ->orderBy('products.id');
 
         if ($search !== '') {
             $productsQuery->whereRaw('LOWER(name) LIKE ?', ['%'.mb_strtolower($search).'%']);
