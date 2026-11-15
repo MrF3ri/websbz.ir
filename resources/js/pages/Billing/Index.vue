@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { Head, useForm } from '@inertiajs/vue3';
-import { computed } from 'vue';
 import { Button } from '@/components/ui/button';
 import { useJalaliDate } from '@/composables/useJalaliDate';
 
@@ -39,12 +38,12 @@ const props = defineProps<{
         card_holder: string;
     };
     hasCardDetails: boolean;
+    hasPendingReview: boolean;
     payments: Payment[];
 }>();
 
 const { formatDateTime } = useJalaliDate();
 const numberFormatter = new Intl.NumberFormat('fa-IR');
-const hasPendingReview = computed(() => props.payments.some((payment) => payment.status === 'pending_review'));
 
 const form = useForm({
     plan_id: props.subscription.plan.id,
