@@ -146,7 +146,10 @@ class SubscriptionPaymentPostgresConcurrencyTest extends TestCase
         $this->assertSame(PaymentStatus::Successful, $payment->fresh()->status);
         $this->assertSame(1, $subscription->events()->where('event_type', SubscriptionEventType::Expired->value)->count());
         $this->assertSame(1, $subscription->events()->where('event_type', SubscriptionEventType::PaymentApproved->value)->count());
-        $this->assertSame(now()->addMonth()->timestamp, $subscription->fresh()->current_period_ends_at?->timestamp);
+        $paidAt = $payment->fresh()->paid_at;
+        self::assertNotNull($paidAt);
+        $this->assertSame($paidAt->timestamp, $subscription->fresh()->current_period_starts_at?->timestamp);
+        $this->assertSame($paidAt->copy()->addMonth()->timestamp, $subscription->fresh()->current_period_ends_at?->timestamp);
     }
 
     /**
