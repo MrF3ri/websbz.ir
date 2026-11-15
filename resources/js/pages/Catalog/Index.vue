@@ -54,6 +54,7 @@ type Props = {
         public_id: string;
         title: string;
         status: 'draft' | 'published';
+        public_url: string;
     };
     categories: Category[];
     products: ProductPaginator;
@@ -79,6 +80,7 @@ const successMessage = ref('');
 const serverError = ref('');
 const selectedCategory = ref<Category | null>(null);
 const selectedProduct = ref<Product | null>(null);
+const publishingMenu = ref(false);
 
 const categoryForm = useForm({
     name: '',
@@ -286,6 +288,39 @@ function moveProduct(product: Product, direction: -1 | 1): void {
     });
 }
 
+function publishMenu(): void {
+    serverError.value = '';
+    publishingMenu.value = true;
+
+    router.put('/catalog/menu/publish', {}, {
+        preserveScroll: true,
+        onSuccess: () => {
+            successMessage.value = 'منوی کسب‌وکار منتشر شد.';
+        },
+        onError: (errors) => {
+            serverError.value = errors.menu ?? 'انتشار منو انجام نشد.';
+        },
+        onFinish: () => {
+            publishingMenu.value = false;
+        },
+    });
+}
+
+function unpublishMenu(): void {
+    serverError.value = '';
+    publishingMenu.value = true;
+
+    router.put('/catalog/menu/unpublish', {}, {
+        preserveScroll: true,
+        onSuccess: () => {
+            successMessage.value = 'انتشار منو متوقف شد.';
+        },
+        onFinish: () => {
+            publishingMenu.value = false;
+        },
+    });
+}
+
 function applyFilters(): void {
     router.get(catalogIndex().url, {
         search: filters.value.search || undefined,
@@ -323,6 +358,49 @@ function goToPage(pageNumber: number): void {
                     دسته‌بندی‌ها و محصولات منوی اصلی کسب‌وکار خود را مدیریت کنید.
                 </p>
             </header>
+
+            <section class="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+                <div class="space-y-1">
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm font-semibold text-foreground">وضعیت منوی عمومی</span>
+                        <span
+                            class="rounded-full px-2 py-1 text-xs"
+                            :class="menu.status === 'published' ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' : 'bg-muted text-muted-foreground'"
+                        >
+                            {{ menu.status === 'published' ? 'منتشرشده' : 'پیش‌نویس' }}
+                        </span>
+                    </div>
+                    <p class="text-xs leading-5 text-muted-foreground">
+                        {{ menu.status === 'published' ? 'مشتریان می‌توانند منوی منتشرشده را بدون ورود مشاهده کنند.' : 'برای نمایش منو به مشتریان، آن را منتشر کنید. حداقل یک محصول موجود و منتشرشده لازم است.' }}
+                    </p>
+                    <a
+                        v-if="menu.status === 'published'"
+                        :href="menu.public_url"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="text-sm text-primary underline underline-offset-4"
+                    >
+                        مشاهده منوی عمومی
+                    </a>
+                </div>
+                <Button
+                    v-if="menu.status === 'draft'"
+                    type="button"
+                    :disabled="publishingMenu"
+                    @click="publishMenu"
+                >
+                    {{ publishingMenu ? 'در حال انتشار...' : 'انتشار منو' }}
+                </Button>
+                <Button
+                    v-else
+                    type="button"
+                    variant="outline"
+                    :disabled="publishingMenu"
+                    @click="unpublishMenu"
+                >
+                    {{ publishingMenu ? 'در حال ذخیره...' : 'توقف انتشار' }}
+                </Button>
+            </section>
 
             <div
                 v-if="successMessage"
