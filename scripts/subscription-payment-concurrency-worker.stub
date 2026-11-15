@@ -1,15 +1,15 @@
 <?php
 
-use App\\Models\\User;
-use App\\Modules\\Subscription\\Actions\\ReviewManualPaymentAction;
-use App\\Modules\\Subscription\\Models\\Payment;
-use Illuminate\\Support\\Facades\\DB;
+use App\Models\User;
+use App\Modules\Subscription\Actions\ReviewManualPaymentAction;
+use App\Modules\Subscription\Models\Payment;
+use Illuminate\Support\Facades\DB;
 
 require dirname(__DIR__).'/vendor/autoload.php';
 
-/** @var \\Illuminate\\Foundation\\Application $app */
+/** @var \Illuminate\Foundation\Application $app */
 $app = require dirname(__DIR__).'/bootstrap/app.php';
-$app->make(\\Illuminate\\Contracts\\Console\\Kernel::class)->bootstrap();
+$app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
 
 if (! app()->environment('testing')) {
     fwrite(STDERR, "This worker is only available in the testing environment.\n");
@@ -42,7 +42,7 @@ file_put_contents($signalDirectory.'/'.$workerId.'.started', 'started');
 
 $paymentLockObserved = false;
 
-DB::listen(function (\\Illuminate\\Database\\Events\\QueryExecuted $query) use (
+DB::listen(function (\Illuminate\Database\Events\QueryExecuted $query) use (
     &$paymentLockObserved,
     $signalDirectory,
     $workerId,
@@ -53,7 +53,7 @@ DB::listen(function (\\Illuminate\\Database\\Events\\QueryExecuted $query) use (
     if (
         $paymentLockObserved
         || ! str_contains($sql, 'for update')
-        || ! preg_match('/\\bfrom\\s+["`]?payments["`]?/', $sql)
+        || ! preg_match('/\bfrom\s+["`]?payments["`]?/', $sql)
     ) {
         return;
     }
@@ -68,12 +68,12 @@ DB::listen(function (\\Illuminate\\Database\\Events\\QueryExecuted $query) use (
     $gate = fopen($signalDirectory.'/gate', 'c+');
 
     if ($gate === false) {
-        throw new \\RuntimeException('Unable to open the concurrency gate.');
+        throw new \RuntimeException('Unable to open the concurrency gate.');
     }
 
     try {
         if (! flock($gate, LOCK_EX)) {
-            throw new \\RuntimeException('Unable to wait on the concurrency gate.');
+            throw new \RuntimeException('Unable to wait on the concurrency gate.');
         }
 
         flock($gate, LOCK_UN);
@@ -93,7 +93,7 @@ try {
         'status' => $approved->status->value,
         'payment_id' => $approved->getKey(),
     ];
-} catch (\\Throwable $exception) {
+} catch (\Throwable $exception) {
     $result = [
         'status' => 'error',
         'exception' => $exception::class,
