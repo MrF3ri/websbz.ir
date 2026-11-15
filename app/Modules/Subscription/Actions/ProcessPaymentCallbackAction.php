@@ -110,6 +110,7 @@ class ProcessPaymentCallbackAction
                 'plan_id' => $targetPlan->getKey(),
                 'features_snapshot' => $featuresSnapshot,
                 'status' => SubscriptionStatus::Active,
+                'current_period_starts_at' => $periodBase,
                 'current_period_ends_at' => $newPeriodEndsAt,
             ]);
 
@@ -121,6 +122,7 @@ class ProcessPaymentCallbackAction
                     'gateway_reference' => $gatewayReference,
                     'target_plan_id' => $targetPlan->getKey(),
                     'paid_at' => $now->toISOString(),
+                    'current_period_starts_at' => $periodBase->toISOString(),
                     'current_period_ends_at' => $newPeriodEndsAt->toISOString(),
                 ],
             ]);
