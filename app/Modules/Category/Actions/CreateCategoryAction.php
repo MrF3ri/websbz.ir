@@ -1,0 +1,51 @@
+<?php
+
+namespace App\Modules\Category\Actions;
+
+use App\Modules\Business\Models\Business;
+use App\Modules\Category\Models\Category;
+use App\Modules\Menu\Models\Menu;
+use App\Modules\Subscription\Services\EnforcementService;
+use App\Modules\Subscription\Services\EntitlementService;
+use Closure;
+use Illuminate\Support\Facades\DB;
+
+class CreateCategoryAction
+{
+    public function execute(
+        Business $business,
+        Menu $menu,
+        string $name,
+        bool $isActive = true,
+        ?Closure $afterMenuLock = null,
+    ): Category {
+        return DB::transaction(function () use (
+            $business,
+            $menu,
+            $name,
+            $isActive,
+            $afterMenuLock,
+        ): Category {
+            $lockedMenu = Menu::query()
+                ->whereKey($menu->getKey())
+                ->where('business_id', $business->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $afterMenuLock?->__invoke();
+
+            $currentCount = $lockedMenu->categories()->count();
+
+            (new EnforcementService(new EntitlementService($business)))
+                ->requireLimit($business, 'max_categories', $currentCount);
+
+            $sortOrder = (int) ($lockedMenu->categories()->max('sort_order') ?? -1) + 1;
+
+            return $lockedMenu->categories()->create([
+                'name' => $name,
+                'is_active' => $isActive,
+                'sort_order' => $sortOrder,
+            ]);
+        });
+    }
+}
