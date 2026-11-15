@@ -62,7 +62,8 @@ class ManualPaymentController
 
         $plan = Plan::query()
             ->where('is_active', true)
-            ->findOrFail($validated['plan_id']);
+            ->whereKey($validated['plan_id'])
+            ->firstOrFail();
 
         $receiptPath = $request->file('receipt')?->store(
             'payment-receipts/'.$business->getKey(),
