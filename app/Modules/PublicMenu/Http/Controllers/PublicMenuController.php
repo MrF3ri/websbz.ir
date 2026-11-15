@@ -4,9 +4,10 @@ namespace App\Modules\PublicMenu\Http\Controllers;
 
 use App\Enums\BusinessStatus;
 use App\Modules\Business\Models\Business;
+use App\Modules\Category\Models\Category;
 use App\Modules\Menu\Enums\MenuStatus;
 use App\Modules\Product\Enums\ProductStatus;
-use Illuminate\View\View;
+use App\Modules\Product\Models\Product;
 use Inertia\Inertia;
 use Inertia\Response;
 
