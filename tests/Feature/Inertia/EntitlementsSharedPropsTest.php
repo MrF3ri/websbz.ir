@@ -26,7 +26,13 @@ class EntitlementsSharedPropsTest extends TestCase
     {
         $user = User::factory()->create(['email_verified_at' => now()]);
         $business = $this->createBusinessFor($user);
-        $this->giveBusinessTrialSubscription($business, 'professional');
+        $subscription = $this->giveBusinessTrialSubscription($business, 'professional');
+        $subscription->forceFill([
+            'features_snapshot' => array_merge($subscription->features_snapshot, [
+                'business_id' => 999,
+                'snapshot_hash' => 'must-not-leak',
+            ]),
+        ])->save();
 
         $this->actingAs($user)
             ->get(route('dashboard'))
@@ -39,7 +45,9 @@ class EntitlementsSharedPropsTest extends TestCase
                 ->has('entitlements.trial_ends_at')
                 ->missing('entitlements.business_id')
                 ->missing('entitlements.subscription_id')
-                ->missing('entitlements.plan_version'));
+                ->missing('entitlements.plan_version')
+                ->missing('entitlements.features.business_id')
+                ->missing('entitlements.features.snapshot_hash'));
     }
 
     public function test_entitlements_are_null_when_user_has_no_current_business_or_subscription(): void

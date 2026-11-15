@@ -63,8 +63,14 @@ class HandleInertiaRequests extends Middleware
         $features = [];
 
         foreach ($subscription->features_snapshot ?? [] as $key => $value) {
+            $featureKey = (string) $key;
+
+            if (preg_match('/(?:^|_)(?:id|hash)(?:$|_)/i', $featureKey) === 1) {
+                continue;
+            }
+
             if (is_bool($value) || is_int($value) || (is_float($value) && is_finite($value))) {
-                $features[$key] = $value;
+                $features[$featureKey] = $value;
             }
         }
 
