@@ -11,9 +11,9 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 require dirname(__DIR__, 2).'/vendor/autoload.php';
 
-/** @var Illuminate\Foundation\Application $app */
+/** @var \Illuminate\Foundation\Application $app */
 $app = require dirname(__DIR__, 2).'/bootstrap/app.php';
-$app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+$app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
 
 if (! app()->environment('testing')) {
     fwrite(STDERR, "This worker is only available in the testing environment.\n");
@@ -76,7 +76,7 @@ DB::listen(function (QueryExecuted $query) use (
         $gate = fopen($signalDirectory.'/gate', 'c+');
 
         if ($gate === false) {
-            throw new \\RuntimeException('Unable to open the concurrency gate.');
+            throw new \RuntimeException('Unable to open the concurrency gate.');
         }
 
         try {
@@ -122,7 +122,7 @@ try {
     $result = ['status' => 'success'];
 } catch (AccessDeniedHttpException $exception) {
     $result = ['status' => 'forbidden', 'message' => $exception->getMessage()];
-} catch (\\Throwable $exception) {
+} catch (\Throwable $exception) {
     $result = [
         'status' => 'error',
         'exception' => $exception::class,
