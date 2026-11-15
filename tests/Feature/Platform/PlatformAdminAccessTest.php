@@ -83,11 +83,11 @@ class PlatformAdminAccessTest extends TestCase
 
         Artisan::call('platform-admin:grant', ['email' => $first->email]);
 
-        $this->assertTrue($first->fresh()->is_platform_admin);
+        $this->assertTrue($first->fresh()->isPlatformAdmin());
 
         $exitCode = Artisan::call('platform-admin:grant', ['email' => $second->email]);
 
         $this->assertSame(1, $exitCode);
-        $this->assertFalse($second->fresh()->is_platform_admin);
+        $this->assertFalse($second->fresh()->isPlatformAdmin());
     }
 }
