@@ -29,7 +29,7 @@ Until PR #25 is merged, do not claim that business owners can download their own
 Review the complete Phase 7 acceptance criteria in `docs/master-spec.md` and close the gaps deliberately:
 
 1. Define and test the exact expired-subscription transition and access behavior after trial/paid period end. The entitlement resolver currently denies access when the period is over; that alone is not a complete persisted lifecycle transition.
-2. Confirm the product rules for cancellation, paid grace period, and downgrade timing. Implement only the approved behavior, with state-transition and event-history tests.
+2. Implement the Phase 7 downgrade behavior with explicit feature-snapshot and effective-time semantics, plus state-transition and event-history tests. The approved Phase 7 task list does not define cancellation or a paid grace period; do not invent either as a requirement without a separate owner decision.
 3. Add PostgreSQL integration coverage for concurrent/delayed payment review and renewal edge cases; SQLite does not prove row-lock semantics.
 4. Verify the manual provider end-to-end through owner acceptance: submit receipt, review as Platform Admin, approve/reject, and confirm subscription access and period.
 5. Keep online gateway callbacks separate from the manual provider. Do not add or assume real gateway credentials.
