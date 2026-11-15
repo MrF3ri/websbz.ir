@@ -76,12 +76,12 @@ DB::listen(function (QueryExecuted $query) use (
         $gate = fopen($signalDirectory.'/gate', 'c+');
 
         if ($gate === false) {
-            throw new \RuntimeException('Unable to open the concurrency gate.');
+            throw new \\RuntimeException('Unable to open the concurrency gate.');
         }
 
         try {
             if (! flock($gate, LOCK_EX)) {
-                throw new RuntimeException('Unable to wait on the concurrency gate.');
+                throw new \RuntimeException('Unable to wait on the concurrency gate.');
             }
 
             flock($gate, LOCK_UN);
@@ -91,7 +91,7 @@ DB::listen(function (QueryExecuted $query) use (
     }
 
     if ($failAfterLock) {
-        throw new RuntimeException('Intentional failure after acquiring the menu lock.');
+        throw new \RuntimeException('Intentional failure after acquiring the menu lock.');
     }
 });
 
