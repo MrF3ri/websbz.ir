@@ -8,7 +8,6 @@ use App\Modules\Menu\Models\Menu;
 use App\Modules\Product\Models\Product;
 use App\Modules\Subscription\Services\EnforcementService;
 use App\Modules\Subscription\Services\EntitlementService;
-use Closure;
 use Illuminate\Support\Facades\DB;
 
 class CreateProductAction
@@ -21,22 +20,18 @@ class CreateProductAction
         Menu $menu,
         Category $category,
         array $data,
-        ?Closure $afterMenuLock = null,
     ): Product {
         return DB::transaction(function () use (
             $business,
             $menu,
             $category,
             $data,
-            $afterMenuLock,
         ): Product {
             $lockedMenu = Menu::query()
                 ->whereKey($menu->getKey())
                 ->where('business_id', $business->getKey())
                 ->lockForUpdate()
                 ->firstOrFail();
-
-            $afterMenuLock?->__invoke();
 
             $lockedCategory = $lockedMenu->categories()
                 ->whereKey($category->getKey())
