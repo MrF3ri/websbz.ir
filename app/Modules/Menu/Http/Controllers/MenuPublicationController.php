@@ -1,15 +1,15 @@
 <?php
 
-namespace App\\Modules\\Menu\\Http\\Controllers;
+namespace App\Modules\Menu\Http\Controllers;
 
-use App\\Modules\\Category\\Models\\Category;
-use App\\Modules\\Menu\\Actions\\EnsurePrimaryMenuAction;
-use App\\Modules\\Menu\\Actions\\PublishMenuAction;
-use App\\Modules\\Menu\\Enums\\MenuStatus;
-use App\\Modules\\Product\\Models\\Product;
-use App\\Modules\\Tenancy\\Services\\CurrentBusiness;
-use Illuminate\\Http\\RedirectResponse;
-use Illuminate\\Support\\Facades\\Gate;
+use App\Modules\Category\Models\Category;
+use App\Modules\Menu\Actions\EnsurePrimaryMenuAction;
+use App\Modules\Menu\Actions\PublishMenuAction;
+use App\Modules\Menu\Enums\MenuStatus;
+use App\Modules\Product\Models\Product;
+use App\Modules\Tenancy\Services\CurrentBusiness;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 
 class MenuPublicationController
 {
