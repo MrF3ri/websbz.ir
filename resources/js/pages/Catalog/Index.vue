@@ -20,6 +20,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { index as catalogIndex } from '@/routes/catalog';
 import type { Entitlements } from '@/types/entitlements';
+import { createQrSvg } from '@/lib/qrCode';
 
 type Category = {
     public_id: string;
@@ -52,6 +53,7 @@ type ProductPaginator = {
 type Props = {
     menu: {
         public_id: string;
+        slug: string;
         title: string;
         status: 'draft' | 'published';
         public_url: string;
@@ -112,6 +114,16 @@ const numberFormatter = new Intl.NumberFormat('fa-IR');
 const entitlements = computed(() => page.props.entitlements);
 const canDiscount = computed(() => entitlements.value?.features.product_discount === true);
 const canToggleAvailability = computed(() => entitlements.value?.features.product_availability_toggle === true);
+
+const qrSvg = computed(() => (
+    props.menu.status === 'published' ? createQrSvg(props.menu.public_url) : null
+));
+
+const qrDataUrl = computed(() => (
+    qrSvg.value
+        ? `data:image/svg+xml;charset=utf-8,${encodeURIComponent(qrSvg.value)}`
+        : ''
+));
 
 const categoryLimitHint = computed(() => limitHint(
     'max_categories',
@@ -421,6 +433,32 @@ function goToPage(pageNumber: number): void {
             >
                 {{ serverError }}
             </div>
+
+            <section
+                v-if="qrDataUrl"
+                class="flex flex-col items-center gap-4 rounded-xl border border-border bg-card p-5 shadow-sm sm:flex-row sm:justify-between"
+            >
+                <div class="space-y-2 text-center sm:text-right">
+                    <h2 class="font-semibold text-foreground">QR منوی عمومی</h2>
+                    <p class="max-w-md text-sm leading-6 text-muted-foreground">
+                        مشتریان با اسکن این کد مستقیماً منوی منتشرشده را باز می‌کنند. کد در همین مرورگر ساخته می‌شود و نشانی منو به سرویس خارجی ارسال نمی‌شود.
+                    </p>
+                    <a
+                        :href="qrDataUrl"
+                        :download="`menu-${menu.slug}-qr.svg`"
+                        class="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
+                    >
+                        دانلود QR با کیفیت برداری (SVG)
+                    </a>
+                </div>
+                <img
+                    :src="qrDataUrl"
+                    alt="کد QR منوی عمومی"
+                    width="192"
+                    height="192"
+                    class="size-48 rounded-lg border border-border bg-white p-2"
+                />
+            </section>
 
             <section class="grid gap-4 sm:grid-cols-2">
                 <article class="rounded-xl border border-border bg-card p-4 shadow-sm">
