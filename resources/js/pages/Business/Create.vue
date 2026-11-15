@@ -35,6 +35,16 @@ function formatPrice(price: number): string {
     return `${priceFormatter.format(price)} تومان در ماه`;
 }
 
+function formatPlanName(plan: PlanOption): string {
+    const labels: Record<string, string> = {
+        economic: 'اقتصادی',
+        professional: 'حرفه‌ای',
+        top: 'ویژه',
+    };
+
+    return labels[plan.code] ?? plan.name;
+}
+
 function submit() {
     form.submit(store());
 }
@@ -108,7 +118,7 @@ function submit() {
                     :key="plan.code"
                     :value="plan.code"
                 >
-                    {{ plan.name }} — {{ formatPrice(plan.monthly_price) }}
+                    {{ formatPlanName(plan) }} — {{ formatPrice(plan.monthly_price) }}
                 </option>
             </select>
             <p
