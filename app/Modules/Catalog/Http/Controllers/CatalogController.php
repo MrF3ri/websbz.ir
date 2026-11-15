@@ -79,6 +79,7 @@ class CatalogController
                 'title' => $menu->title,
                 'status' => $menu->status->value,
                 'default_locale' => $menu->default_locale,
+                'public_url' => route('public.menu.show', [$business->slug, $menu->slug]),
             ],
             'categories' => $categories->map(fn (Category $category): array => [
                 'public_id' => $category->public_id,
