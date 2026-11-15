@@ -8,7 +8,6 @@ use App\Modules\Subscription\Actions\SubmitManualPaymentAction;
 use App\Modules\Subscription\Enums\PaymentStatus;
 use App\Modules\Subscription\Enums\SubscriptionEventType;
 use App\Modules\Subscription\Enums\SubscriptionStatus;
-use App\Modules\Subscription\Models\Payment;
 use App\Modules\Subscription\Models\Plan;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Concerns\InteractsWithBusinesses;
