@@ -38,7 +38,7 @@ class ManualPaymentSubmissionTest extends TestCase
             ->post(route('billing.payments.store'), [
                 'plan_id' => $plan->getKey(),
                 'bank_tracking_number' => 'BANK-TRACK-001',
-                'receipt' => UploadedFile::fake()->image('receipt.png'),
+                'receipt' => UploadedFile::fake()->create('receipt.pdf', 50, 'application/pdf'),
             ])
             ->assertRedirect()
             ->assertSessionHasNoErrors();
@@ -81,7 +81,7 @@ class ManualPaymentSubmissionTest extends TestCase
         $this->actingAs($user)
             ->post(route('billing.payments.store'), [
                 ...$payload,
-                'receipt' => UploadedFile::fake()->image('second.png'),
+                'receipt' => UploadedFile::fake()->create('second.pdf', 50, 'application/pdf'),
             ])
             ->assertSessionHasErrors('bank_tracking_number');
 
