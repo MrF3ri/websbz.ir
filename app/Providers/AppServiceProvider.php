@@ -31,7 +31,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Category::class, CategoryPolicy::class);
         Gate::policy(Product::class, ProductPolicy::class);
 
-        Gate::define('platform-admin', fn (User $user): bool => (bool) $user->getAttribute('is_platform_admin'));
+        Gate::define('platform-admin', fn (User $user): bool => $user->isPlatformAdmin());
     }
 
     protected function configureDefaults(): void
