@@ -11,6 +11,7 @@ use App\Modules\Subscription\Enums\SubscriptionStatus;
 use App\Modules\Subscription\Models\Plan;
 use App\Modules\Subscription\Models\PlanFeature;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Tests\Concerns\InteractsWithBusinesses;
 use Tests\TestCase;
 
@@ -52,6 +53,49 @@ class ManualPaymentReviewTest extends TestCase
         $this->assertSame(750_000, $approved->amount);
         $this->assertSame(1, $subscription->events()->where('event_type', SubscriptionEventType::PaymentApproved)->count());
         $this->assertSame(1, $subscription->events()->where('event_type', SubscriptionEventType::Upgraded)->count());
+    }
+
+    public function test_delayed_approval_starts_a_fresh_paid_period_after_trial_expiry(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-11-15 10:00:00', 'UTC'));
+
+        try {
+            $owner = User::factory()->create();
+            $business = $this->createBusinessFor($owner);
+            $subscription = $this->giveBusinessTrialSubscription($business, 'economic');
+            $trialEndsAt = $subscription->trial_ends_at;
+            $plan = Plan::query()->where('code', 'professional')->firstOrFail();
+            $payment = app(SubmitManualPaymentAction::class)->execute(
+                $subscription,
+                $plan,
+                'BANK-DELAYED-APPROVAL-001',
+                'payment-receipts/1/delayed-receipt.pdf',
+            );
+
+            self::assertNotNull($trialEndsAt);
+            Carbon::setTestNow($trialEndsAt->copy()->addDays(2));
+
+            $admin = User::factory()->create();
+            $admin->forceFill(['is_platform_admin' => true])->save();
+
+            $approved = app(ReviewManualPaymentAction::class)->approve($payment, $admin);
+            $freshSubscription = $subscription->fresh();
+            $paidAt = Carbon::now();
+
+            $this->assertSame(PaymentStatus::Approved, $approved->status);
+            $this->assertSame(SubscriptionStatus::Active, $freshSubscription->status);
+            $this->assertSame($paidAt->timestamp, $freshSubscription->current_period_starts_at?->timestamp);
+            $this->assertSame(
+                $paidAt->copy()->addMonth()->timestamp,
+                $freshSubscription->current_period_ends_at?->timestamp,
+            );
+            $this->assertSame(
+                1,
+                $subscription->events()->where('event_type', SubscriptionEventType::PaymentApproved->value)->count(),
+            );
+        } finally {
+            Carbon::setTestNow();
+        }
     }
 
     public function test_rejection_keeps_trial_subscription_unchanged(): void
