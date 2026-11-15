@@ -243,7 +243,7 @@ class CatalogPostgresConcurrencyTest extends TestCase
     ): array {
         $command = [
             PHP_BINARY,
-            base_path('tests/Support/catalog-concurrency-worker.php'),
+            base_path('scripts/catalog-concurrency-worker.php'),
             $resource,
             (string) $business->getKey(),
             (string) $menu->getKey(),
