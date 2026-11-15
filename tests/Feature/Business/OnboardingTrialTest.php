@@ -7,7 +7,6 @@ use App\Modules\Business\Models\Business;
 use App\Modules\Subscription\Actions\StartTrialAction;
 use Database\Seeders\PlanSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Carbon;
 use Inertia\Testing\AssertableInertia as Assert;
 use Mockery;
 use RuntimeException;
@@ -43,18 +42,21 @@ class OnboardingTrialTest extends TestCase
         $user = User::factory()->create(['email_verified_at' => now()]);
 
         $this->actingAs($user)
-                ->post(route('onboarding.store'), [
-                    'name' => 'Professional Cafe',
-                    'plan_code' => 'professional',
-                ])
-                ->assertRedirect(route('dashboard'));
+            ->post(route('onboarding.store'), [
+                'name' => 'Professional Cafe',
+                'plan_code' => 'professional',
+            ])
+            ->assertRedirect(route('dashboard'));
 
         $business = Business::query()->where('slug', 'professional-cafe')->firstOrFail();
         $subscription = $business->subscriptions()->with('plan')->firstOrFail();
 
         $this->assertSame('professional', $subscription->plan->code);
         $this->assertSame('trialing', $subscription->status->value);
-        $this->assertSame(72, (int) $subscription->current_period_starts_at?->diffInHours($subscription->trial_ends_at));
+        $this->assertSame(
+            72,
+            (int) $subscription->current_period_starts_at?->diffInHours($subscription->trial_ends_at),
+        );
         $this->assertSame(-1, $subscription->features_snapshot['max_products']);
         $this->assertTrue($subscription->features_snapshot['product_discount']);
     }
