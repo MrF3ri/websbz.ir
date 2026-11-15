@@ -3,6 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      target: app
     env_file:
       - .env.docker
     environment:
@@ -51,14 +52,20 @@ services:
       - websbz
 
   vite:
-    image: node:22-bookworm-slim
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: vite
     working_dir: /var/www/html
     command: sh -lc "npm ci && npm run dev -- --host 0.0.0.0"
     ports:
       - "5173:5173"
     volumes:
       - .:/var/www/html
+      - vendor:/var/www/html/vendor
       - node_modules:/var/www/html/node_modules
+    depends_on:
+      - app
     environment:
       VITE_DEV_SERVER_HOST: 0.0.0.0
     networks:
@@ -69,6 +76,7 @@ services:
   #   build:
   #     context: .
   #     dockerfile: Dockerfile
+  #     target: app
   #   env_file:
   #     - .env.docker
   #   environment:

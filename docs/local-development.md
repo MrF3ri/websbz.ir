@@ -8,7 +8,7 @@ Laravel Sail remains installed as a development dependency and is intentionally 
 
 - Docker Engine and Docker Compose v2.
 - PHP 8.5 is provided by the application image.
-- Node in the CI workflow is pinned to Node 22. The owner's workstation is currently Node 26.13.1 / npm 12.2.2 (ERRATA); the Docker Vite service uses Node 22 to match CI. The local Node 26 version is not a CI target and no build behavior is changed to accommodate it.
+- Node in CI is pinned to Node 22. The owner's workstation is currently Node 26.13.1 / npm 12.2.2 (ERRATA); the dedicated Vite image uses the Node 22 runtime copied from the official Node image to match CI. The Vite image also includes PHP CLI and Composer-installed dependencies because the Laravel Wayfinder Vite plugin invokes Artisan to generate route/action declarations. The local Node 26 version is not a CI target and no build behavior is changed to accommodate it.
 - The Dockerfile installs `pdo_pgsql`, `mbstring`, `intl`, `zip`, `bcmath`, and `opcache`.
 
 ## First-time setup
