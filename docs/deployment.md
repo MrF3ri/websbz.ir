@@ -87,6 +87,16 @@ mkdir -p backups
 docker compose --env-file .env.production -f compose.production.yaml exec -T postgres sh -lc 'pg_dump -U "$POSTGRES_USER" "$POSTGRES_DB"' > "backups/database-$(date +%F-%H%M%S).sql"
 ```
 
+Back up private receipts and runtime storage separately:
+
+```sh
+docker run --rm \
+  -v websbz-production_storage_data:/data:ro \
+  -v "$PWD/backups":/backups \
+  alpine:3.20 \
+  tar czf "/backups/storage-$(date +%F-%H%M%S).tgz" -C /data .
+```
+
 The Compose volume named `websbz-production_storage_data` contains private receipts and must be backed up separately. Test restoration before relying on backups. The `public_assets` volume is reproducible from the deployed image.
 
 For an update, deploy an immutable image tag, run reviewed additive migrations, refresh the `assets` volume from that image, and then restart app/web/worker/scheduler. Take a database and storage backup before migrations. Rollback must account for database migration compatibility; reverting the image alone is not sufficient for destructive schema changes.
