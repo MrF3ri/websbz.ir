@@ -1,4 +1,5 @@
-import qrcode from 'qrcode-generator';
+// @ts-expect-error The ESM entry exposes a named export; the package declaration targets its CommonJS entry.
+import { qrcode } from 'qrcode-generator';
 
 export function createQrSvg(value: string): string {
     const content = value.trim();
