@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Head, useForm } from '@inertiajs/vue3';
+import { computed } from 'vue';
 import { Button } from '@/components/ui/button';
 import { useJalaliDate } from '@/composables/useJalaliDate';
 
@@ -44,6 +45,8 @@ const props = defineProps<{
 
 const { formatDateTime } = useJalaliDate();
 const numberFormatter = new Intl.NumberFormat('fa-IR');
+
+const paymentError = computed(() => (form.errors as Record<string, string>).payment ?? '');
 
 const form = useForm({
     plan_id: props.subscription.plan.id,
@@ -166,7 +169,7 @@ function submitPayment(): void {
                         <p v-if="form.errors.receipt" class="text-sm text-destructive">{{ form.errors.receipt }}</p>
                     </div>
 
-                    <p v-if="form.errors.payment" class="text-sm text-destructive sm:col-span-2">{{ form.errors.payment }}</p>
+                    <p v-if="paymentError" class="text-sm text-destructive sm:col-span-2">{{ paymentError }}</p>
 
                     <div class="sm:col-span-2">
                         <Button type="submit" :disabled="form.processing || !hasCardDetails || props.hasPendingReview">
