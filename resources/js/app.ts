@@ -13,6 +13,8 @@ void createInertiaApp({
         switch (true) {
             case name === 'Welcome':
                 return null;
+            case name === 'PublicMenu/Show':
+                return null;
             case name.startsWith('auth/'):
             case name === 'Business/Create':
                 return AuthLayout;

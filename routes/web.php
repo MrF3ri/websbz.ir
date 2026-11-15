@@ -4,11 +4,16 @@ use App\Modules\Business\Http\Controllers\BusinessOnboardingController;
 use App\Modules\Business\Http\Controllers\BusinessSettingsController;
 use App\Modules\Catalog\Http\Controllers\CatalogController;
 use App\Modules\Category\Http\Controllers\CategoryController;
+use App\Modules\Menu\Http\Controllers\MenuPublicationController;
 use App\Modules\Product\Http\Controllers\ProductController;
+use App\Modules\PublicMenu\Http\Controllers\PublicMenuController;
 use App\Modules\Tenancy\Http\Middleware\TenantMiddleware;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'Welcome')->name('home');
+
+Route::get('/menu/{businessSlug}/{menuSlug}', [PublicMenuController::class, 'show'])
+    ->name('public.menu.show');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     // Onboarding must remain outside TenantMiddleware to avoid redirect loops.
@@ -29,6 +34,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::get('/catalog', [CatalogController::class, 'index'])
             ->name('catalog.index');
+
+        Route::put('/catalog/menu/publish', [MenuPublicationController::class, 'publish'])
+            ->name('catalog.menu.publish');
+        Route::put('/catalog/menu/unpublish', [MenuPublicationController::class, 'unpublish'])
+            ->name('catalog.menu.unpublish');
 
         Route::post('/catalog/categories', [CategoryController::class, 'store'])
             ->name('catalog.categories.store');
