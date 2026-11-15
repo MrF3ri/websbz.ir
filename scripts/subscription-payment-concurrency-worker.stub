@@ -60,7 +60,7 @@ DB::listen(function (\Illuminate\Database\Events\QueryExecuted $query) use (
     if (
         $paymentLockObserved
         || ! str_contains($sql, 'for update')
-        || ! preg_match('/\bfrom\s+["`]?payments["`]?/', $sql)
+        || ! preg_match('/\\bfrom\\s+["`]?'.preg_quote($lockedTable, '/').'["`]?/', $sql)
     ) {
         return;
     }
@@ -93,7 +93,7 @@ $result = ['status' => 'error', 'message' => 'Worker did not execute.'];
 
 try {
     if ($mode === 'expire') {
-        $expiredCount = app(\\App\\Modules\\Subscription\\Actions\\ExpireSubscriptionsAction::class)->execute();
+        $expiredCount = app(\App\Modules\Subscription\Actions\ExpireSubscriptionsAction::class)->execute();
         $processedStatus = 'expired:'.$expiredCount;
         $processedId = $paymentId;
     } elseif ($mode === 'callback') {
