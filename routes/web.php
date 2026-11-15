@@ -5,6 +5,8 @@ use App\Modules\Business\Http\Controllers\BusinessSettingsController;
 use App\Modules\Catalog\Http\Controllers\CatalogController;
 use App\Modules\Category\Http\Controllers\CategoryController;
 use App\Modules\Product\Http\Controllers\ProductController;
+use App\Modules\Menu\Http\Controllers\MenuPublicationController;
+use App\Modules\PublicMenu\Http\Controllers\PublicMenuController;
 use App\Modules\Tenancy\Http\Middleware\TenantMiddleware;
 use Illuminate\Support\Facades\Route;
 
