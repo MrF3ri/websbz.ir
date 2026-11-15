@@ -6,7 +6,6 @@ use App\Modules\Business\Models\Business;
 use App\Modules\Category\Models\Category;
 use App\Modules\Menu\Enums\MenuStatus;
 use App\Modules\Product\Models\Product;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -23,8 +22,6 @@ use Illuminate\Support\Str;
  */
 class Menu extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'business_id',
         'title',

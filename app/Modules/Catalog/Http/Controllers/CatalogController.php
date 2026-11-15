@@ -69,6 +69,7 @@ class CatalogController
         return Inertia::render('Catalog/Index', [
             'menu' => [
                 'public_id' => $menu->public_id,
+                'slug' => $menu->slug,
                 'title' => $menu->title,
                 'status' => $menu->status->value,
                 'default_locale' => $menu->default_locale,

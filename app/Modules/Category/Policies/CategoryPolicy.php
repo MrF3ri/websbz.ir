@@ -4,8 +4,8 @@ namespace App\Modules\Category\Policies;
 
 use App\Models\User;
 use App\Modules\Business\Models\Business;
-use App\Modules\Category\Models\Category;
 use App\Modules\Catalog\Services\CatalogAuthorization;
+use App\Modules\Category\Models\Category;
 use App\Modules\Tenancy\Services\CurrentBusiness;
 
 class CategoryPolicy
