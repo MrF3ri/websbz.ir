@@ -46,13 +46,13 @@ const props = defineProps<{
 const { formatDateTime } = useJalaliDate();
 const numberFormatter = new Intl.NumberFormat('fa-IR');
 
-const paymentError = computed(() => (form.errors as Record<string, string>).payment ?? '');
-
 const form = useForm({
     plan_id: props.subscription.plan.id,
     bank_tracking_number: '',
     receipt: null as File | null,
 });
+
+const paymentError = computed(() => (form.errors as Record<string, string>).payment ?? '');
 
 function formatToman(amount: number): string {
     return `${numberFormatter.format(amount)} تومان`;
