@@ -25,6 +25,11 @@ class TenantIsolationContractTest extends TestCase
             ->get('/__testing/current-business-contract', function (CurrentBusiness $current): array {
                 return ['business_id' => $current->get()?->getKey()];
             });
+
+        Route::middleware(['web', TenantMiddleware::class])
+            ->get('/__testing/current-business-guest-contract', function (CurrentBusiness $current): array {
+                return ['business_id' => $current->get()?->getKey()];
+            });
     }
 
     public function test_user_a_cannot_view_or_update_business_b_settings_via_foreign_session_context(): void
@@ -68,6 +73,19 @@ class TenantIsolationContractTest extends TestCase
         $this->assertDatabaseHas('businesses', ['id' => $foreign->getKey(), 'name' => $foreign->name]);
     }
 
+    public function test_stale_session_active_business_id_falls_back_to_the_users_own_business(): void
+    {
+        $user = User::factory()->create(['email_verified_at' => now()]);
+        $own = $this->createBusinessFor($user);
+
+        $this->actingAs($user)
+            ->withSession(['active_business_id' => 999999999])
+            ->get('/__testing/current-business-contract')
+            ->assertOk()
+            ->assertJson(['business_id' => $own->getKey()])
+            ->assertSessionHas('active_business_id', $own->getKey());
+    }
+
     public function test_guest_is_redirected_to_login_and_user_without_business_is_sent_to_onboarding(): void
     {
         $this->get('/__testing/current-business-contract')->assertRedirect(route('login'));
@@ -103,17 +121,21 @@ class TenantIsolationContractTest extends TestCase
             ->assertJson(['business_id' => min($first->getKey(), $second->getKey())]);
     }
 
-    public function test_current_business_context_is_empty_after_scoped_instances_are_flushed(): void
+    public function test_current_business_context_does_not_leak_between_authenticated_and_guest_requests(): void
     {
         $user = User::factory()->create(['email_verified_at' => now()]);
-        $business = $this->createBusinessFor($user);
+        $this->createBusinessFor($user);
 
-        $this->actingAs($user)->get('/__testing/current-business-contract')->assertOk();
+        $this->actingAs($user)
+            ->get('/__testing/current-business-contract')
+            ->assertOk();
 
-        $this->app->forgetScopedInstances();
+        auth()->guard()->logout();
+
+        $this->get('/__testing/current-business-guest-contract')
+            ->assertRedirect(route('login'));
 
         $this->assertNull(app(CurrentBusiness::class)->get());
-        $this->assertNotSame($business->getKey(), app(CurrentBusiness::class)->get()?->getKey());
     }
 
     public function test_current_business_is_empty_in_a_fresh_synchronous_job_scope_unless_explicitly_set(): void

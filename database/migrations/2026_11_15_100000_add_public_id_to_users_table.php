@@ -11,7 +11,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table): void {
-            $table->string('public_id', 26)->nullable()->after('id');
+            $table->ulid('public_id')->nullable()->after('id');
         });
 
         DB::table('users')
@@ -27,7 +27,7 @@ return new class extends Migration
             });
 
         Schema::table('users', function (Blueprint $table): void {
-            $table->string('public_id', 26)->nullable(false)->change();
+            $table->ulid('public_id')->nullable(false)->change();
             $table->unique('public_id');
         });
     }
