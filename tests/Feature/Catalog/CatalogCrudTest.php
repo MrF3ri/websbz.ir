@@ -182,7 +182,6 @@ class CatalogCrudTest extends TestCase
                 ->where('products.data.0.name', 'Special Coffee 24'));
     }
 
-
     public function test_catalog_groups_products_by_category_before_applying_product_order(): void
     {
         [$user, , $menu] = $this->createCatalogTenant();
