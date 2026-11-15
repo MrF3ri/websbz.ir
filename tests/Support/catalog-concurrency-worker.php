@@ -5,9 +5,7 @@ use App\Modules\Category\Actions\CreateCategoryAction;
 use App\Modules\Category\Models\Category;
 use App\Modules\Menu\Models\Menu;
 use App\Modules\Product\Actions\CreateProductAction;
-use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Support\Facades\DB;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 require dirname(__DIR__, 2).'/vendor/autoload.php';
 
@@ -52,7 +50,7 @@ file_put_contents($signalDirectory.'/'.$workerId.'.started', 'started');
 
 $menuLockObserved = false;
 
-DB::listen(function (QueryExecuted $query) use (
+DB::listen(function (\Illuminate\Database\Events\QueryExecuted $query) use (
     &$menuLockObserved,
     $signalDirectory,
     $workerId,
@@ -120,7 +118,7 @@ try {
     }
 
     $result = ['status' => 'success'];
-} catch (AccessDeniedHttpException $exception) {
+} catch (\Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException $exception) {
     $result = ['status' => 'forbidden', 'message' => $exception->getMessage()];
 } catch (\Throwable $exception) {
     $result = [
