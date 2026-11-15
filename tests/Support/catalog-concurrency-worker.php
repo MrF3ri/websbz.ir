@@ -76,7 +76,7 @@ DB::listen(function (QueryExecuted $query) use (
         $gate = fopen($signalDirectory.'/gate', 'c+');
 
         if ($gate === false) {
-            throw new \\RuntimeException('Unable to open the concurrency gate.');
+            throw new \RuntimeException('Unable to open the concurrency gate.');
         }
 
         try {
