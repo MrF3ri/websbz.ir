@@ -5,6 +5,8 @@ namespace App\Actions\Business;
 use App\Enums\BusinessRole;
 use App\Models\User;
 use App\Modules\Business\Models\Business;
+use App\Modules\Subscription\Actions\StartTrialAction;
+use App\Modules\Subscription\Models\Plan;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -12,10 +14,14 @@ use Illuminate\Validation\ValidationException;
 
 class CreateBusinessAction
 {
+    public function __construct(
+        private readonly StartTrialAction $startTrialAction,
+    ) {}
+
     /**
-     * Create a business and assign its creator the owner role.
+     * Create a business, its owner membership, and its selected plan trial atomically.
      *
-     * @param  array{name: string}  $data
+     * @param  array{name: string, plan_code: string}  $data
      */
     public function execute(User $user, array $data): Business
     {
@@ -27,10 +33,20 @@ class CreateBusinessAction
             ]);
         }
 
-        // Retry only when concurrent requests claim the same globally unique slug.
+        $plan = Plan::query()
+            ->where('code', $data['plan_code'])
+            ->where('is_active', true)
+            ->first();
+
+        if ($plan === null) {
+            throw ValidationException::withMessages([
+                'plan_code' => 'The selected plan is invalid or inactive.',
+            ]);
+        }
+
         for ($attempt = 1; $attempt <= 3; $attempt++) {
             try {
-                return DB::transaction(function () use ($user, $name): Business {
+                return DB::transaction(function () use ($user, $name, $plan): Business {
                     $business = Business::query()->create([
                         'name' => $name,
                         'slug' => $this->generateUniqueSlug($name),
@@ -41,6 +57,9 @@ class CreateBusinessAction
                         'role' => BusinessRole::Owner,
                     ]);
 
+                    // StartTrialAction runs inside this transaction; failures roll back all three records.
+                    $this->startTrialAction->execute($business, $plan);
+
                     return $business;
                 });
             } catch (QueryException $exception) {
@@ -50,13 +69,9 @@ class CreateBusinessAction
             }
         }
 
-        // The loop either returns a Business or rethrows the database exception.
         throw new \LogicException('Unable to create the business.');
     }
 
-    /**
-     * Generate an available slug, using a numeric suffix when necessary.
-     */
     private function generateUniqueSlug(string $name): string
     {
         $baseSlug = Str::slug($name);
@@ -76,9 +91,6 @@ class CreateBusinessAction
         return $slug;
     }
 
-    /**
-     * Determine whether a query exception was caused by the unique slug index.
-     */
     private function isSlugUniqueConstraintViolation(QueryException $exception): bool
     {
         $sqlState = $exception->errorInfo[0] ?? (string) $exception->getCode();

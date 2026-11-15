@@ -5,6 +5,7 @@ namespace App\Modules\Business\Http\Controllers;
 use App\Actions\Business\CreateBusinessAction;
 use App\Models\User;
 use App\Modules\Business\Http\Requests\StoreBusinessRequest;
+use App\Modules\Subscription\Models\Plan;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -18,7 +19,20 @@ class BusinessOnboardingController
             return to_route('dashboard');
         }
 
-        return Inertia::render('Business/Create');
+        $plans = Plan::query()
+            ->where('is_active', true)
+            ->orderBy('monthly_price')
+            ->get(['code', 'name', 'monthly_price'])
+            ->map(fn (Plan $plan): array => [
+                'code' => $plan->code,
+                'name' => $plan->name,
+                'monthly_price' => $plan->monthly_price,
+            ])
+            ->values();
+
+        return Inertia::render('Business/Create', [
+            'plans' => $plans,
+        ]);
     }
 
     public function store(
@@ -33,7 +47,7 @@ class BusinessOnboardingController
             return to_route('dashboard');
         }
 
-        /** @var array{name: string} $data */
+        /** @var array{name: string, plan_code: string} $data */
         $data = $request->validated();
 
         $action->execute($user, $data);
