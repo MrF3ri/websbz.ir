@@ -1,14 +1,14 @@
 <?php
 
-namespace Tests\\Feature\\PublicMenu;
+namespace Tests\Feature\PublicMenu;
 
-use App\\Enums\\BusinessStatus;
-use App\\Modules\\Menu\\Enums\\MenuStatus;
-use App\\Modules\\Product\\Enums\\ProductStatus;
-use Illuminate\\Foundation\\Testing\\RefreshDatabase;
-use Inertia\\Testing\\AssertableInertia as Assert;
-use Tests\\Concerns\\InteractsWithCatalog;
-use Tests\\TestCase;
+use App\Enums\BusinessStatus;
+use App\Modules\Menu\Enums\MenuStatus;
+use App\Modules\Product\Enums\ProductStatus;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Inertia\Testing\AssertableInertia as Assert;
+use Tests\Concerns\InteractsWithCatalog;
+use Tests\TestCase;
 
 class PublicMenuTest extends TestCase
 {
