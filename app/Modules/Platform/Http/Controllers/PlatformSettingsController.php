@@ -21,7 +21,7 @@ class PlatformSettingsController
     public function update(Request $request, PlatformSettingsService $settings): RedirectResponse
     {
         $user = $request->user();
-        abort_unless($user instanceof User && $user->is_platform_admin, 403);
+        abort_unless($user instanceof User && $user->isPlatformAdmin(), 403);
 
         $validated = $request->validate([
             'bank_name' => ['required', 'string', 'max:100'],
