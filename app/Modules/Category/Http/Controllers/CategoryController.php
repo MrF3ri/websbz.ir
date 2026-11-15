@@ -3,13 +3,12 @@
 namespace App\Modules\Category\Http\Controllers;
 
 use App\Modules\Business\Models\Business;
+use App\Modules\Category\Actions\CreateCategoryAction;
 use App\Modules\Category\Http\Requests\ReorderCategoriesRequest;
 use App\Modules\Category\Http\Requests\SaveCategoryRequest;
 use App\Modules\Category\Models\Category;
 use App\Modules\Menu\Actions\EnsurePrimaryMenuAction;
 use App\Modules\Menu\Models\Menu;
-use App\Modules\Subscription\Services\EnforcementService;
-use App\Modules\Subscription\Services\EntitlementService;
 use App\Modules\Tenancy\Services\CurrentBusiness;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
@@ -22,26 +21,19 @@ class CategoryController
         SaveCategoryRequest $request,
         CurrentBusiness $currentBusiness,
         EnsurePrimaryMenuAction $ensurePrimaryMenu,
+        CreateCategoryAction $createCategory,
     ): RedirectResponse {
         $business = $this->currentBusiness($currentBusiness);
         Gate::authorize('create', Category::class);
         $menu = $ensurePrimaryMenu->execute($business);
         $data = $request->validated();
 
-        DB::transaction(function () use ($business, $menu, $data): void {
-            $lockedMenu = Menu::query()->whereKey($menu->getKey())->lockForUpdate()->firstOrFail();
-            $currentCount = $lockedMenu->categories()->count();
-
-            $this->enforcementFor($business)->requireLimit($business, 'max_categories', $currentCount);
-
-            $sortOrder = (int) ($lockedMenu->categories()->max('sort_order') ?? -1) + 1;
-
-            $lockedMenu->categories()->create([
-                'name' => $data['name'],
-                'is_active' => $data['is_active'] ?? true,
-                'sort_order' => $sortOrder,
-            ]);
-        });
+        $createCategory->execute(
+            $business,
+            $menu,
+            $data['name'],
+            $data['is_active'] ?? true,
+        );
 
         return back()->with('success', 'دسته‌بندی با موفقیت ایجاد شد.');
     }
@@ -140,10 +132,5 @@ class CategoryController
     private function resolveCategory(Menu $menu, string $publicId): Category
     {
         return $menu->categories()->where('public_id', $publicId)->firstOrFail();
-    }
-
-    private function enforcementFor(Business $business): EnforcementService
-    {
-        return new EnforcementService(new EntitlementService($business));
     }
 }

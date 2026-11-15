@@ -6,6 +6,7 @@ use App\Modules\Business\Models\Business;
 use App\Modules\Category\Models\Category;
 use App\Modules\Menu\Actions\EnsurePrimaryMenuAction;
 use App\Modules\Menu\Models\Menu;
+use App\Modules\Product\Actions\CreateProductAction;
 use App\Modules\Product\Http\Requests\ReorderProductsRequest;
 use App\Modules\Product\Http\Requests\SaveProductRequest;
 use App\Modules\Product\Models\Product;
@@ -23,6 +24,7 @@ class ProductController
         SaveProductRequest $request,
         CurrentBusiness $currentBusiness,
         EnsurePrimaryMenuAction $ensurePrimaryMenu,
+        CreateProductAction $createProduct,
     ): RedirectResponse {
         $business = $this->currentBusiness($currentBusiness);
         Gate::authorize('create', Product::class);
@@ -30,30 +32,7 @@ class ProductController
         $data = $request->validated();
         $category = $this->resolveCategory($menu, $data['category_public_id']);
 
-        DB::transaction(function () use ($business, $menu, $category, $data): void {
-            $lockedMenu = Menu::query()->whereKey($menu->getKey())->lockForUpdate()->firstOrFail();
-            $lockedCategory = $lockedMenu->categories()->whereKey($category->getKey())->firstOrFail();
-
-            $this->enforcementFor($business)->requireLimit(
-                $business,
-                'max_products',
-                $lockedMenu->products()->count(),
-            );
-            $this->enforceOptionalFeatures($business, $data);
-
-            $sortOrder = (int) ($lockedCategory->products()->max('sort_order') ?? -1) + 1;
-
-            $lockedCategory->products()->create([
-                'menu_id' => $lockedMenu->getKey(),
-                'name' => $data['name'],
-                'description' => $data['description'] ?? null,
-                'base_price' => $data['base_price'],
-                'discount_price' => $data['discount_price'] ?? null,
-                'is_available' => $data['is_available'] ?? true,
-                'status' => $data['status'],
-                'sort_order' => $sortOrder,
-            ]);
-        });
+        $createProduct->execute($business, $menu, $category, $data);
 
         return back()->with('success', 'محصول با موفقیت ایجاد شد.');
     }
@@ -177,7 +156,7 @@ class ProductController
      */
     private function enforceOptionalFeatures(Business $business, array $data): void
     {
-        $enforcement = $this->enforcementFor($business);
+        $enforcement = new EnforcementService(new EntitlementService($business));
 
         if (($data['discount_price'] ?? null) !== null) {
             $enforcement->requireFeature($business, 'product_discount');
@@ -186,10 +165,5 @@ class ProductController
         if (($data['is_available'] ?? true) === false) {
             $enforcement->requireFeature($business, 'product_availability_toggle');
         }
-    }
-
-    private function enforcementFor(Business $business): EnforcementService
-    {
-        return new EnforcementService(new EntitlementService($business));
     }
 }
