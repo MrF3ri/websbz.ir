@@ -9,6 +9,7 @@ use App\Modules\Subscription\Enums\PaymentStatus;
 use App\Modules\Subscription\Enums\SubscriptionEventType;
 use App\Modules\Subscription\Enums\SubscriptionStatus;
 use App\Modules\Subscription\Models\Plan;
+use App\Modules\Subscription\Models\PlanFeature;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Concerns\InteractsWithBusinesses;
 use Tests\TestCase;
@@ -30,6 +31,13 @@ class ManualPaymentReviewTest extends TestCase
             'BANK-APPROVE-001',
             'payment-receipts/1/receipt.pdf',
         );
+        $expectedSnapshot = $payment->target_features_snapshot;
+
+        PlanFeature::query()
+            ->where('plan_id', $plan->getKey())
+            ->where('feature_key', 'max_products')
+            ->update(['value' => 999]);
+
         $admin = User::factory()->create();
         $admin->forceFill(['is_platform_admin' => true])->save();
 
@@ -40,6 +48,7 @@ class ManualPaymentReviewTest extends TestCase
         $this->assertSame(PaymentStatus::Approved, $approved->fresh()->status);
         $this->assertSame(SubscriptionStatus::Active, $subscription->fresh()->status);
         $this->assertSame($plan->getKey(), $subscription->fresh()->plan_id);
+        $this->assertSame($expectedSnapshot, $subscription->fresh()->features_snapshot);
         $this->assertSame(750_000, $approved->amount);
         $this->assertSame(1, $subscription->events()->where('event_type', SubscriptionEventType::PaymentApproved)->count());
         $this->assertSame(1, $subscription->events()->where('event_type', SubscriptionEventType::Upgraded)->count());
