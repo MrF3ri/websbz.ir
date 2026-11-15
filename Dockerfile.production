@@ -18,7 +18,7 @@ RUN groupadd --gid 1000 app \
         /var/www/html/storage/logs \
         /var/www/html/bootstrap/cache \
     && chown -R app:app /var/www/html/storage /var/www/html/bootstrap/cache \
-    && sed -i 's/^user = www-data/user = app/; s/^group = www-data/group = app/' /usr/local/etc/php-fpm.d/www.conf \
+    && sed -i 's/^user = www-data/user = app/; s/^group = www-data/group = app/; s/^;*clear_env = .*/clear_env = no/' /usr/local/etc/php-fpm.d/www.conf \
     && sed -i 's#^;*pid = .*#pid = /tmp/php-fpm.pid#' /usr/local/etc/php-fpm.conf \
     && sed -i 's#^;*error_log = .*#error_log = /proc/self/fd/2#' /usr/local/etc/php-fpm.conf
 
