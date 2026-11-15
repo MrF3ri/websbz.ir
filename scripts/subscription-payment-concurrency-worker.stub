@@ -52,8 +52,10 @@ DB::listen(function (\Illuminate\Database\Events\QueryExecuted $query) use (
     $signalDirectory,
     $workerId,
     $holdAfterLock,
+    $mode,
 ): void {
     $sql = strtolower($query->sql);
+    $lockedTable = $mode === 'expire' ? 'subscriptions' : 'payments';
 
     if (
         $paymentLockObserved
@@ -90,7 +92,11 @@ DB::listen(function (\Illuminate\Database\Events\QueryExecuted $query) use (
 $result = ['status' => 'error', 'message' => 'Worker did not execute.'];
 
 try {
-    if ($mode === 'callback') {
+    if ($mode === 'expire') {
+        $expiredCount = app(\\App\\Modules\\Subscription\\Actions\\ExpireSubscriptionsAction::class)->execute();
+        $processedStatus = 'expired:'.$expiredCount;
+        $processedId = $paymentId;
+    } elseif ($mode === 'callback') {
         app()->instance(PaymentGatewayInterface::class, new class implements PaymentGatewayInterface {
             public function initiatePayment(Payment $payment): string
             {
@@ -112,9 +118,14 @@ try {
         $processed = app(ReviewManualPaymentAction::class)->approve($payment, $reviewer);
     }
 
+    if (! isset($processedStatus)) {
+        $processedStatus = $processed->status->value;
+        $processedId = $processed->getKey();
+    }
+
     $result = [
-        'status' => $processed->status->value,
-        'payment_id' => $processed->getKey(),
+        'status' => $processedStatus,
+        'payment_id' => $processedId,
     ];
 } catch (\Throwable $exception) {
     $result = [
