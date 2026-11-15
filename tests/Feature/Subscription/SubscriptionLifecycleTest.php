@@ -83,17 +83,17 @@ class SubscriptionLifecycleTest extends TestCase
         $this->assertSame(SubscriptionStatus::Expired, $subscription->fresh()->status);
         $this->assertSame(
             1,
-            $subscription->events()->where('event_type', SubscriptionEventType::TrialEnded)->count(),
+            $subscription->events()->where('event_type', SubscriptionEventType::TrialEnded->value)->count(),
         );
         $this->assertSame(
             1,
-            $subscription->events()->where('event_type', SubscriptionEventType::Expired)->count(),
+            $subscription->events()->where('event_type', SubscriptionEventType::Expired->value)->count(),
         );
         $this->assertTrue($business->exists);
         $this->assertSame(0, $action->execute());
         $this->assertSame(
             1,
-            $subscription->events()->where('event_type', SubscriptionEventType::Expired)->count(),
+            $subscription->events()->where('event_type', SubscriptionEventType::Expired->value)->count(),
         );
     }
 
@@ -121,11 +121,11 @@ class SubscriptionLifecycleTest extends TestCase
         $this->assertSame(SubscriptionStatus::Expired, $expiredSubscription->fresh()->status);
         $this->assertSame(
             0,
-            $expiredSubscription->events()->where('event_type', SubscriptionEventType::TrialEnded)->count(),
+            $expiredSubscription->events()->where('event_type', SubscriptionEventType::TrialEnded->value)->count(),
         );
         $this->assertSame(
             1,
-            $expiredSubscription->events()->where('event_type', SubscriptionEventType::Expired)->count(),
+            $expiredSubscription->events()->where('event_type', SubscriptionEventType::Expired->value)->count(),
         );
         $this->assertSame(SubscriptionStatus::Trialing, $futureSubscription->fresh()->status);
     }
