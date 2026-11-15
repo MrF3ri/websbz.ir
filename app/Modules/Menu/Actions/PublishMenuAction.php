@@ -1,13 +1,13 @@
 <?php
 
-namespace App\\Modules\\Menu\\Actions;
+namespace App\Modules\Menu\Actions;
 
-use App\\Modules\\Category\\Models\\Category;
-use App\\Modules\\Menu\\Enums\\MenuStatus;
-use App\\Modules\\Menu\\Models\\Menu;
-use App\\Modules\\Product\\Enums\\ProductStatus;
-use Illuminate\\Support\\Facades\\DB;
-use Illuminate\\Validation\\ValidationException;
+use App\Modules\Category\Models\Category;
+use App\Modules\Menu\Enums\MenuStatus;
+use App\Modules\Menu\Models\Menu;
+use App\Modules\Product\Enums\ProductStatus;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class PublishMenuAction
 {
