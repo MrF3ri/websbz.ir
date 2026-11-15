@@ -10,6 +10,7 @@ use App\Modules\Subscription\Models\Subscription;
 use App\Modules\Tenancy\Services\CurrentBusiness;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -75,6 +76,16 @@ class ManualPaymentController
                 $validated['bank_tracking_number'],
                 $receiptPath,
             );
+        } catch (QueryException $exception) {
+            Storage::disk('local')->delete($receiptPath);
+
+            if (in_array($exception->getCode(), ['23000', '23505'], true)) {
+                throw ValidationException::withMessages([
+                    'bank_tracking_number' => 'این شماره پیگیری قبلاً ثبت شده است.',
+                ]);
+            }
+
+            throw $exception;
         } catch (Throwable $exception) {
             Storage::disk('local')->delete($receiptPath);
 
