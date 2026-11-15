@@ -6,6 +6,7 @@ use App\Modules\Subscription\Enums\PaymentStatus;
 use App\Modules\Subscription\Enums\SubscriptionEventType;
 use App\Modules\Subscription\Models\Payment;
 use App\Modules\Subscription\Models\Plan;
+use App\Modules\Subscription\Models\PlanFeature;
 use App\Modules\Subscription\Models\Subscription;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -30,6 +31,7 @@ class SubmitManualPaymentAction
                 ->firstOrFail();
 
             $lockedPlan = Plan::query()
+                ->with('features')
                 ->whereKey($plan->getKey())
                 ->where('is_active', true)
                 ->firstOrFail();
@@ -45,8 +47,16 @@ class SubmitManualPaymentAction
                 ]);
             }
 
+            /** @var array<string, mixed> $featuresSnapshot */
+            $featuresSnapshot = $lockedPlan->features
+                ->mapWithKeys(
+                    fn (PlanFeature $feature): array => [$feature->feature_key => $feature->value],
+                )
+                ->all();
+
             $payment = $lockedSubscription->payments()->create([
                 'target_plan_id' => $lockedPlan->getKey(),
+                'target_features_snapshot' => $featuresSnapshot,
                 'amount' => $lockedPlan->monthly_price,
                 'status' => PaymentStatus::PendingReview,
                 'bank_tracking_number' => $bankTrackingNumber,
