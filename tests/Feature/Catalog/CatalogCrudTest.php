@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Catalog;
 
-use App\Modules\Category\Models\Category;
 use App\Modules\Product\Enums\ProductStatus;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -42,7 +41,7 @@ class CatalogCrudTest extends TestCase
 
     public function test_category_and_product_crud_supports_discount_and_publication_status(): void
     {
-        [$user, $business, $menu] = $this->createCatalogTenant('professional');
+        [$user, , $menu] = $this->createCatalogTenant('professional');
 
         $this->actingAs($user)
             ->post(route('catalog.categories.store'), [

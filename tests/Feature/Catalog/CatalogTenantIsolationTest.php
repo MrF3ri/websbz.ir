@@ -6,7 +6,6 @@ use App\Enums\BusinessRole;
 use App\Models\User;
 use App\Modules\Business\Models\Business;
 use App\Modules\Category\Models\Category;
-use App\Modules\Product\Models\Product;
 use App\Modules\Tenancy\Services\CurrentBusiness;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Gate;

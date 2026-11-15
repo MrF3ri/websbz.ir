@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Catalog;
 
-use App\Modules\Business\Models\Business;
-use App\Modules\Subscription\Models\Subscription;
+use App\Models\User;
+use App\Modules\Menu\Actions\EnsurePrimaryMenuAction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Concerns\InteractsWithCatalog;
 use Tests\TestCase;
@@ -125,9 +125,9 @@ class CatalogEntitlementTest extends TestCase
 
     public function test_business_without_subscription_and_business_with_expired_subscription_receive_403(): void
     {
-        $userWithoutSubscription = \App\Models\User::factory()->create(['email_verified_at' => now()]);
+        $userWithoutSubscription = User::factory()->create(['email_verified_at' => now()]);
         $businessWithoutSubscription = $this->createBusinessFor($userWithoutSubscription);
-        $menuWithoutSubscription = app(\App\Modules\Menu\Actions\EnsurePrimaryMenuAction::class)
+        $menuWithoutSubscription = app(EnsurePrimaryMenuAction::class)
             ->execute($businessWithoutSubscription);
 
         $this->actingAs($userWithoutSubscription)
