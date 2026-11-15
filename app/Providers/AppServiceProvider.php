@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\User;
 use App\Modules\Business\Models\Business;
 use App\Modules\Business\Policies\BusinessPolicy;
 use App\Modules\Category\Models\Category;
@@ -29,6 +30,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Business::class, BusinessPolicy::class);
         Gate::policy(Category::class, CategoryPolicy::class);
         Gate::policy(Product::class, ProductPolicy::class);
+
+        Gate::define('platform-admin', fn (User $user): bool => $user->is_platform_admin);
     }
 
     protected function configureDefaults(): void
