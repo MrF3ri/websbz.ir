@@ -5,6 +5,7 @@ namespace Tests\Feature\Business;
 use App\Enums\BusinessRole;
 use App\Models\User;
 use App\Modules\Business\Models\Business;
+use Database\Seeders\PlanSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
@@ -18,6 +19,7 @@ class BusinessOnboardingTest extends TestCase
         parent::setUp();
 
         $this->withoutVite();
+        $this->seed(PlanSeeder::class);
     }
 
     public function test_authenticated_user_can_view_onboarding_page(): void
@@ -32,6 +34,7 @@ class BusinessOnboardingTest extends TestCase
             ->assertInertia(
                 fn (Assert $page) => $page
                     ->component('Business/Create', false)
+                    ->where('plans.0.code', 'economic')
             );
     }
 
@@ -44,6 +47,7 @@ class BusinessOnboardingTest extends TestCase
         $response = $this->actingAs($user)
             ->post('/onboarding', [
                 'name' => 'F3ri Test Cafe',
+                'plan_code' => 'economic',
             ]);
 
         $response
@@ -68,6 +72,11 @@ class BusinessOnboardingTest extends TestCase
             'business_id' => $business->id,
             'user_id' => $user->id,
             'role' => BusinessRole::Owner->value,
+        ]);
+
+        $this->assertDatabaseHas('subscriptions', [
+            'business_id' => $business->id,
+            'status' => 'trialing',
         ]);
     }
 
@@ -94,6 +103,7 @@ class BusinessOnboardingTest extends TestCase
         $this->actingAs($user)
             ->post(route('onboarding'), [
                 'name' => 'Duplicate Business',
+                'plan_code' => 'economic',
             ])
             ->assertRedirect(route('dashboard'));
 
@@ -113,10 +123,12 @@ class BusinessOnboardingTest extends TestCase
         $this->actingAs($user)
             ->post('/onboarding', [
                 'name' => '',
+                'plan_code' => 'economic',
             ])
             ->assertSessionHasErrors('name');
 
         $this->assertDatabaseCount('businesses', 0);
         $this->assertDatabaseCount('business_members', 0);
+        $this->assertDatabaseCount('subscriptions', 0);
     }
 }
