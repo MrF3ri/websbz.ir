@@ -7,7 +7,6 @@ use App\Modules\Category\Models\Category;
 use App\Modules\Menu\Models\Menu;
 use App\Modules\Subscription\Services\EnforcementService;
 use App\Modules\Subscription\Services\EntitlementService;
-use Closure;
 use Illuminate\Support\Facades\DB;
 
 class CreateCategoryAction
@@ -17,22 +16,18 @@ class CreateCategoryAction
         Menu $menu,
         string $name,
         bool $isActive = true,
-        ?Closure $afterMenuLock = null,
     ): Category {
         return DB::transaction(function () use (
             $business,
             $menu,
             $name,
             $isActive,
-            $afterMenuLock,
         ): Category {
             $lockedMenu = Menu::query()
                 ->whereKey($menu->getKey())
                 ->where('business_id', $business->getKey())
                 ->lockForUpdate()
                 ->firstOrFail();
-
-            $afterMenuLock?->__invoke();
 
             $currentCount = $lockedMenu->categories()->count();
 
