@@ -37,7 +37,7 @@ class SubmitManualPaymentAction
             $hasPendingReview = $lockedSubscription->payments()
                 ->where('status', PaymentStatus::PendingReview)
                 ->lockForUpdate()
-                ->exists();
+                ->first() !== null;
 
             if ($hasPendingReview) {
                 throw ValidationException::withMessages([
