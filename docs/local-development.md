@@ -53,11 +53,21 @@ Run migrations:
 docker compose --env-file .env.docker exec app php artisan migrate
 ```
 
-Run the full PHPUnit suite inside the PHP container:
+Run the full PHPUnit suite inside the PHP container using the isolated SQLite in-memory database:
 
 ```sh
-docker compose --env-file .env.docker exec app php artisan test
+sh scripts/test-docker-sqlite.sh
 ```
+
+Run the full PHPUnit suite against the dedicated PostgreSQL test database:
+
+```sh
+sh scripts/test-docker-pgsql.sh
+```
+
+The PostgreSQL runner targets `websbz_test`, never the development database. It checks the active development database name and aborts if the target matches it. It creates `websbz_test` when missing; the Compose Postgres init hook also creates it when a fresh data volume is initialized.
+
+**Critical test-data warning:** Tests use Laravel's `RefreshDatabase` trait. It may drop/recreate or otherwise reset the schema on the database connection used by the test process. It wipes the database it runs against; therefore, run the PostgreSQL test script only against the dedicated disposable `websbz_test` database. Never point it at a development, staging, or production database. The SQLite runner uses `:memory:` and does not touch PostgreSQL.
 
 Build frontend assets:
 
