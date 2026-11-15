@@ -17,13 +17,16 @@ The above work is merged to `main` through PRs #12, #16, #17, #18, #19, #20, and
 
 ## Current release objective
 
-Prepare a reproducible production image and deployment runbook, validate the production Compose topology, then perform an owner-controlled deployment to a real server. A green CI pipeline does not by itself mean the product is deployed or production-ready.
+The production build and deployment topology are now prepared and CI-validated (PR #22). The remaining work is owner-controlled provisioning and verification on a real server. A green pipeline and a production image build do not by themselves mean the product is deployed or production-ready.
 
-Current work in progress:
+Completed in the release-preparation layer:
 - Production-only PHP 8.5 image with Node 22 asset build and no Composer dev dependencies.
 - Production Compose topology with private PostgreSQL, Nginx, persistent private storage, queue worker, and scheduler.
 - Explicit trusted reverse-proxy configuration, secure cookie defaults, and deployment/backup/rollback runbook.
 - Production-image build and Compose configuration validation in CI.
+
+Next owner-dependent step:
+- Choose the VPS/hosting provider and region, connect the domain and DNS, supply SMTP details, provision TLS, and run the deployment checklist in `docs/deployment.md`.
 
 ## Deferred product phases
 
