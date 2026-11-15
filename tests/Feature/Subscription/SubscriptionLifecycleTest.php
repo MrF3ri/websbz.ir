@@ -326,8 +326,10 @@ class SubscriptionLifecycleTest extends TestCase
         $this->assertSame(0, app(ExpireSubscriptionsAction::class)->execute());
         $this->assertSame(PaymentStatus::Successful, $payment->fresh()->status);
         $this->assertSame(SubscriptionStatus::Active, $subscription->fresh()->status);
+        $paidAt = $payment->fresh()->paid_at;
+        self::assertNotNull($paidAt);
         $this->assertSame(
-            $trialEndsAt->copy()->addMonth()->timestamp,
+            $paidAt->copy()->addMonth()->timestamp,
             $subscription->fresh()->current_period_ends_at?->timestamp,
         );
         $this->assertSame(0, $subscription->events()->where('event_type', SubscriptionEventType::Expired->value)->count());
