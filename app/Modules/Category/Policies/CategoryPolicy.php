@@ -1,0 +1,44 @@
+<?php
+
+namespace App\Modules\Category\Policies;
+
+use App\Models\User;
+use App\Modules\Business\Models\Business;
+use App\Modules\Category\Models\Category;
+use App\Modules\Catalog\Services\CatalogAuthorization;
+use App\Modules\Tenancy\Services\CurrentBusiness;
+
+class CategoryPolicy
+{
+    public function __construct(
+        private readonly CatalogAuthorization $authorization,
+        private readonly CurrentBusiness $currentBusiness,
+    ) {}
+
+    public function viewAny(User $user): bool
+    {
+        $business = $this->currentBusiness->get();
+
+        return $business instanceof Business && $this->authorization->allows($user, $business);
+    }
+
+    public function create(User $user): bool
+    {
+        return $this->viewAny($user);
+    }
+
+    public function view(User $user, Category $category): bool
+    {
+        return $this->authorization->allows($user, $category->menu->business);
+    }
+
+    public function update(User $user, Category $category): bool
+    {
+        return $this->view($user, $category);
+    }
+
+    public function delete(User $user, Category $category): bool
+    {
+        return $this->view($user, $category);
+    }
+}

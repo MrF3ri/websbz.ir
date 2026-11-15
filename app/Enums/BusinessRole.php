@@ -7,4 +7,5 @@ enum BusinessRole: string
     case Owner = 'owner';
     case Admin = 'admin';
     case Manager = 'manager';
+    case Editor = 'editor';
 }
