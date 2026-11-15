@@ -7,10 +7,10 @@ use App\Modules\Menu\Models\Menu;
 use App\Modules\Product\Actions\CreateProductAction;
 use Illuminate\Support\Facades\DB;
 
-require dirname(__DIR__, 2).'/vendor/autoload.php';
+require dirname(__DIR__).'/vendor/autoload.php';
 
 /** @var \Illuminate\Foundation\Application $app */
-$app = require dirname(__DIR__, 2).'/bootstrap/app.php';
+$app = require dirname(__DIR__).'/bootstrap/app.php';
 $app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
 
 if (! app()->environment('testing')) {
