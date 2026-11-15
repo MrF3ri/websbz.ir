@@ -52,6 +52,52 @@ class ManualPaymentSubmissionTest extends TestCase
         Storage::disk('local')->assertExists($payment->receipt_path);
     }
 
+    public function test_business_admin_can_download_own_receipt_but_not_another_business_receipt(): void
+    {
+        Storage::fake('local');
+
+        $ownerA = User::factory()->create();
+        $businessA = $this->createBusinessFor($ownerA);
+        $subscriptionA = $this->giveBusinessTrialSubscription($businessA, 'economic');
+        $planA = Plan::query()->where('code', 'economic')->firstOrFail();
+
+        $ownerB = User::factory()->create();
+        $businessB = $this->createBusinessFor($ownerB);
+        $subscriptionB = $this->giveBusinessTrialSubscription($businessB, 'economic');
+        $planB = Plan::query()->where('code', 'economic')->firstOrFail();
+
+        $receiptPathA = 'payment-receipts/'.$businessA->getKey().'/receipt-a.pdf';
+        $receiptPathB = 'payment-receipts/'.$businessB->getKey().'/receipt-b.pdf';
+        Storage::disk('local')->put($receiptPathA, '%PDF-1.4 business A');
+        Storage::disk('local')->put($receiptPathB, '%PDF-1.4 business B');
+
+        $paymentA = $subscriptionA->payments()->create([
+            'target_plan_id' => $planA->getKey(),
+            'amount' => $planA->monthly_price,
+            'status' => PaymentStatus::PendingReview,
+            'bank_tracking_number' => 'BANK-OWNER-A-001',
+            'receipt_path' => $receiptPathA,
+            'submitted_at' => now(),
+        ]);
+
+        $paymentB = $subscriptionB->payments()->create([
+            'target_plan_id' => $planB->getKey(),
+            'amount' => $planB->monthly_price,
+            'status' => PaymentStatus::PendingReview,
+            'bank_tracking_number' => 'BANK-OWNER-B-001',
+            'receipt_path' => $receiptPathB,
+            'submitted_at' => now(),
+        ]);
+
+        $this->actingAs($ownerA)
+            ->get(route('billing.payments.receipt', $paymentA))
+            ->assertOk();
+
+        $this->actingAs($ownerA)
+            ->get(route('billing.payments.receipt', $paymentB))
+            ->assertNotFound();
+    }
+
     public function test_duplicate_bank_tracking_number_is_rejected(): void
     {
         Storage::fake('local');
