@@ -34,6 +34,13 @@ jobs:
       - name: Setup Application
         run: composer setup
 
+      - name: Upload resolved npm lockfile for the Stage C dependency update
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: stage-c-package-lock
+          path: package-lock.json
+          retention-days: 1
+
       - name: Run SQLite tests and quality gates
         run: composer ci:check
 
@@ -87,7 +94,7 @@ jobs:
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
       - name: Build frontend assets for HTTP feature tests
-        run: npm ci && npm run build
+        run: npm install && npm run build
 
       - name: Prepare application key
         run: |

@@ -1,7 +1,39 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3';
+import { computed } from 'vue';
+import { Head, usePage } from '@inertiajs/vue3';
 import { Activity, Eye, Users } from '@lucide/vue';
 import { dashboard } from '@/routes';
+import { useJalaliDate } from '@/composables/useJalaliDate';
+import type { Entitlements } from '@/types/entitlements';
+
+type DashboardPageProps = {
+    entitlements: Entitlements | null;
+};
+
+const page = usePage<DashboardPageProps>();
+const { formatDateTime } = useJalaliDate();
+
+const trialEndsAt = computed(() => {
+    const entitlements = page.props.entitlements;
+
+    if (entitlements?.status !== 'trialing' || !entitlements.trial_ends_at) {
+        return null;
+    }
+
+    return formatDateTime(entitlements.trial_ends_at);
+});
+
+const currentPlanLabel = computed(() => {
+    const labels: Record<string, string> = {
+        economic: 'اقتصادی',
+        professional: 'حرفه‌ای',
+        top: 'ویژه',
+    };
+
+    const planCode = page.props.entitlements?.plan_code;
+
+    return planCode ? labels[planCode] ?? planCode : '';
+});
 
 const stats = [
     {
@@ -52,6 +84,22 @@ defineOptions({
                     در این بخش می‌توانید نمایی کلی از وضعیت و فعالیت‌های کسب‌وکار خود داشته باشید.
                 </p>
             </header>
+
+            <section
+                v-if="trialEndsAt"
+                aria-labelledby="trial-status-heading"
+                class="rounded-xl border border-primary/20 bg-primary/5 p-5"
+            >
+                <h2 id="trial-status-heading" class="font-semibold text-foreground">
+                    دوره آزمایشی طرح {{ currentPlanLabel }} فعال است
+                </h2>
+                <p class="mt-2 text-sm leading-6 text-muted-foreground">
+                    زمان پایان دوره آزمایشی:
+                    <time :datetime="page.props.entitlements?.trial_ends_at ?? undefined" class="font-medium text-foreground">
+                        {{ trialEndsAt }}
+                    </time>
+                </p>
+            </section>
 
             <section aria-labelledby="dashboard-stats-heading" class="space-y-4">
                 <div class="flex items-center justify-between">
