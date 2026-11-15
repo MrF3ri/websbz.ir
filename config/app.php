@@ -7,6 +7,10 @@ return [
     'debug' => (bool) env('APP_DEBUG', false),
     'url' => env('APP_URL', 'http://localhost'),
     'timezone' => 'UTC',
+    'trusted_proxies' => array_values(array_filter(array_map(
+        'trim',
+        explode(',', (string) env('TRUSTED_PROXIES', '')),
+    ))),
 
     'locale' => env('APP_LOCALE', 'fa'),
     'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
