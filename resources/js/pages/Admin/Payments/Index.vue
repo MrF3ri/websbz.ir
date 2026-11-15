@@ -56,6 +56,7 @@ function reject(payment: Payment): void {
             <header>
                 <h1 class="text-2xl font-bold">بررسی پرداخت‌ها</h1>
                 <p class="mt-2 text-sm text-muted-foreground">رسیدهای در انتظار بررسی مدیر پلتفرم.</p>
+                <a href="/admin/settings" class="mt-2 inline-block text-sm text-primary underline underline-offset-4">تنظیمات کارت بانکی</a>
             </header>
 
             <div v-if="payments.data.length === 0" class="rounded-xl border border-border bg-card px-6 py-12 text-center text-sm text-muted-foreground">
