@@ -10,6 +10,8 @@
 /node_modules
 /public/build
 /public/hot
+/storage/app/private/*
+/storage/app/public/*
 /storage/logs/*
 /storage/framework/cache/*
 /storage/framework/sessions/*
