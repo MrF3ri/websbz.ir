@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
+import { Head, router, useForm, usePage } from '@inertiajs/vue3';
 import {
     ChevronDown,
     ChevronUp,
@@ -57,6 +57,10 @@ type Props = {
     };
     categories: Category[];
     products: ProductPaginator;
+    usage: {
+        categories: number;
+        products: number;
+    };
     filters: {
         search: string;
         category: string;
@@ -109,12 +113,12 @@ const canToggleAvailability = computed(() => entitlements.value?.features.produc
 
 const categoryLimitHint = computed(() => limitHint(
     'max_categories',
-    props.categories.length,
+    props.usage.categories,
 ));
 
 const productLimitHint = computed(() => limitHint(
     'max_products',
-    props.products.total,
+    props.usage.products,
 ));
 
 function limitHint(feature: string, used: number): string {
@@ -311,7 +315,7 @@ function goToPage(pageNumber: number): void {
     <main dir="rtl" class="min-h-full bg-background px-4 py-6 text-right sm:px-6 lg:px-8">
         <div class="mx-auto w-full max-w-7xl space-y-7">
             <header class="space-y-2">
-                <p class="text-sm font-medium text-primary">مدیریت کسب‌وکار</p>
+                <p class="text-sm font-medium text-primary">{{ menu.title }} · مدیریت کسب‌وکار</p>
                 <h1 class="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
                     مدیریت منو و محصولات
                 </h1>

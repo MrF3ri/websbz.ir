@@ -92,6 +92,10 @@ class CatalogController
                 'status' => $product->status->value,
                 'sort_order' => $product->sort_order,
             ]),
+            'usage' => [
+                'categories' => $menu->categories()->count(),
+                'products' => $menu->products()->count(),
+            ],
             'filters' => [
                 'search' => $search,
                 'category' => is_string($categoryPublicId) ? $categoryPublicId : '',
