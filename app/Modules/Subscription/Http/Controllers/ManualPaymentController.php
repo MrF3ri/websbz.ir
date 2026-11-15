@@ -2,7 +2,6 @@
 
 namespace App\Modules\Subscription\Http\Controllers;
 
-use App\Models\User;
 use App\Modules\Business\Models\Business;
 use App\Modules\Platform\Services\PlatformSettingsService;
 use App\Modules\Subscription\Actions\SubmitManualPaymentAction;
