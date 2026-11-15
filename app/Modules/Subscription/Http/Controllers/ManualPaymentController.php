@@ -11,6 +11,7 @@ use App\Modules\Tenancy\Services\CurrentBusiness;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -51,6 +52,7 @@ class ManualPaymentController
 
         $business = $currentBusiness->get();
         abort_unless($business instanceof Business, 404);
+        Gate::authorize('update', $business);
 
         $subscription = $business->subscriptions()
             ->latest('id')
