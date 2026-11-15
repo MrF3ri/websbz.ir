@@ -99,6 +99,56 @@ class SubscriptionPaymentPostgresConcurrencyTest extends TestCase
         $this->assertSame(1, $subscription->events()->where('event_type', SubscriptionEventType::Upgraded->value)->count());
     }
 
+    public function test_expiration_and_successful_callback_serialize_on_subscription_lock(): void
+    {
+        $owner = User::factory()->create();
+        $business = $this->createBusinessFor($owner);
+        $subscription = $this->giveBusinessTrialSubscription($business, 'economic');
+        $trialEndsAt = $subscription->trial_ends_at;
+        self::assertNotNull($trialEndsAt);
+        $plan = Plan::query()->where('code', 'professional')->firstOrFail();
+        $payment = $subscription->payments()->create([
+            'target_plan_id' => $plan->getKey(),
+            'amount' => $plan->monthly_price,
+            'status' => PaymentStatus::Pending,
+            'gateway_reference' => 'EXPIRY-CALLBACK-RACE-001',
+        ]);
+
+        // Make the trial eligible for expiration before either process starts.
+        $subscription->forceFill(['trial_ends_at' => now()->subSecond(), 'current_period_ends_at' => now()->subSecond()])->saveQuietly();
+
+        $directory = $this->makeSignalDirectory();
+        $gate = $this->lockGate($directory);
+        $expiry = null;
+        $callback = null;
+
+        try {
+            $expiry = $this->startWorker($payment, $owner, $directory, 'expiry-wins', true, 'expire');
+            $this->waitForFile($directory.'/expiry-wins.locked');
+
+            $callback = $this->startWorker($payment, $owner, $directory, 'callback-waits', false, 'callback');
+            $this->waitForDatabaseLockWait('callback-waits');
+            $this->releaseGate($gate);
+
+            $expiryResult = $this->awaitWorker($expiry, $directory, 'expiry-wins');
+            $callbackResult = $this->awaitWorker($callback, $directory, 'callback-waits');
+
+            $this->assertSame('expired:1', $expiryResult['status']);
+            $this->assertSame(PaymentStatus::Successful->value, $callbackResult['status']);
+        } finally {
+            $this->releaseGate($gate);
+            $this->stopWorker($expiry);
+            $this->stopWorker($callback);
+            $this->removeSignalDirectory($directory);
+        }
+
+        $this->assertSame(SubscriptionStatus::Active, $subscription->fresh()->status);
+        $this->assertSame(PaymentStatus::Successful, $payment->fresh()->status);
+        $this->assertSame(1, $subscription->events()->where('event_type', SubscriptionEventType::Expired->value)->count());
+        $this->assertSame(1, $subscription->events()->where('event_type', SubscriptionEventType::PaymentApproved->value)->count());
+        $this->assertSame(now()->addMonth()->timestamp, $subscription->fresh()->current_period_ends_at?->timestamp);
+    }
+
     /**
      * @return array{0: array{status: string}, 1: array{status: string}}
      */
