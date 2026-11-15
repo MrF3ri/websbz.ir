@@ -13,14 +13,24 @@ type DashboardPageProps = {
 const page = usePage<DashboardPageProps>();
 const { formatDateTime } = useJalaliDate();
 
-const trialEndsAt = computed(() => {
+const hasTrial = computed(() => {
     const entitlements = page.props.entitlements;
 
-    if (entitlements?.status !== 'trialing' || !entitlements.trial_ends_at) {
-        return null;
-    }
+    return entitlements?.status === 'trialing' && Boolean(entitlements.trial_ends_at);
+});
 
-    return formatDateTime(entitlements.trial_ends_at);
+const trialIsActive = computed(() => {
+    const trialEndsAt = page.props.entitlements?.trial_ends_at;
+
+    return hasTrial.value && trialEndsAt !== null && trialEndsAt !== undefined
+        && Number.isFinite(Date.parse(trialEndsAt))
+        && Date.parse(trialEndsAt) > Date.now();
+});
+
+const trialEndsAt = computed(() => {
+    const value = page.props.entitlements?.trial_ends_at;
+
+    return hasTrial.value && value ? formatDateTime(value) : null;
 });
 
 const currentPlanLabel = computed(() => {
@@ -91,7 +101,12 @@ defineOptions({
                 class="rounded-xl border border-primary/20 bg-primary/5 p-5"
             >
                 <h2 id="trial-status-heading" class="font-semibold text-foreground">
-                    دوره آزمایشی طرح {{ currentPlanLabel }} فعال است
+                    <template v-if="trialIsActive">
+                        دوره آزمایشی طرح {{ currentPlanLabel }} فعال است
+                    </template>
+                    <template v-else>
+                        دوره آزمایشی طرح {{ currentPlanLabel }} به پایان رسیده است
+                    </template>
                 </h2>
                 <p class="mt-2 text-sm leading-6 text-muted-foreground">
                     زمان پایان دوره آزمایشی:
