@@ -48,8 +48,8 @@ class Subscription extends Model
         });
 
         static::updating(function (Subscription $subscription): void {
-            if ($subscription->isDirty('plan_id') && ! $subscription->isDirty('features_snapshot')) {
-                // Capture the plan when callers do not supply an explicit contractual snapshot.
+            if ($subscription->isDirty('plan_id')) {
+                // An upgrade or downgrade establishes a new contractual snapshot.
                 $subscription->capturePlanSnapshot();
 
                 return;
