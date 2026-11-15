@@ -108,13 +108,17 @@ class ReviewManualPaymentAction
                 'rejection_reason' => null,
             ]);
 
-            $subscription->update([
+            $subscription->forceFill([
                 'plan_id' => $targetPlan->getKey(),
                 'features_snapshot' => $featuresSnapshot,
+                'plan_version' => hash(
+                    'sha256',
+                    json_encode($featuresSnapshot, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES),
+                ),
                 'status' => SubscriptionStatus::Active,
                 'current_period_starts_at' => $periodBase,
                 'current_period_ends_at' => $periodEndsAt,
-            ]);
+            ])->saveQuietly();
 
             $subscription->events()->create([
                 'event_type' => SubscriptionEventType::PaymentApproved,
