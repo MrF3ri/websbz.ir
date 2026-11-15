@@ -47,7 +47,6 @@ function save(): void {
                     <input id="card-holder" v-model="form.card_holder" required maxlength="120" class="h-10 rounded-md border border-input bg-background px-3 text-sm" />
                     <p v-if="form.errors.card_holder" class="text-sm text-destructive">{{ form.errors.card_holder }}</p>
                 </div>
-                <p v-if="form.errors" class="text-sm text-destructive">{{ form.errors.message }}</p>
                 <Button type="submit" :disabled="form.processing">
                     {{ form.processing ? 'در حال ذخیره...' : 'ذخیره اطلاعات کارت' }}
                 </Button>
