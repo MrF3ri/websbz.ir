@@ -82,7 +82,8 @@ class ProcessPaymentCallbackAction
                 )
                 ->all();
 
-            $previousPlanId = $subscription->plan_id;
+            $previousPlan = $subscription->plan()->firstOrFail();
+            $previousPlanId = $previousPlan->getKey();
             $now = now();
             $periodCandidates = [
                 $now,
@@ -124,16 +125,20 @@ class ProcessPaymentCallbackAction
                 ],
             ]);
 
-            if ($previousPlanId !== $targetPlan->getKey()) {
-                $subscription->events()->create([
-                    'event_type' => SubscriptionEventType::Upgraded,
-                    'metadata' => [
-                        'payment_id' => $payment->getKey(),
-                        'previous_plan_id' => $previousPlanId,
-                        'new_plan_id' => $targetPlan->getKey(),
-                    ],
-                ]);
-            }
+            $changeEvent = match (true) {
+                $previousPlanId === $targetPlan->getKey() => SubscriptionEventType::Renewed,
+                $targetPlan->monthly_price < $previousPlan->monthly_price => SubscriptionEventType::Downgraded,
+                default => SubscriptionEventType::Upgraded,
+            };
+
+            $subscription->events()->create([
+                'event_type' => $changeEvent,
+                'metadata' => [
+                    'payment_id' => $payment->getKey(),
+                    'previous_plan_id' => $previousPlanId,
+                    'new_plan_id' => $targetPlan->getKey(),
+                ],
+            ]);
 
             return $payment->refresh();
         }, attempts: 3);
