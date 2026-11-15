@@ -90,6 +90,16 @@ docker compose --env-file .env.docker down
 
 **Data warning:** Do not add `-v` to the teardown command unless you explicitly intend to permanently delete the named PostgreSQL data volume. The default teardown above preserves database data.
 
+## Platform administrator setup
+
+After creating and verifying the platform owner's user account, grant the single platform-admin flag through the CLI. This command refuses to grant access when a different platform administrator is already configured:
+
+```sh
+docker compose --env-file .env.docker exec app php artisan platform-admin:grant owner@example.com
+```
+
+Then sign in as that user and configure the destination bank card at `/admin/settings`. Never grant platform-admin access through a business membership role or a web form.
+
 ## Notes
 
 - The application source is bind-mounted for live PHP edits. Composer dependencies use a named `vendor` volume; Node dependencies use a named `node_modules` volume.
