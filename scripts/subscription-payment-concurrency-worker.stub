@@ -1,7 +1,10 @@
 <?php
 
 use App\Models\User;
+use App\Modules\Subscription\Actions\ProcessPaymentCallbackAction;
 use App\Modules\Subscription\Actions\ReviewManualPaymentAction;
+use App\Modules\Subscription\Contracts\PaymentGatewayInterface;
+use App\Modules\Subscription\Enums\GatewayVerificationResult;
 use App\Modules\Subscription\Models\Payment;
 use Illuminate\Support\Facades\DB;
 
@@ -27,7 +30,8 @@ if (! app()->environment('testing')) {
 
 $paymentId = (int) $paymentId;
 $reviewerId = (int) $reviewerId;
-$holdAfterLock = $holdAfterLock === '1';\n$mode = $mode ?? 'review';
+$holdAfterLock = $holdAfterLock === '1';
+$mode = $mode ?? 'review';
 
 if (! is_dir((string) $signalDirectory)) {
     fwrite(STDERR, "Invalid worker signal directory.\n");
