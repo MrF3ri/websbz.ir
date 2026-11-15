@@ -8,6 +8,7 @@ use App\Modules\Subscription\Models\Payment;
 use App\Modules\Subscription\Models\Plan;
 use App\Modules\Tenancy\Services\CurrentBusiness;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -19,6 +20,7 @@ class BillingController
     ): Response|RedirectResponse {
         $business = $currentBusiness->get();
         abort_unless($business !== null, 404);
+        Gate::authorize('update', $business);
 
         $subscription = $business->subscriptions()
             ->with(['plan', 'payments.targetPlan'])
