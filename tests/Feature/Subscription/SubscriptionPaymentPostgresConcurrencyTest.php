@@ -3,7 +3,6 @@
 namespace Tests\Feature\Subscription;
 
 use App\Models\User;
-use App\Modules\Subscription\Actions\ReviewManualPaymentAction;
 use App\Modules\Subscription\Actions\SubmitManualPaymentAction;
 use App\Modules\Subscription\Enums\PaymentStatus;
 use App\Modules\Subscription\Enums\SubscriptionEventType;
@@ -145,7 +144,7 @@ class SubscriptionPaymentPostgresConcurrencyTest extends TestCase
         $pipes = [];
         $process = proc_open($command, $descriptors, $pipes, base_path(), $environment);
 
-        if (! is_resource($process)) {
+        if (!is_resource($process)) {
             $this->fail("Unable to start PostgreSQL payment worker [{$workerId}].");
         }
 
@@ -170,7 +169,7 @@ class SubscriptionPaymentPostgresConcurrencyTest extends TestCase
                 $result = json_decode((string) file_get_contents($resultPath), true, 512, JSON_THROW_ON_ERROR);
                 $exitCode = proc_close($worker['process']);
 
-                if (! is_array($result) || ! is_string($result['status'] ?? null)) {
+                if (!is_array($result) || !is_string($result['status'] ?? null)) {
                     $this->fail("Worker [{$workerId}] returned an invalid result.");
                 }
 
@@ -183,7 +182,7 @@ class SubscriptionPaymentPostgresConcurrencyTest extends TestCase
 
             $status = proc_get_status($worker['process']);
 
-            if (! $status['running']) {
+            if (!$status['running']) {
                 $stderr = is_file($worker['stderr'])
                     ? (string) file_get_contents($worker['stderr'])
                     : '';
@@ -255,7 +254,7 @@ class SubscriptionPaymentPostgresConcurrencyTest extends TestCase
     {
         $gate = fopen($directory.'/gate', 'c+');
 
-        if ($gate === false || ! flock($gate, LOCK_EX | LOCK_NB)) {
+        if ($gate === false || !flock($gate, LOCK_EX | LOCK_NB)) {
             $this->fail('Unable to acquire the PostgreSQL payment concurrency gate.');
         }
 
@@ -278,7 +277,7 @@ class SubscriptionPaymentPostgresConcurrencyTest extends TestCase
      */
     private function stopWorker(?array $worker): void
     {
-        if ($worker === null || ! is_resource($worker['process'])) {
+        if ($worker === null || !is_resource($worker['process'])) {
             return;
         }
 
