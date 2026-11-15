@@ -18,8 +18,13 @@ return Application::configure(basePath: dirname(__DIR__))
         __DIR__.'/../app/Console/Commands',
     ])
     ->withMiddleware(function (Middleware $middleware): void {
-        /** @var list<string> $trustedProxies */
-        $trustedProxies = config('app.trusted_proxies', []);
+        // Bootstrap runs before the config repository is registered, so this is an intentional env() exception.
+        /** @phpstan-ignore larastan.noEnvCallsOutsideOfConfig */
+        $trustedProxySetting = (string) env('TRUSTED_PROXIES', '');
+        $trustedProxies = array_values(array_filter(array_map(
+            'trim',
+            explode(',', $trustedProxySetting),
+        )));
 
         $middleware->trustProxies(
             at: $trustedProxies === [] ? null : $trustedProxies,
