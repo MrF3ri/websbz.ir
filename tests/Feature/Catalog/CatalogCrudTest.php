@@ -182,6 +182,29 @@ class CatalogCrudTest extends TestCase
                 ->where('products.data.0.name', 'Special Coffee 24'));
     }
 
+
+    public function test_catalog_groups_products_by_category_before_applying_product_order(): void
+    {
+        [$user, , $menu] = $this->createCatalogTenant();
+
+        $firstCategory = $this->createCatalogCategory($menu, 'First category', 0);
+        $secondCategory = $this->createCatalogCategory($menu, 'Second category', 1);
+
+        $this->createCatalogProduct($menu, $firstCategory, 'First A', 0);
+        $this->createCatalogProduct($menu, $firstCategory, 'Second A', 1);
+        $this->createCatalogProduct($menu, $secondCategory, 'First B', 0);
+        $this->createCatalogProduct($menu, $secondCategory, 'Second B', 1);
+
+        $this->actingAs($user)
+            ->get(route('catalog.index'))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('products.data.0.name', 'First A')
+                ->where('products.data.1.name', 'Second A')
+                ->where('products.data.2.name', 'First B')
+                ->where('products.data.3.name', 'Second B'));
+    }
+
     public function test_category_and_product_reordering_rewrites_sort_order_stably(): void
     {
         [$user, , $menu] = $this->createCatalogTenant();
