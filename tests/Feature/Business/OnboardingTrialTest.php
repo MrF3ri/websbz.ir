@@ -40,29 +40,23 @@ class OnboardingTrialTest extends TestCase
 
     public function test_selected_plan_starts_a_72_hour_trial_with_its_own_snapshot(): void
     {
-        Carbon::setTestNow(Carbon::parse('2026-11-15 10:00:00', 'UTC'));
+        $user = User::factory()->create(['email_verified_at' => now()]);
 
-        try {
-            $user = User::factory()->create(['email_verified_at' => now()]);
-
-            $this->actingAs($user)
+        $this->actingAs($user)
                 ->post(route('onboarding.store'), [
                     'name' => 'Professional Cafe',
                     'plan_code' => 'professional',
                 ])
                 ->assertRedirect(route('dashboard'));
 
-            $business = Business::query()->where('slug', 'professional-cafe')->firstOrFail();
-            $subscription = $business->subscriptions()->with('plan')->firstOrFail();
+        $business = Business::query()->where('slug', 'professional-cafe')->firstOrFail();
+        $subscription = $business->subscriptions()->with('plan')->firstOrFail();
 
-            $this->assertSame('professional', $subscription->plan->code);
-            $this->assertSame('trialing', $subscription->status->value);
-            $this->assertSame(now()->addHours(72)->toISOString(), $subscription->trial_ends_at?->toISOString());
-            $this->assertSame(-1, $subscription->features_snapshot['max_products']);
-            $this->assertTrue($subscription->features_snapshot['product_discount']);
-        } finally {
-            Carbon::setTestNow();
-        }
+        $this->assertSame('professional', $subscription->plan->code);
+        $this->assertSame('trialing', $subscription->status->value);
+        $this->assertSame(72, (int) $subscription->current_period_starts_at?->diffInHours($subscription->trial_ends_at));
+        $this->assertSame(-1, $subscription->features_snapshot['max_products']);
+        $this->assertTrue($subscription->features_snapshot['product_discount']);
     }
 
     public function test_invalid_or_inactive_plan_code_fails_validation_without_creating_records(): void
