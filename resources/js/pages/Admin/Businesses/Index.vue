@@ -118,7 +118,7 @@ function statusClass(status: string): string {
                         <tbody class="divide-y divide-border">
                             <tr v-for="business in businesses.data" :key="business.public_id">
                                 <td class="px-5 py-4">
-                                    <p class="font-semibold">{{ business.name }}</p>
+                                    <a :href="`/admin/businesses/${business.public_id}`" class="font-semibold text-primary underline-offset-4 hover:underline">{{ business.name }}</a>
                                     <p dir="ltr" class="mt-1 text-xs text-muted-foreground">{{ business.slug }}</p>
                                 </td>
                                 <td class="px-5 py-4">

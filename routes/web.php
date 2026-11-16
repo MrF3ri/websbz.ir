@@ -28,6 +28,8 @@ Route::middleware(['auth', 'verified', 'can:platform-admin'])
     ->group(function () {
         Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
         Route::get('/businesses', [AdminBusinessController::class, 'index'])->name('businesses.index');
+        Route::get('/businesses/{businessPublicId}', [AdminBusinessController::class, 'show'])
+            ->name('businesses.show');
         Route::get('/subscriptions', [AdminSubscriptionController::class, 'index'])->name('subscriptions.index');
         Route::get('/payments', [AdminPaymentController::class, 'index'])->name('payments.index');
         Route::get('/payments/{payment}/receipt', [AdminPaymentController::class, 'receipt'])->name('payments.receipt');
