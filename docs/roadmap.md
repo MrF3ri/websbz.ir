@@ -70,7 +70,7 @@ These are intentionally not blockers for the first usable MVP unless the busines
 - PR #45 adds `/admin/audit-logs` and transactionally records platform card-setting changes with actor, target, timestamp, and safe before/after snapshots. Card numbers are reduced to their final four digits; raw card numbers, receipt paths, and arbitrary request payloads are excluded. The log has no application update/delete workflow.
 - PR #46 extends the audit trail to manual payment approval and rejection. It records actor, payment target, status, amount, plan, and subscription-period transitions in the same transaction as the review. Rejection reasons, bank tracking numbers, receipt paths, and feature snapshots are excluded from audit snapshots.
 - The current branch also records the one-time `platform-admin:grant` CLI operation, with an explicit `CLI / Artisan` actor label, target public ULID, and before/after privilege flag. Repeated grants do not create duplicate records.
-- Remaining dashboard slice: platform configuration health, gated by authorization and regression tests.
+- The current branch adds a platform configuration-health section to `/admin`, covering completeness of the manual payment destination, availability of active plans, separation of private receipt storage from public storage, and a non-synchronous queue backend. It reports configuration only; it does not claim to verify worker liveness, external integrations, or email delivery, and it never exposes secret values.
 
 ## Remaining release gates
 
