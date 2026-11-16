@@ -1,18 +1,18 @@
 <?php
 
-use App\Modules\Business\Http\Controllers\BusinessOnboardingController;
-use App\Modules\Business\Http\Controllers\BusinessSettingsController;
-use App\Modules\Catalog\Http\Controllers\CatalogController;
-use App\Modules\Category\Http\Controllers\CategoryController;
-use App\Modules\Menu\Http\Controllers\MenuPublicationController;
-use App\Modules\Platform\Http\Controllers\AdminPaymentController;
-use App\Modules\Platform\Http\Controllers\PlatformSettingsController;
-use App\Modules\Product\Http\Controllers\ProductController;
-use App\Modules\PublicMenu\Http\Controllers\PublicMenuController;
-use App\Modules\Subscription\Http\Controllers\BillingController;
-use App\Modules\Subscription\Http\Controllers\ManualPaymentController;
-use App\Modules\Tenancy\Http\Middleware\TenantMiddleware;
-use Illuminate\Support\Facades\Route;
+use App\\Modules\\Business\\Http\\Controllers\\BusinessOnboardingController;
+use App\\Modules\\Business\\Http\\Controllers\\BusinessSettingsController;
+use App\\Modules\\Catalog\\Http\\Controllers\\CatalogController;
+use App\\Modules\\Category\\Http\\Controllers\\CategoryController;
+use App\\Modules\\Menu\\Http\\Controllers\\MenuPublicationController;
+use App\\Modules\\Platform\\Http\\Controllers\\AdminPaymentController;
+use App\\Modules\\Platform\\Http\\Controllers\\PlatformSettingsController;
+use App\\Modules\\Product\\Http\\Controllers\\ProductController;
+use App\\Modules\\PublicMenu\\Http\\Controllers\\PublicMenuController;
+use App\\Modules\\Subscription\\Http\\Controllers\\BillingController;
+use App\\Modules\\Subscription\\Http\\Controllers\\ManualPaymentController;
+use App\\Modules\\Tenancy\\Http\\Middleware\\TenantMiddleware;
+use Illuminate\\Support\\Facades\\Route;
 
 Route::inertia('/', 'Welcome')->name('home');
 
@@ -43,7 +43,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::inertia('dashboard', 'Dashboard')->name('dashboard');
 
         Route::get('/billing', [BillingController::class, 'index'])->name('billing.index');
-        Route::post('/billing/payments', [ManualPaymentController::class, 'store'])->name('billing.payments.store');
+        Route::post('/billing/payments', [ManualPaymentController::class, 'store'])
+            ->middleware('throttle:5,1')
+            ->name('billing.payments.store');
         Route::get('/billing/payments/{payment}/receipt', [ManualPaymentController::class, 'receipt'])
             ->name('billing.payments.receipt');
 
