@@ -29,7 +29,7 @@ class AdminPaymentController
         $payments = Payment::query()
             ->with(['subscription.business', 'targetPlan'])
             ->when($filters['status'] ?? null, fn (Builder $query, string $status) => $query->where('status', $status))
-            ->when(! array_key_exists('status', $filters), fn (Builder $query) => $query->where('status', PaymentStatus::PendingReview->value))
+            ->when(!array_key_exists('status', $filters), fn (Builder $query) => $query->where('status', PaymentStatus::PendingReview->value))
             ->when($search !== '', function (Builder $query) use ($search): void {
                 $term = '%'.mb_strtolower($search).'%';
 
