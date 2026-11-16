@@ -32,8 +32,9 @@ class PublicMenuController
                     ->where('status', ProductStatus::Published)
                     ->where('is_available', true);
             })
-            ->with(['products' => function ($query): void {
+            ->with(['products' => function ($query) use ($menu): void {
                 $query
+                    ->where('products.menu_id', $menu->getKey())
                     ->where('status', ProductStatus::Published)
                     ->where('is_available', true)
                     ->orderBy('sort_order')
