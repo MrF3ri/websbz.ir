@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Security;
 
-use Illuminate\Cookie\Cookie;
+use Symfony\Component\HttpFoundation\Cookie;
 use Tests\TestCase;
 
 class SessionCookieSecurityTest extends TestCase
