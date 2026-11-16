@@ -111,7 +111,7 @@ class ReviewManualPaymentAction
                 && $subscription->current_period_ends_at !== null
                 && $subscription->current_period_ends_at->greaterThan($now)
             );
-            $accessPeriodStartsAt = $preserveCurrentAccessPeriod && $subscription->current_period_starts_at !== null
+            $accessPeriodStartsAt = $preserveCurrentAccessPeriod
                 ? $subscription->current_period_starts_at
                 : $periodBase;
             $periodEndsAt = $periodBase->copy()->addMonth();
