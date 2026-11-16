@@ -50,6 +50,22 @@ CI runs the same test in its ephemeral `websbz_test` PostgreSQL service.
 SQLite skips this benchmark because SQLite cannot provide PostgreSQL query
 plans or buffer statistics.
 
+
+## Initial CI baseline (2026-11-16)
+
+PostgreSQL 17, 60,000 synthetic products, warm-cache single-run measurements:
+
+| Query shape | Without explicit menu scope | With explicit menu scope |
+|---|---:|---:|
+| Public product read | 7.350 ms, 1,094 shared hits, sequential scan | 1.095 ms, 78 shared hits, index scan |
+| Category product counts | 68.112 ms, 21,823 shared hits, sequential scan in correlated aggregate | 0.672 ms, 227 shared hits, existing composite index |
+
+The measurements justify adding the explicit `products.menu_id` predicate to the
+public menu's existence/eager-load queries and catalog category product counts.
+The result sets remain tenant/menu constrained; automated feature tests assert
+the menu predicate is present. These figures are a CI baseline, not production
+latency guarantees. No new index is justified by this result.
+
 ## Safety
 
 Do not point this test at the development or production database. The test uses
