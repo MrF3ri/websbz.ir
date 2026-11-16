@@ -1,18 +1,18 @@
 <?php
 
-namespace Tests\Feature\Subscription;
+namespace Tests\\Feature\\Subscription;
 
-use App\Models\User;
-use App\Modules\Platform\Services\PlatformSettingsService;
-use App\Modules\Subscription\Enums\PaymentStatus;
-use App\Modules\Subscription\Enums\SubscriptionStatus;
-use App\Modules\Subscription\Models\Payment;
-use App\Modules\Subscription\Models\Plan;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
-use Tests\Concerns\InteractsWithBusinesses;
-use Tests\TestCase;
+use App\\Models\\User;
+use App\\Modules\\Platform\\Services\\PlatformSettingsService;
+use App\\Modules\\Subscription\\Enums\\PaymentStatus;
+use App\\Modules\\Subscription\\Enums\\SubscriptionStatus;
+use App\\Modules\\Subscription\\Models\\Payment;
+use App\\Modules\\Subscription\\Models\\Plan;
+use Illuminate\\Foundation\\Testing\\RefreshDatabase;
+use Illuminate\\Http\\UploadedFile;
+use Illuminate\\Support\\Facades\\Storage;
+use Tests\\Concerns\\InteractsWithBusinesses;
+use Tests\\TestCase;
 
 class ManualPaymentSubmissionTest extends TestCase
 {
@@ -132,5 +132,21 @@ class ManualPaymentSubmissionTest extends TestCase
             ->assertSessionHasErrors('bank_tracking_number');
 
         $this->assertSame(1, Payment::query()->count());
+    }
+
+    public function test_payment_submission_endpoint_is_rate_limited_to_five_attempts_per_minute(): void
+    {
+        $user = User::factory()->create(['email_verified_at' => now()]);
+        $this->createBusinessFor($user);
+
+        for ($attempt = 0; $attempt < 5; $attempt++) {
+            $this->actingAs($user)
+                ->post(route('billing.payments.store'), [])
+                ->assertRedirect();
+        }
+
+        $this->actingAs($user)
+            ->post(route('billing.payments.store'), [])
+            ->assertTooManyRequests();
     }
 }
