@@ -3,6 +3,7 @@
 namespace Tests\Feature\Platform;
 
 use App\Models\User;
+use App\Modules\Platform\Models\PlatformAuditLog;
 use App\Modules\Platform\Services\PlatformSettingsService;
 use App\Modules\Subscription\Enums\PaymentStatus;
 use App\Modules\Subscription\Models\Plan;
@@ -85,9 +86,24 @@ class PlatformAdminAccessTest extends TestCase
 
         $this->assertTrue($first->fresh()->isPlatformAdmin());
 
+        $log = PlatformAuditLog::query()
+            ->where('action', 'platform.admin.granted')
+            ->sole();
+
+        $this->assertNull($log->actor_id);
+        $this->assertSame('CLI / Artisan', $log->actor_label);
+        $this->assertSame('user', $log->target_type);
+        $this->assertSame($first->public_id, $log->target_id);
+        $this->assertFalse($log->before_data['is_platform_admin']);
+        $this->assertTrue($log->after_data['is_platform_admin']);
+
+        Artisan::call('platform-admin:grant', ['email' => $first->email]);
+        $this->assertSame(1, PlatformAuditLog::query()->count());
+
         $exitCode = Artisan::call('platform-admin:grant', ['email' => $second->email]);
 
         $this->assertSame(1, $exitCode);
         $this->assertFalse($second->fresh()->isPlatformAdmin());
+        $this->assertSame(1, PlatformAuditLog::query()->count());
     }
 }
