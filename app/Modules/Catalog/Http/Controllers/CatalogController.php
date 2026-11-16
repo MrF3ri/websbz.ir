@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Modules\Catalog\Http\Controllers;
+namespace App\\Modules\\Catalog\\Http\\Controllers;
 
-use App\Modules\Business\Models\Business;
-use App\Modules\Category\Models\Category;
-use App\Modules\Menu\Actions\EnsurePrimaryMenuAction;
-use App\Modules\Product\Enums\ProductStatus;
-use App\Modules\Product\Models\Product;
-use App\Modules\Tenancy\Services\CurrentBusiness;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
-use Inertia\Inertia;
-use Inertia\Response;
+use App\\Modules\\Business\\Models\\Business;
+use App\\Modules\\Category\\Models\\Category;
+use App\\Modules\\Menu\\Actions\\EnsurePrimaryMenuAction;
+use App\\Modules\\Product\\Enums\\ProductStatus;
+use App\\Modules\\Product\\Models\\Product;
+use App\\Modules\\Tenancy\\Services\\CurrentBusiness;
+use Illuminate\\Http\\Request;
+use Illuminate\\Support\\Facades\\Gate;
+use Inertia\\Inertia;
+use Inertia\\Response;
 
 class CatalogController
 {
@@ -106,8 +106,10 @@ class CatalogController
                 ];
             }),
             'usage' => [
-                'categories' => $menu->categories()->count(),
-                'products' => $menu->products()->count(),
+                // The categories and their product counts are already loaded above.
+                // Reuse them instead of issuing two additional COUNT queries.
+                'categories' => $categories->count(),
+                'products' => $categories->sum('products_count'),
             ],
             'filters' => [
                 'search' => $search,
