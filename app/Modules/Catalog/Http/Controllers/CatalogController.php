@@ -33,7 +33,10 @@ class CatalogController
         $status = $request->query('status');
 
         $categories = $menu->categories()
-            ->withCount('products')
+            ->withCount(['products' => function ($query) use ($menu): void {
+                // Match the composite menu/category index and keep the tenant boundary explicit.
+                $query->where('products.menu_id', $menu->getKey());
+            }])
             ->orderBy('sort_order')
             ->orderBy('id')
             ->get(['id', 'public_id', 'name', 'sort_order', 'is_active']);
