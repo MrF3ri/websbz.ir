@@ -7,12 +7,13 @@ use App\Modules\Subscription\Enums\PaymentStatus;
 use App\Modules\Subscription\Enums\SubscriptionStatus;
 use App\Modules\Subscription\Models\Payment;
 use App\Modules\Subscription\Models\Subscription;
+use App\Modules\Platform\Services\PlatformConfigurationHealthService;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class AdminDashboardController
 {
-    public function index(): Response
+    public function index(PlatformConfigurationHealthService $configurationHealth): Response
     {
         $metrics = [
             'businesses' => Business::query()->count(),
@@ -53,6 +54,7 @@ class AdminDashboardController
         return Inertia::render('Admin/Dashboard/Index', [
             'metrics' => $metrics,
             'recentPayments' => $recentPayments,
+            'configurationHealth' => $configurationHealth->checks(),
         ]);
     }
 }
