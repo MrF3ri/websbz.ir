@@ -2,7 +2,7 @@
 
 ## Current status
 
-**MVP manual card-to-card billing is implemented; Phase 7 is not yet fully complete.** This document is the current implementation record, not a historical handoff archive. The approved project requirements are in the ERRATA at the top of `docs/master-spec.md`.
+**Phase 7 is complete for the MVP.** The manual card-to-card billing flow is implemented, automated lifecycle and PostgreSQL concurrency coverage are merged, and the owner has confirmed successful real-world acceptance: receipt submission, Platform Admin review, approval and rejection, and verification of resulting subscription access. This document is the current implementation record; the approved project requirements are in the ERRATA at the top of `docs/master-spec.md`.
 
 ## Implemented on `main`
 
@@ -30,16 +30,9 @@
 
 ## Remaining Phase 7 work
 
-Automated lifecycle implementation and PostgreSQL race coverage are in place. The remaining Phase 7 release gate is owner-controlled end-to-end acceptance of the approved manual provider:
+No owner-controlled billing acceptance remains open for the MVP. The owner has confirmed the real manual-payment workflow works end to end, including receipt submission, Platform Admin review, approval/rejection, and resulting subscription access.
 
-1. Configure the platform card details as Platform Admin.
-2. Submit a real transfer receipt from a Business owner account and confirm it appears as `pending_review`.
-3. Review the private receipt as Platform Admin; exercise both rejection and approval using separate payment submissions.
-4. Confirm rejection leaves the subscription and entitlements unchanged.
-5. Confirm approval activates the selected plan, preserves uninterrupted access, records the reviewer/event, and extends the paid period exactly as shown in the billing UI.
-6. Confirm the Business owner can download only their own receipt and cannot access another Business's receipt.
-
-Keep online gateway callbacks separate from the approved manual provider. Do not add or assume real gateway credentials. Do not mark Phase 7 complete until the owner acceptance above has passed.
+Online gateway callbacks remain a future-provider integration boundary; they are not required for the approved manual card-to-card MVP. Do not add or assume real gateway credentials.
 
 ## Important invariants
 
