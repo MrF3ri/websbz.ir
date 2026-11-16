@@ -8,6 +8,7 @@ use App\Modules\Menu\Actions\EnsurePrimaryMenuAction;
 use App\Modules\Menu\Actions\PublishMenuAction;
 use App\Modules\Menu\Enums\MenuStatus;
 use App\Modules\Product\Models\Product;
+use App\Modules\PublicMenu\Services\PublicMenuCache;
 use App\Modules\Tenancy\Services\CurrentBusiness;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
@@ -18,6 +19,7 @@ class MenuPublicationController
         CurrentBusiness $currentBusiness,
         EnsurePrimaryMenuAction $ensurePrimaryMenu,
         PublishMenuAction $publishMenu,
+        PublicMenuCache $publicMenuCache,
     ): RedirectResponse {
         Gate::authorize('viewAny', Category::class);
         Gate::authorize('viewAny', Product::class);
@@ -27,6 +29,7 @@ class MenuPublicationController
 
         $menu = $ensurePrimaryMenu->execute($business);
         $publishMenu->execute($menu);
+        $publicMenuCache->forget($menu);
 
         return back()->with('success', 'منوی کسب‌وکار با موفقیت منتشر شد.');
     }
@@ -34,6 +37,7 @@ class MenuPublicationController
     public function unpublish(
         CurrentBusiness $currentBusiness,
         EnsurePrimaryMenuAction $ensurePrimaryMenu,
+        PublicMenuCache $publicMenuCache,
     ): RedirectResponse {
         Gate::authorize('viewAny', Category::class);
 
@@ -42,6 +46,7 @@ class MenuPublicationController
 
         $menu = $ensurePrimaryMenu->execute($business);
         $menu->update(['status' => MenuStatus::Draft]);
+        $publicMenuCache->forget($menu);
 
         return back()->with('success', 'انتشار منو متوقف شد.');
     }
