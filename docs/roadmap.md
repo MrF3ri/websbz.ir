@@ -1,6 +1,6 @@
 # Roadmap and delivery status
 
-Last reviewed: 2026-11-16
+Last reviewed: 2026-11-17
 
 This roadmap preserves the phase numbering in `docs/master-spec.md` and its ERRATA. Historical audit statements describe the repository at the time of that audit; the current status below reflects the changes merged afterward.
 
@@ -35,18 +35,37 @@ See `docs/phase-7/README.md` for the implementation boundary and handoff notes.
 
 ## Current release objective
 
-The production build and deployment topology are prepared and CI-validated (PR #22). The remaining work is owner-controlled provisioning and verification on a real server. A green pipeline and a production image build do not by themselves mean the product is deployed or production-ready.
+The application is already deployed on the owner's Ubuntu VPS. The initial production provisioning described in the original deployment checklist has been carried out; the remaining objective is to verify operational safety and establish a repeatable release process. A working website, successful SMTP test, green CI, and production image build do not by themselves establish production readiness.
 
-Completed in the release-preparation layer:
+### Production state recorded on 2026-11-17
 
-- Production-only PHP 8.5 image with Node 22 asset build and no Composer dev dependencies.
+- Domain: `websbz.ir` (with `www.websbz.ir`); HTTPS is served through Caddy, which reverse-proxies to the local Nginx web service.
+- Application topology: Docker Compose production stack with Laravel/PHP-FPM, Nginx, PostgreSQL, queue worker, scheduler, and a one-shot asset-copy service.
+- The web service is bound to loopback on host port `8080`; Caddy is the public TLS entry point.
+- PostgreSQL is on the private Compose network; private application storage is persisted in a named volume.
+- Production environment uses `APP_ENV=production`, `APP_DEBUG=false`, HTTPS URL and secure session-cookie settings.
+- SMTP is configured through Resend using `smtp.resend.com`; domain verification and a successful delivery test were confirmed by the owner. No credentials or API keys belong in this repository.
+- Initial production migrations and plan catalog seeding have been completed. Do not repeat first-deployment migrations/seeding as a routine deployment step.
+- The existing legacy services on the same host are out of scope for this application's deployment. Do not stop, recreate, or reconfigure them as part of websbz release work.
+
+This snapshot records the operational state reported and verified during the owner-assisted deployment session. It is not a substitute for a fresh host-side health check. Never commit `.env.production`, credentials, private keys, database dumps, or receipt files.
+
+### Release-preparation layer already in place
+
+- Production-only PHP 8.5 image with Node 22 asset build and no Composer development dependencies.
 - Production Compose topology with private PostgreSQL, Nginx, persistent private storage, queue worker, and scheduler.
-- Explicit trusted reverse-proxy configuration, secure cookie defaults, and deployment/backup/rollback runbook.
+- Trusted reverse-proxy support and secure cookie defaults.
 - Production-image build and Compose configuration validation in CI.
 
-Next owner-dependent step:
+### Remaining owner-controlled release work
 
-- Choose the VPS/hosting provider and region, connect the domain and DNS, supply SMTP details, provision TLS, and run the deployment checklist in `docs/deployment.md`.
+- Reconcile and verify the actual production runtime configuration without printing secret values.
+- Perform a clean-PostgreSQL QA pass in a separate test environment; never use the live production database for destructive QA.
+- Perform a real phone scan of a downloaded QR code and verify the printed-size result.
+- Validate representative application load, queue/database connection behavior, image delivery, and slow-query visibility.
+- Create and restore-test coordinated PostgreSQL and private-storage backups.
+- Establish immutable image publishing, reviewed migrations, deployment, and rollback verification.
+- Complete the operational runbook, monitoring/alerting, and final launch acceptance.
 
 ## Deferred product phases
 
@@ -77,8 +96,8 @@ These are intentionally not blockers for the first usable MVP unless the busines
 - **Phase 19 — QA:** run end-to-end acceptance tests on a clean PostgreSQL deployment, including payment receipt privacy and admin approval. The current branch adds HTTP-level submission-to-admin-rejection and submission-to-admin-approval scenarios. They verify that rejection preserves the trial subscription and period; approval activates the server-priced selected plan while preserving the trial period and extending it by one paid month; receipts remain tenant-private and admin-accessible; and audit snapshots exclude tracking numbers, rejection reasons, and receipt paths. These are covered billing scenarios, not completion of Phase 19.
 - **Phase 20 — Performance:** PostgreSQL query-plan benchmark and explicit menu-scope optimization are merged (PR #35). Public-menu response caching with write-path invalidation is merged (PR #36). Billing history has a bounded query budget (PR #37). Catalog substring-search plan measurement is merged (PR #38); the observed CI sample did not justify adding a trigram index. The current branch adds a bounded SELECT-query regression test for the Platform Admin dashboard at 1 versus 31 payments. Representative-load validation, image delivery, queue/connection review, and slow-query monitoring remain.
 - **Phase 21 — Security:** baseline HTTP security headers are merged, and this follow-up aligns production Nginx static/dynamic responses with the Laravel policy, prevents duplicate upstream headers, and adds `nginx -t` to CI. CSP is deliberately deferred until a nonce/hash and asset-origin policy is designed. Production and development dependency auditing is added on the current branch (`composer audit --locked` and high/critical `npm audit` across all dependency groups). PR #56 hardens manual receipt validation by independently checking detected MIME and filename extension, retaining the 5 MiB limit, and testing that rejected files are never stored. PR #57 adds regression coverage for the five-per-minute two-factor challenge limit and the 60-second per-user password-reset throttle. PR #58 defaults production session cookies to Secure and verifies Secure/HttpOnly/SameSite flags. The current review found no tenant-boundary bypass in the reviewed routes and records the repository secret-handling review. Remaining owner-controlled work: historical secret scanning and verification of actual production runtime secrets/host configuration; the connected source review cannot certify deployed credentials.
-- **Phase 22 — Production infrastructure:** validate image build and Compose config, provision host, DNS, TLS, SMTP, persistent volumes, and backups.
-- **Phase 23 — CI/CD:** publish immutable images, deploy with reviewed migrations, and verify rollback procedure.
-- **Phase 24 — Final readiness:** operational documentation, owner runbook, monitoring/alerts, restore drill, and launch acceptance.
+- **Phase 22 — Production infrastructure:** host, DNS, TLS, SMTP, Compose services, PostgreSQL, and persistent application storage are provisioned on the owner's VPS. Remaining: verify runtime configuration/host exposure, implement coordinated database and private-storage backups, and complete a restore drill. The prior first-provisioning checklist is historical; see the current-state warning in `docs/deployment.md`.
+- **Phase 23 — CI/CD:** CI and production-image build validation exist. Remaining: publish immutable images, deploy a reviewed release with reviewed migrations, and verify rollback procedure.
+- **Phase 24 — Final readiness:** reconcile operational documentation, complete owner runbook, monitoring/alerts, restore drill, and launch acceptance.
 
 Do not mark the product production-ready until the remaining release gates are completed on the actual deployment target.
