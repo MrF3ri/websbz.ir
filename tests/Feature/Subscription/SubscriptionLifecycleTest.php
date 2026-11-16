@@ -15,6 +15,7 @@ use App\Modules\Subscription\Enums\SubscriptionStatus;
 use App\Modules\Subscription\Models\Payment;
 use App\Modules\Subscription\Models\Plan;
 use App\Modules\Subscription\Models\PlanFeature;
+use App\Modules\Subscription\Services\EntitlementService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Mockery;
@@ -251,6 +252,56 @@ class SubscriptionLifecycleTest extends TestCase
             'event_type' => SubscriptionEventType::Upgraded->value,
         ]);
         $this->assertSame($targetPlan->getKey(), $payment->fresh()->target_plan_id);
+    }
+
+    public function test_early_successful_callback_preserves_trial_access_until_the_paid_period_starts(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-11-16 10:00:00', 'UTC'));
+
+        $business = $this->createBusiness();
+        $currentPlan = $this->createPlan('starter', 1000, ['max_products' => 10]);
+        $targetPlan = $this->createPlan('pro', 5000, ['max_products' => 100]);
+        $subscription = app(StartTrialAction::class)->execute($business, $currentPlan);
+        $trialStartsAt = $subscription->current_period_starts_at;
+        $trialEndsAt = $subscription->trial_ends_at;
+
+        $payment = $subscription->payments()->create([
+            'target_plan_id' => $targetPlan->getKey(),
+            'amount' => $targetPlan->monthly_price,
+            'status' => PaymentStatus::Pending,
+            'gateway_reference' => 'early-success-reference',
+        ]);
+
+        $gateway = Mockery::mock(PaymentGatewayInterface::class);
+        $gateway->shouldReceive('verifyPayment')
+            ->once()
+            ->with('early-success-reference')
+            ->andReturn(GatewayVerificationResult::SUCCESS);
+        $this->app->instance(PaymentGatewayInterface::class, $gateway);
+
+        app(ProcessPaymentCallbackAction::class)->execute('early-success-reference');
+
+        $freshSubscription = $subscription->fresh();
+        self::assertNotNull($trialStartsAt);
+        self::assertNotNull($trialEndsAt);
+        $this->assertSame($trialStartsAt->timestamp, $freshSubscription->current_period_starts_at?->timestamp);
+        $this->assertSame(
+            $trialEndsAt->copy()->addMonth()->timestamp,
+            $freshSubscription->current_period_ends_at?->timestamp,
+        );
+        $this->assertSame(100, (new EntitlementService($business))->getLimit('max_products'));
+
+        Carbon::setTestNow($trialEndsAt);
+        $this->assertSame(100, (new EntitlementService($business))->getLimit('max_products'));
+        $this->assertDatabaseHas('subscription_events', [
+            'subscription_id' => $subscription->getKey(),
+            'event_type' => SubscriptionEventType::PaymentApproved->value,
+        ]);
+        $this->assertDatabaseHas('subscription_events', [
+            'subscription_id' => $subscription->getKey(),
+            'event_type' => SubscriptionEventType::PaymentApproved->value,
+            'metadata->paid_period_starts_at' => $trialEndsAt->toISOString(),
+        ]);
     }
 
     public function test_delayed_successful_callback_after_trial_expiration_starts_a_fresh_paid_period_and_is_idempotent(): void
