@@ -61,8 +61,8 @@ class ManualPaymentSubmissionTest extends TestCase
         Storage::fake('local');
 
         $user = User::factory()->create();
-        $this->createBusinessFor($user);
-        $this->giveBusinessTrialSubscription($user->businesses()->firstOrFail(), 'economic');
+        $business = $this->createBusinessFor($user);
+        $this->giveBusinessTrialSubscription($business, 'economic');
         $plan = Plan::query()->where('code', 'professional')->firstOrFail();
 
         app(PlatformSettingsService::class)->updateCardDetails([
