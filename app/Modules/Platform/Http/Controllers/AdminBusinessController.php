@@ -116,7 +116,7 @@ class AdminBusinessController
                 'id' => $event->getKey(),
                 'type' => $event->event_type->value,
                 'plan' => $event->subscription->plan->name,
-                'created_at' => $event->created_at?->toISOString(),
+                'created_at' => $event->created_at->toISOString(),
             ]);
 
         return Inertia::render('Admin/Businesses/Show', [
