@@ -66,6 +66,30 @@ The result sets remain tenant/menu constrained; automated feature tests assert
 the menu predicate is present. These figures are a CI baseline, not production
 latency guarantees. No new index is justified by this result.
 
+
+## Public-menu response cache
+
+The public menu payload is cached for five minutes using the framework's configured
+cache store. The cache key is namespaced by the internal menu ID, while every
+request still resolves the active business and published menu from PostgreSQL
+before reading cached content. This keeps suspended businesses and unpublished
+menus inaccessible even if an old payload remains in cache.
+
+Successful writes invalidate the affected menu cache after persistence:
+- Category create, update, delete, and reorder.
+- Product create, update, delete, and reorder.
+- Menu publish and unpublish.
+- Business profile updates, because the public payload includes the business name.
+
+The cache stores only the public Inertia payload, not Eloquent model instances or
+administrative fields. A feature test verifies that a cache hit skips category
+and product reads and that a product update invalidates the payload immediately.
+
+The cache uses the configured Laravel cache backend. Redis is not forced as a
+new dependency; production should select a shared cache backend before running
+multiple application replicas. Until then, each replica's cache remains local
+to its configured store.
+
 ## Safety
 
 Do not point this test at the development or production database. The test uses
