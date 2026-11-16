@@ -34,6 +34,11 @@ jobs:
       - name: Setup Application
         run: composer setup
 
+      - name: Audit production dependencies
+        run: |
+          composer audit --locked --no-dev
+          npm audit --omit=dev --audit-level=high
+
       - name: Run SQLite tests and quality gates
         run: composer ci:check
 
