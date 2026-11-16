@@ -86,7 +86,7 @@ Run these checks against the isolated staging deployment, recording the build/co
 
 - [ ] On Economic, confirm product 21 and category 3 are rejected without creating records.
 - [ ] On Economic, confirm unsupported discount/availability features are rejected.
-- [ ] On Professional, confirm the sixth category is rejected and only the permitted image entitlement is exposed/enforced by implemented flows.
+- [ ] On Professional, confirm the sixth category is rejected and the implemented numerical/boolean entitlements are enforced. Image-upload workflow acceptance is excluded because media management is a deferred product phase.
 - [ ] On Top, confirm the configured product/category limits and currently implemented entitlements behave as expected.
 - [ ] Confirm rejected requests do not leave orphaned rows or uploaded files.
 - [ ] Confirm sorting, filtering, search, and pagination do not cross business/menu boundaries.
@@ -141,7 +141,7 @@ Record the accepted commit SHA and date below when the owner completes the run:
 
 ## Out of scope for this MVP QA gate
 
-Branch management, media management, visual templates, localization, custom domains, and the advanced Top-plan feature set belong to deferred product phases unless a separate launch requirement explicitly promotes one of them into scope.
+Branch management, media management/image upload, visual templates, localization, custom domains, and the advanced Top-plan feature set belong to deferred product phases unless a separate launch requirement explicitly promotes one of them into scope. The image-count entitlement policy has unit-level coverage in `PlanRestrictionTest`; that is not evidence of a shipped media-upload workflow.
 
 ## Current status
 
