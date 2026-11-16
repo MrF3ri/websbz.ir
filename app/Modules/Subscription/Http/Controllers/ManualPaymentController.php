@@ -49,7 +49,7 @@ class ManualPaymentController
                 'max:100',
                 Rule::unique('payments', 'bank_tracking_number'),
             ],
-            'receipt' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
+            'receipt' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'extensions:jpg,jpeg,png,pdf', 'mimetypes:image/jpeg,image/png,application/pdf', 'max:5120'],
         ]);
 
         $business = $currentBusiness->get();
