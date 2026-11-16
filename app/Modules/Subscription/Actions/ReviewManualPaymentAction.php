@@ -3,6 +3,7 @@
 namespace App\Modules\Subscription\Actions;
 
 use App\Models\User;
+use App\Modules\Platform\Models\PlatformAuditLog;
 use App\Modules\Subscription\Enums\PaymentStatus;
 use App\Modules\Subscription\Enums\SubscriptionEventType;
 use App\Modules\Subscription\Enums\SubscriptionStatus;
@@ -53,6 +54,7 @@ class ReviewManualPaymentAction
                 ->lockForUpdate()
                 ->firstOrFail();
 
+            $beforeAudit = $this->auditSnapshot($lockedPayment, $subscription);
             $now = now();
 
             if (! $approve) {
@@ -72,6 +74,15 @@ class ReviewManualPaymentAction
                         'reason' => $reason,
                         'reviewed_by' => $reviewer->getKey(),
                     ],
+                ]);
+
+                PlatformAuditLog::query()->create([
+                    'actor_id' => $reviewer->getKey(),
+                    'action' => 'platform.payment.review.rejected',
+                    'target_type' => 'payment',
+                    'target_id' => (string) $lockedPayment->getKey(),
+                    'before_data' => $beforeAudit,
+                    'after_data' => $this->auditSnapshot($lockedPayment, $subscription),
                 ]);
 
                 return $lockedPayment->refresh();
@@ -166,7 +177,32 @@ class ReviewManualPaymentAction
                 ],
             ]);
 
+            PlatformAuditLog::query()->create([
+                'actor_id' => $reviewer->getKey(),
+                'action' => 'platform.payment.review.approved',
+                'target_type' => 'payment',
+                'target_id' => (string) $lockedPayment->getKey(),
+                'before_data' => $beforeAudit,
+                'after_data' => $this->auditSnapshot($lockedPayment, $subscription),
+            ]);
+
             return $lockedPayment->refresh();
         }, attempts: 3);
+    }
+
+    /**
+     * @return array<string, int|string|null>
+     */
+    private function auditSnapshot(Payment $payment, Subscription $subscription): array
+    {
+        return [
+            'payment_status' => $payment->status->value,
+            'payment_amount' => $payment->amount,
+            'target_plan_id' => $payment->target_plan_id,
+            'subscription_status' => $subscription->status->value,
+            'subscription_plan_id' => $subscription->plan_id,
+            'current_period_starts_at' => $subscription->current_period_starts_at?->toISOString(),
+            'current_period_ends_at' => $subscription->current_period_ends_at?->toISOString(),
+        ];
     }
 }

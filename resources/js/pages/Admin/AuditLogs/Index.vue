@@ -37,6 +37,13 @@ function fieldLabel(key: string): string {
         bank_name: 'نام بانک',
         card_number_last4: 'چهار رقم پایانی کارت',
         card_holder: 'صاحب کارت',
+        payment_status: 'وضعیت پرداخت',
+        payment_amount: 'مبلغ پرداخت',
+        target_plan_id: 'شناسه طرح درخواستی',
+        subscription_status: 'وضعیت اشتراک',
+        subscription_plan_id: 'شناسه طرح اشتراک',
+        current_period_starts_at: 'شروع دوره اشتراک',
+        current_period_ends_at: 'پایان دوره اشتراک',
     } as Record<string, string>)[key] ?? key;
 }
 </script>
