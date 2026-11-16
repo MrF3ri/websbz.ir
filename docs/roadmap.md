@@ -65,8 +65,9 @@ These are intentionally not blockers for the first usable MVP unless the busines
 
 - Existing admin capabilities: manual payment review and platform card settings.
 - PR #39 adds the first real `/admin` overview with live business, active/trial subscription, pending payment, approved payment totals, and recent payment data. PR #40 adds a searchable and filterable paginated business directory with each business's latest subscription summary; PR #41 adds the subscription directory; PR #42 adds payment history and review filters.
-- The current branch adds a read-only business detail view: contact and owner information, members and roles, latest subscription, ten recent payments, and ten recent subscription events. Receipt access uses the existing protected receipt endpoint; private storage paths and raw event metadata are not exposed. This remains one dashboard slice, not the complete administrative console.
-- Next dashboard slices: operational/audit event feed and platform configuration health, each gated by authorization and regression tests.
+- PR #43 adds a read-only business detail view: contact and owner information, members and roles, latest subscription, ten recent payments, and ten recent subscription events. Receipt access uses the existing protected receipt endpoint; private storage paths and raw event metadata are not exposed.
+- The current branch adds the first operational event center at `/admin/events`, with filtering by lifecycle event type and business/plan search, newest-first pagination, links to business details, and a deliberately restricted event projection. It exposes only the existing subscription lifecycle and manual-payment events; it does not yet claim to be a complete audit trail of arbitrary admin actions or settings changes.
+- Next dashboard slices: instrument and display platform-setting changes and other sensitive administrative actions through a dedicated audit record, then platform configuration health; each gated by authorization and regression tests.
 
 ## Remaining release gates
 
