@@ -52,7 +52,7 @@ class AdminAuditLogController
                 'action' => $log->action,
                 'target_type' => $log->target_type,
                 'target_id' => $log->target_id,
-                'actor_name' => $log->actor_id === null ? 'کاربر حذف‌شده' : $log->actor->name,
+                'actor_name' => $log->actor_id === null ? ($log->actor_label ?? 'کاربر حذف‌شده') : $log->actor->name,
                 'actor_email' => $log->actor?->email,
                 'before' => $log->before_data,
                 'after' => $log->after_data,

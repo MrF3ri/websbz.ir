@@ -68,8 +68,9 @@ These are intentionally not blockers for the first usable MVP unless the busines
 - PR #43 adds a read-only business detail view: contact and owner information, members and roles, latest subscription, ten recent payments, and ten recent subscription events. Receipt access uses the existing protected receipt endpoint; private storage paths and raw event metadata are not exposed.
 - PR #44 adds the first operational event center at `/admin/events`, with filtering by lifecycle event type and business/plan search, newest-first pagination, links to business details, and a deliberately restricted event projection. It exposes only the existing subscription lifecycle and manual-payment events.
 - PR #45 adds `/admin/audit-logs` and transactionally records platform card-setting changes with actor, target, timestamp, and safe before/after snapshots. Card numbers are reduced to their final four digits; raw card numbers, receipt paths, and arbitrary request payloads are excluded. The log has no application update/delete workflow.
-- The current branch extends the audit trail to manual payment approval and rejection. It records actor, payment target, status, amount, plan, and subscription-period transitions in the same transaction as the review. Rejection reasons, bank tracking numbers, receipt paths, and feature snapshots are excluded from audit snapshots.
-- Remaining dashboard slices: extend audited coverage to other sensitive administrative actions through explicit per-action snapshot allowlists, then add platform configuration health; each gated by authorization and regression tests.
+- PR #46 extends the audit trail to manual payment approval and rejection. It records actor, payment target, status, amount, plan, and subscription-period transitions in the same transaction as the review. Rejection reasons, bank tracking numbers, receipt paths, and feature snapshots are excluded from audit snapshots.
+- The current branch also records the one-time `platform-admin:grant` CLI operation, with an explicit `CLI / Artisan` actor label, target public ULID, and before/after privilege flag. Repeated grants do not create duplicate records.
+- Remaining dashboard slice: platform configuration health, gated by authorization and regression tests.
 
 ## Remaining release gates
 

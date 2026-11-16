@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\User;
+use App\Modules\Platform\Models\PlatformAuditLog;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
@@ -38,7 +39,18 @@ class GrantPlatformAdminCommand extends Command
                 return self::FAILURE;
             }
 
-            $user->forceFill(['is_platform_admin' => true])->save();
+            if (! $user->isPlatformAdmin()) {
+                $user->forceFill(['is_platform_admin' => true])->save();
+
+                PlatformAuditLog::query()->create([
+                    'actor_label' => 'CLI / Artisan',
+                    'action' => 'platform.admin.granted',
+                    'target_type' => 'user',
+                    'target_id' => $user->public_id,
+                    'before_data' => ['is_platform_admin' => false],
+                    'after_data' => ['is_platform_admin' => true],
+                ]);
+            }
 
             $this->info('Platform administrator access granted.');
 
