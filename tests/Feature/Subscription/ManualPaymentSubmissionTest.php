@@ -75,7 +75,7 @@ class ManualPaymentSubmissionTest extends TestCase
             ->post(route('billing.payments.store'), [
                 'plan_id' => $plan->getKey(),
                 'bank_tracking_number' => 'BANK-TRACK-BAD-EXT',
-                'receipt' => UploadedFile::fake()->createWithContent('receipt.txt', "%PDF-1.4\\nnot a valid uploaded extension"),
+                'receipt' => UploadedFile::fake()->createWithContent('receipt.txt', '%PDF-1.4\\nnot a valid uploaded extension'),
             ])
             ->assertSessionHasErrors('receipt');
 
