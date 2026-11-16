@@ -26,6 +26,29 @@ class TwoFactorChallengeTest extends TestCase
         $response->assertRedirect(route('login'));
     }
 
+    public function test_two_factor_challenge_is_rate_limited_to_five_attempts_per_minute(): void
+    {
+        Features::twoFactorAuthentication([
+            'confirm' => true,
+            'confirmPassword' => true,
+        ]);
+
+        $user = User::factory()->withTwoFactor()->create();
+
+        $this->post(route('login'), [
+            'email' => $user->email,
+            'password' => 'password',
+        ])->assertRedirect(route('two-factor.login'));
+
+        for ($attempt = 0; $attempt < 5; $attempt++) {
+            $this->post(route('two-factor.login'), ['code' => '000000'])
+                ->assertSessionHasErrors();
+        }
+
+        $this->post(route('two-factor.login'), ['code' => '000000'])
+            ->assertTooManyRequests();
+    }
+
     public function test_two_factor_challenge_can_be_rendered(): void
     {
         Features::twoFactorAuthentication([
