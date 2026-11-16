@@ -5,6 +5,7 @@ use App\Modules\Business\Http\Controllers\BusinessSettingsController;
 use App\Modules\Catalog\Http\Controllers\CatalogController;
 use App\Modules\Category\Http\Controllers\CategoryController;
 use App\Modules\Menu\Http\Controllers\MenuPublicationController;
+use App\Modules\Platform\Http\Controllers\AdminDashboardController;
 use App\Modules\Platform\Http\Controllers\AdminPaymentController;
 use App\Modules\Platform\Http\Controllers\PlatformSettingsController;
 use App\Modules\Product\Http\Controllers\ProductController;
