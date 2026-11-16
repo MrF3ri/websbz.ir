@@ -9,6 +9,7 @@ use App\Modules\Category\Http\Requests\SaveCategoryRequest;
 use App\Modules\Category\Models\Category;
 use App\Modules\Menu\Actions\EnsurePrimaryMenuAction;
 use App\Modules\Menu\Models\Menu;
+use App\Modules\PublicMenu\Services\PublicMenuCache;
 use App\Modules\Tenancy\Services\CurrentBusiness;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
@@ -22,6 +23,7 @@ class CategoryController
         CurrentBusiness $currentBusiness,
         EnsurePrimaryMenuAction $ensurePrimaryMenu,
         CreateCategoryAction $createCategory,
+        PublicMenuCache $publicMenuCache,
     ): RedirectResponse {
         $business = $this->currentBusiness($currentBusiness);
         Gate::authorize('create', Category::class);
@@ -34,6 +36,7 @@ class CategoryController
             $data['name'],
             $data['is_active'] ?? true,
         );
+        $publicMenuCache->forget($menu);
 
         return back()->with('success', 'دسته‌بندی با موفقیت ایجاد شد.');
     }
@@ -43,12 +46,14 @@ class CategoryController
         string $categoryPublicId,
         CurrentBusiness $currentBusiness,
         EnsurePrimaryMenuAction $ensurePrimaryMenu,
+        PublicMenuCache $publicMenuCache,
     ): RedirectResponse {
         $menu = $this->currentMenu($currentBusiness, $ensurePrimaryMenu);
         $category = $this->resolveCategory($menu, $categoryPublicId);
         Gate::authorize('update', $category);
 
-        $category->update($request->validated());\n        $publicMenuCache->forget($menu);
+        $category->update($request->validated());
+        $publicMenuCache->forget($menu);
 
         return back()->with('success', 'دسته‌بندی با موفقیت ویرایش شد.');
     }
@@ -57,6 +62,7 @@ class CategoryController
         string $categoryPublicId,
         CurrentBusiness $currentBusiness,
         EnsurePrimaryMenuAction $ensurePrimaryMenu,
+        PublicMenuCache $publicMenuCache,
     ): RedirectResponse {
         $menu = $this->currentMenu($currentBusiness, $ensurePrimaryMenu);
         $category = $this->resolveCategory($menu, $categoryPublicId);
@@ -77,6 +83,7 @@ class CategoryController
 
             $lockedCategory->delete();
         });
+        $publicMenuCache->forget($menu);
 
         return back()->with('success', 'دسته‌بندی حذف شد.');
     }
@@ -85,6 +92,7 @@ class CategoryController
         ReorderCategoriesRequest $request,
         CurrentBusiness $currentBusiness,
         EnsurePrimaryMenuAction $ensurePrimaryMenu,
+        PublicMenuCache $publicMenuCache,
     ): RedirectResponse {
         $menu = $this->currentMenu($currentBusiness, $ensurePrimaryMenu);
         Gate::authorize('viewAny', Category::class);
@@ -110,6 +118,7 @@ class CategoryController
                 ]);
             }
         });
+        $publicMenuCache->forget($menu);
 
         return back()->with('success', 'ترتیب دسته‌بندی‌ها ذخیره شد.');
     }
