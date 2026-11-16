@@ -99,7 +99,22 @@ class ProcessPaymentCallbackAction
                 }
             }
 
-            $newPeriodEndsAt = $periodBase->copy()->addMonth();
+            $preserveCurrentAccessPeriod = (
+                $subscription->status === SubscriptionStatus::Trialing
+                && $subscription->trial_ends_at !== null
+                && $subscription->trial_ends_at->greaterThan($now)
+                && $subscription->current_period_starts_at !== null
+            ) || (
+                $subscription->status === SubscriptionStatus::Active
+                && $subscription->current_period_starts_at !== null
+                && $subscription->current_period_starts_at->lessThanOrEqualTo($now)
+                && $subscription->current_period_ends_at !== null
+                && $subscription->current_period_ends_at->greaterThan($now)
+            );
+            $accessPeriodStartsAt = $preserveCurrentAccessPeriod
+                ? $subscription->current_period_starts_at
+                : $periodBase;
+            $newPeriodEndsAt = $periodBase->copy()->addMonthNoOverflow();
 
             $payment->update([
                 'status' => PaymentStatus::Successful,
@@ -110,7 +125,7 @@ class ProcessPaymentCallbackAction
                 'plan_id' => $targetPlan->getKey(),
                 'features_snapshot' => $featuresSnapshot,
                 'status' => SubscriptionStatus::Active,
-                'current_period_starts_at' => $periodBase,
+                'current_period_starts_at' => $accessPeriodStartsAt,
                 'current_period_ends_at' => $newPeriodEndsAt,
             ]);
 
@@ -122,7 +137,8 @@ class ProcessPaymentCallbackAction
                     'gateway_reference' => $gatewayReference,
                     'target_plan_id' => $targetPlan->getKey(),
                     'paid_at' => $now->toISOString(),
-                    'current_period_starts_at' => $periodBase->toISOString(),
+                    'current_period_starts_at' => $accessPeriodStartsAt->toISOString(),
+                    'paid_period_starts_at' => $periodBase->toISOString(),
                     'current_period_ends_at' => $newPeriodEndsAt->toISOString(),
                 ],
             ]);

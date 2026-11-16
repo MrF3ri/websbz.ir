@@ -1,6 +1,6 @@
 # Roadmap and delivery status
 
-Last reviewed: 2026-11-15
+Last reviewed: 2026-11-16
 
 This roadmap preserves the phase numbering in `docs/master-spec.md` and its ERRATA. Historical audit statements describe the repository at the time of that audit; the current status below reflects the changes merged afterward.
 
@@ -10,6 +10,7 @@ This roadmap preserves the phase numbering in `docs/master-spec.md` and its ERRA
 - **Phase 8 — Menu and Catalog:** primary menu, category/product CRUD, sorting, search/filter/pagination, tenant authorization, entitlement limits, and same-menu composite foreign keys.
 - **Phase 13 — Public Menu:** stable guest URL, publication/unpublication, and public visibility filters.
 - **Phase 14 — QR:** local browser-side QR generation and downloadable SVG; no external QR service receives the menu URL.
+  - Owner's final physical scan/print acceptance is still outstanding; automated SVG generation tests do not replace scanning the downloaded QR with a phone.
 
 The above work is merged to `main` through PRs #12, #16, #17, #18, #19, #20, and #21. Each feature PR passed the configured SQLite and PostgreSQL CI jobs before merge.
 
@@ -24,14 +25,11 @@ The MVP manual card-to-card path is implemented on `main`:
 - Approval updates the subscription plan/snapshot and extends its paid period transactionally.
 - A legacy gateway abstraction and callback processing Actions remain available for future online providers.
 
-Remaining Phase 7 work (do not mark the phase fully complete yet):
+Automated Phase 7 lifecycle work is implemented and covered on `main`: persisted trial/paid expiration and scheduler (PR #29), delayed/concurrent manual review tests (PR #30), and concurrent gateway callback plus expiration/callback race tests (PR #31). The current audit also addresses uninterrupted entitlements during early payment/renewal; see `docs/phase-7/README.md`.
 
-- Implement and test the persisted expiration transition and access behavior after trial/paid period end, while preserving customer data.
-- Review plan-change feature-snapshot/effective-access behavior against the Phase 7 acceptance criteria. PR #28 now classifies manual approval and verified callback outcomes as upgraded, downgraded, or renewed and adds downgrade regression tests.
-- Add PostgreSQL coverage for delayed/concurrent payment review and renewal boundaries; the existing PR #27 PostgreSQL concurrency suite covers catalog quota writes, not payment lifecycle races.
-- Complete owner end-to-end acceptance of manual billing: submit a receipt, review as Platform Admin, approve/reject, and verify subscription access and period.
+**Phase 7 remains open only for owner-controlled end-to-end acceptance of manual card-to-card billing.** The owner must submit a real receipt, review it as Platform Admin, exercise approval and rejection, and verify the resulting subscription access, dates, and private receipt boundaries. Do not mark Phase 7 complete before this acceptance passes.
 
-Merged supporting changes: PR #25 (tenant-scoped business-owner receipt download and IDOR test), PR #27 (deterministic PostgreSQL catalog concurrency tests), and PR #28 (plan-change event classification and regression tests).
+Merged supporting changes: PR #25 (tenant-scoped receipt access), PR #27 (catalog concurrency tests), PR #28 (plan-change event classification), PR #29 (persisted expiration), PR #30 (manual-payment concurrency), and PR #31 (gateway callback/expiration races).
 
 See `docs/phase-7/README.md` for the implementation boundary and handoff notes.
 

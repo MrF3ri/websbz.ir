@@ -90,7 +90,7 @@ class EntitlementService
 
         if (
             $subscription->current_period_starts_at->isAfter($now)
-            || $subscription->current_period_ends_at->isPast()
+            || $subscription->current_period_ends_at->lessThanOrEqualTo($now)
         ) {
             return false;
         }

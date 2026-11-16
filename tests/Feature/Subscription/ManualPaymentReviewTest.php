@@ -10,6 +10,7 @@ use App\Modules\Subscription\Enums\SubscriptionEventType;
 use App\Modules\Subscription\Enums\SubscriptionStatus;
 use App\Modules\Subscription\Models\Plan;
 use App\Modules\Subscription\Models\PlanFeature;
+use App\Modules\Subscription\Services\EntitlementService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Tests\Concerns\InteractsWithBusinesses;
@@ -92,6 +93,146 @@ class ManualPaymentReviewTest extends TestCase
             $this->assertSame(
                 1,
                 $subscription->events()->where('event_type', SubscriptionEventType::PaymentApproved->value)->count(),
+            );
+        } finally {
+            Carbon::setTestNow();
+        }
+    }
+
+    public function test_early_approval_preserves_trial_access_and_starts_paid_month_after_trial(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-11-16 10:00:00', 'UTC'));
+
+        try {
+            $owner = User::factory()->create();
+            $business = $this->createBusinessFor($owner);
+            $subscription = $this->giveBusinessTrialSubscription($business, 'economic');
+            $trialStartsAt = $subscription->current_period_starts_at;
+            $trialEndsAt = $subscription->trial_ends_at;
+            $plan = Plan::query()->where('code', 'professional')->firstOrFail();
+            $payment = app(SubmitManualPaymentAction::class)->execute(
+                $subscription,
+                $plan,
+                'BANK-EARLY-APPROVAL-001',
+                'payment-receipts/1/early-approval.pdf',
+            );
+
+            self::assertNotNull($trialStartsAt);
+            self::assertNotNull($trialEndsAt);
+
+            $admin = User::factory()->create();
+            $admin->forceFill(['is_platform_admin' => true])->save();
+
+            app(ReviewManualPaymentAction::class)->approve($payment, $admin);
+
+            $freshSubscription = $subscription->fresh();
+            $this->assertSame($trialStartsAt->timestamp, $freshSubscription->current_period_starts_at?->timestamp);
+            $this->assertSame(
+                $trialEndsAt->copy()->addMonth()->timestamp,
+                $freshSubscription->current_period_ends_at?->timestamp,
+            );
+
+            $targetFeaturesSnapshot = $payment->target_features_snapshot;
+            self::assertIsArray($targetFeaturesSnapshot);
+            $expectedLimit = $targetFeaturesSnapshot['max_products'] ?? null;
+            self::assertIsInt($expectedLimit);
+            $this->assertSame(
+                $expectedLimit,
+                (new EntitlementService($business))->getLimit('max_products'),
+            );
+
+            Carbon::setTestNow($trialEndsAt);
+            $this->assertSame(
+                $expectedLimit,
+                (new EntitlementService($business))->getLimit('max_products'),
+            );
+
+            self::assertNotNull($freshSubscription->current_period_ends_at);
+            Carbon::setTestNow($freshSubscription->current_period_ends_at);
+            $this->assertNull((new EntitlementService($business))->getLimit('max_products'));
+        } finally {
+            Carbon::setTestNow();
+        }
+    }
+
+    public function test_early_paid_renewal_preserves_current_access_until_extended_period_end(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-11-16 10:00:00', 'UTC'));
+
+        try {
+            $owner = User::factory()->create();
+            $business = $this->createBusinessFor($owner);
+            $subscription = $this->giveBusinessTrialSubscription($business, 'economic');
+            $periodStartsAt = Carbon::now()->subDays(15);
+            $periodEndsAt = Carbon::now()->addDays(15);
+            $subscription->update([
+                'status' => SubscriptionStatus::Active,
+                'trial_ends_at' => Carbon::now()->subDays(30),
+                'current_period_starts_at' => $periodStartsAt,
+                'current_period_ends_at' => $periodEndsAt,
+            ]);
+
+            $plan = Plan::query()->where('code', 'professional')->firstOrFail();
+            $payment = app(SubmitManualPaymentAction::class)->execute(
+                $subscription,
+                $plan,
+                'BANK-EARLY-RENEWAL-001',
+                'payment-receipts/1/early-renewal.pdf',
+            );
+            $admin = User::factory()->create();
+            $admin->forceFill(['is_platform_admin' => true])->save();
+
+            app(ReviewManualPaymentAction::class)->approve($payment, $admin);
+
+            $freshSubscription = $subscription->fresh();
+            $this->assertSame($periodStartsAt->timestamp, $freshSubscription->current_period_starts_at?->timestamp);
+            $this->assertSame(
+                $periodEndsAt->copy()->addMonth()->timestamp,
+                $freshSubscription->current_period_ends_at?->timestamp,
+            );
+            $targetFeaturesSnapshot = $payment->target_features_snapshot;
+            self::assertIsArray($targetFeaturesSnapshot);
+            $expectedLimit = $targetFeaturesSnapshot['max_products'] ?? null;
+            self::assertIsInt($expectedLimit);
+            $this->assertSame(
+                $expectedLimit,
+                (new EntitlementService($business))->getLimit('max_products'),
+            );
+        } finally {
+            Carbon::setTestNow();
+        }
+    }
+
+    public function test_renewal_at_month_end_clamps_to_the_last_day_of_the_next_month(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2027-01-01 10:00:00', 'UTC'));
+
+        try {
+            $owner = User::factory()->create();
+            $business = $this->createBusinessFor($owner);
+            $subscription = $this->giveBusinessTrialSubscription($business, 'economic');
+            $subscription->update([
+                'status' => SubscriptionStatus::Active,
+                'trial_ends_at' => Carbon::parse('2026-12-31 10:00:00', 'UTC'),
+                'current_period_starts_at' => Carbon::parse('2026-12-31 10:00:00', 'UTC'),
+                'current_period_ends_at' => Carbon::parse('2027-01-31 10:00:00', 'UTC'),
+            ]);
+
+            $plan = Plan::query()->where('code', 'professional')->firstOrFail();
+            $payment = app(SubmitManualPaymentAction::class)->execute(
+                $subscription,
+                $plan,
+                'BANK-MONTH-END-001',
+                'payment-receipts/1/month-end.pdf',
+            );
+            $admin = User::factory()->create();
+            $admin->forceFill(['is_platform_admin' => true])->save();
+
+            app(ReviewManualPaymentAction::class)->approve($payment, $admin);
+
+            $this->assertSame(
+                Carbon::parse('2027-02-28 10:00:00', 'UTC')->timestamp,
+                $subscription->fresh()->current_period_ends_at?->timestamp,
             );
         } finally {
             Carbon::setTestNow();
