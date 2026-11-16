@@ -90,6 +90,20 @@ new dependency; production should select a shared cache backend before running
 multiple application replicas. Until then, each replica's cache remains local
 to its configured store.
 
+
+## Billing history query budget
+
+The billing page now computes `hasPendingReview` as a correlated `EXISTS` expression
+on the subscription query and performs one bounded query for the latest ten payment
+records (with their target plans). This avoids eagerly loading the complete payment
+history and then querying the same history again for display.
+
+A feature regression creates twelve payment rows and asserts:
+- Exactly two SQL statements reference the payments table: the subscription
+  `EXISTS` and the bounded latest-ten query.
+- The page still reports a pending review when the newest payment is pending.
+- Only ten recent payment records are returned.
+
 ## Safety
 
 Do not point this test at the development or production database. The test uses
