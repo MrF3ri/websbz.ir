@@ -183,7 +183,6 @@ class PostgresCatalogQueryPlanTest extends TestCase
         }
     }
 
-    /** @return array<string, mixed> */
     private function explain(Builder $query): array
     {
         $row = DB::select(
@@ -209,11 +208,6 @@ class PostgresCatalogQueryPlanTest extends TestCase
         ];
     }
 
-    /**
-     * @param array<string, mixed> $plan
-     * @param list<string> $nodes
-     * @param list<string> $indexes
-     */
     private function collectPlanNodes(array $plan, array &$nodes, array &$indexes): void
     {
         $nodes[] = (string) $plan['Node Type'];
