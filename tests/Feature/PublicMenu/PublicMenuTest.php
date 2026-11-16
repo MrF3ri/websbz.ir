@@ -54,8 +54,25 @@ class PublicMenuTest extends TestCase
 
         $menu->update(['status' => MenuStatus::Published]);
 
-        $this->get(route('public.menu.show', [$business->slug, $menu->slug]))
-            ->assertOk()
+        $productQueries = [];
+
+        DB::listen(function (QueryExecuted $query) use (&$productQueries): void {
+            $sql = strtolower($query->sql);
+
+            if (str_contains($sql, 'products') && str_contains($sql, 'select')) {
+                $productQueries[] = $sql;
+            }
+        });
+
+        $response = $this->get(route('public.menu.show', [$business->slug, $menu->slug]));
+
+        $this->assertNotEmpty($productQueries);
+
+        foreach ($productQueries as $sql) {
+            $this->assertStringContainsString('products"."menu_id', $sql);
+        }
+
+        $response->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('PublicMenu/Show', false)
                 ->where('business.name', $business->name)
