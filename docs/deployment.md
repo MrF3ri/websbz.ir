@@ -1,20 +1,35 @@
 # Production deployment runbook
 
-This document describes a production topology. It does not mean that a production server has been provisioned or deployed.
+Last reconciled: 2026-11-17.
 
-## Architecture
+> **Existing production warning:** `websbz.ir` is already deployed on the owner's Ubuntu VPS. The first-deployment procedure below is retained as historical reference for a genuinely new environment. Do not run it against the existing production host as a setup checklist. In particular, do not regenerate `APP_KEY`, recreate the database, rerun seeders, remove volumes, or restart unrelated legacy services. For the existing host, use the operational and release guidance below and take verified backups before any schema or deployment change.
 
-- `Dockerfile.production` builds a PHP 8.5 FPM image with production Composer dependencies and Vite assets built by Node 22.
-- Nginx serves the built public assets and forwards PHP requests to the private FPM service.
-- PostgreSQL is reachable only on the private backend network.
-- Queue worker and scheduler run as separate containers.
-- `storage_data` persists private payment receipts and Laravel runtime files.
-- `postgres_data` persists database state.
-- The web container binds to `127.0.0.1:8080` by default. Put a TLS reverse proxy in front of it; do not publish PHP-FPM or PostgreSQL ports.
+This runbook distinguishes the already-provisioned production environment from the remaining operational work. It does not contain production credentials.
 
-## First deployment
+## Current production architecture
 
-1. Check out a reviewed release tag on the server. Do not deploy an unreviewed feature branch.
+The deployed topology recorded during the owner-assisted setup is:
+
+- Public domain: `websbz.ir` and `www.websbz.ir`.
+- Caddy runs on the VPS as the public TLS reverse proxy and forwards requests to `http://127.0.0.1:8080`.
+- The production Compose stack contains the Laravel/PHP-FPM application, Nginx, PostgreSQL, queue worker, scheduler, and a one-shot asset-copy service.
+- Nginx serves public assets and forwards PHP requests to the private FPM service.
+- PostgreSQL is reachable through the private Compose backend network, not as a public service.
+- The web container is published on host loopback at `127.0.0.1:8080:80`.
+- Persistent Compose volumes hold PostgreSQL state and application storage, including private payment receipts.
+- The production app uses `APP_ENV=production`, `APP_DEBUG=false`, HTTPS `APP_URL`, and secure session-cookie settings.
+- SMTP uses Resend (`smtp.resend.com`); the owner confirmed domain verification and a successful delivery test. Keep API keys and SMTP credentials only in the protected production environment file; never place them in this runbook or Git.
+- Initial production migrations and plan catalog seeding were completed during provisioning.
+
+The host also runs legacy services unrelated to this application. They are explicitly out of scope: do not stop, recreate, or reconfigure them during websbz deployment work.
+
+The architecture above reflects the setup session. Before operational changes, verify the live service state using the commands below without printing environment values or secrets.
+
+## First deployment — historical procedure only
+
+Use this section only when provisioning a genuinely new, empty production environment. It is not the procedure for the already-running `websbz.ir` host. Never repeat these steps against the existing production database or volumes.
+
+1. Check out a reviewed release tag on the new server. Do not deploy an unreviewed feature branch.
 2. Create the production environment file:
 
    ```sh
@@ -69,7 +84,9 @@ This document describes a production topology. It does not mean that a productio
 - A persistent, backed-up `storage_data` volume. Payment receipts are private files and must not be moved to `public` storage.
 - Host firewall rules that expose only the TLS reverse proxy. PostgreSQL and PHP-FPM must not be publicly reachable.
 
-## Operations
+## Existing production operations
+
+Start with read-only checks. These commands inspect the application stack and do not expose environment values:
 
 Useful commands:
 
@@ -101,6 +118,18 @@ The Compose volume named `websbz-production_storage_data` contains private recei
 
 For an update, deploy an immutable image tag, run reviewed additive migrations, refresh the `assets` volume from that image, and then restart app/web/worker/scheduler. Take a database and storage backup before migrations. Rollback must account for database migration compatibility; reverting the image alone is not sufficient for destructive schema changes.
 
-## Not yet performed
+## Remaining production verification
 
-No server credentials, DNS zone, TLS certificate, SMTP account, or production database were provided in this project session. Therefore no production infrastructure has been created, no production migration has been run, and no customer data has been touched.
+The following items are not yet evidenced as completed and must be closed before declaring production readiness:
+
+- Verify the actual runtime configuration and trusted-proxy settings on the VPS without printing `.env.production`, API keys, passwords, or `docker compose config` output that may interpolate secrets.
+- Verify the host's externally exposed ports and confirm PostgreSQL/PHP-FPM are not publicly reachable. Do not change firewall rules or Docker networking without a separate reviewed plan because the host also runs legacy services.
+- Confirm the exact Compose volume names and contents before writing backup commands for this host.
+- Back up PostgreSQL and private application storage together, store backups outside the application container/volume, and protect them as sensitive data.
+- Restore both backups into an isolated environment and verify database/storage consistency. A backup that has not been restored successfully is not an accepted recovery procedure.
+- Complete a release procedure using immutable image tags, reviewed migrations, pre-deployment backups, and an explicit rollback plan.
+- Add uptime/error monitoring and document alert ownership.
+
+SMTP delivery and domain verification were confirmed by the owner during setup. Repeat a functional email-verification test after confirming the production queue worker is using the current configuration.
+
+Do not run destructive QA, `migrate:fresh`, database resets, broad seeders, or volume deletion against production. Do not restart or modify unrelated legacy services as part of this work.
