@@ -1,21 +1,21 @@
 <?php
 
-use App\Modules\Business\Http\Controllers\BusinessOnboardingController;
-use App\Modules\Business\Http\Controllers\BusinessSettingsController;
-use App\Modules\Catalog\Http\Controllers\CatalogController;
-use App\Modules\Category\Http\Controllers\CategoryController;
-use App\Modules\Menu\Http\Controllers\MenuPublicationController;
-use App\Modules\Platform\Http\Controllers\AdminBusinessController;
-use App\Modules\Platform\Http\Controllers\AdminDashboardController;
-use App\Modules\Platform\Http\Controllers\AdminPaymentController;
-use App\Modules\Platform\Http\Controllers\AdminSubscriptionController;
-use App\Modules\Platform\Http\Controllers\PlatformSettingsController;
-use App\Modules\Product\Http\Controllers\ProductController;
-use App\Modules\PublicMenu\Http\Controllers\PublicMenuController;
-use App\Modules\Subscription\Http\Controllers\BillingController;
-use App\Modules\Subscription\Http\Controllers\ManualPaymentController;
-use App\Modules\Tenancy\Http\Middleware\TenantMiddleware;
-use Illuminate\Support\Facades\Route;
+use App\\Modules\\Business\\Http\\Controllers\\BusinessOnboardingController;
+use App\\Modules\\Business\\Http\\Controllers\\BusinessSettingsController;
+use App\\Modules\\Catalog\\Http\\Controllers\\CatalogController;
+use App\\Modules\\Category\\Http\\Controllers\\CategoryController;
+use App\\Modules\\Menu\\Http\\Controllers\\MenuPublicationController;
+use App\\Modules\\Platform\\Http\\Controllers\\AdminBusinessController;
+use App\\Modules\\Platform\\Http\\Controllers\\AdminDashboardController;
+use App\\Modules\\Platform\\Http\\Controllers\\AdminPaymentController;
+use App\\Modules\\Platform\\Http\\Controllers\\AdminSubscriptionController;
+use App\\Modules\\Platform\\Http\\Controllers\\PlatformSettingsController;
+use App\\Modules\\Product\\Http\\Controllers\\ProductController;
+use App\\Modules\\PublicMenu\\Http\\Controllers\\PublicMenuController;
+use App\\Modules\\Subscription\\Http\\Controllers\\BillingController;
+use App\\Modules\\Subscription\\Http\\Controllers\\ManualPaymentController;
+use App\\Modules\\Tenancy\\Http\\Middleware\\TenantMiddleware;
+use Illuminate\\Support\\Facades\\Route;
 
 Route::inertia('/', 'Welcome')->name('home');
 
@@ -28,6 +28,8 @@ Route::middleware(['auth', 'verified', 'can:platform-admin'])
     ->group(function () {
         Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
         Route::get('/businesses', [AdminBusinessController::class, 'index'])->name('businesses.index');
+        Route::get('/businesses/{businessPublicId}', [AdminBusinessController::class, 'show'])
+            ->name('businesses.show');
         Route::get('/subscriptions', [AdminSubscriptionController::class, 'index'])->name('subscriptions.index');
         Route::get('/payments', [AdminPaymentController::class, 'index'])->name('payments.index');
         Route::get('/payments/{payment}/receipt', [AdminPaymentController::class, 'receipt'])->name('payments.receipt');

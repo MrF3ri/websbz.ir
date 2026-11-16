@@ -1,15 +1,17 @@
 <?php
 
-namespace App\Modules\Platform\Http\Controllers;
+namespace App\\Modules\\Platform\\Http\\Controllers;
 
-use App\Modules\Business\Models\Business;
-use App\Modules\Subscription\Models\Subscription;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
-use Inertia\Inertia;
-use Inertia\Response;
+use App\\Modules\\Business\\Models\\Business;
+use App\\Modules\\Subscription\\Models\\Payment;
+use App\\Modules\\Subscription\\Models\\Subscription;
+use App\\Modules\\Subscription\\Models\\SubscriptionEvent;
+use Illuminate\\Database\\Eloquent\\Builder;
+use Illuminate\\Database\\Eloquent\\Relations\\HasMany;
+use Illuminate\\Http\\Request;
+use Illuminate\\Validation\\Rule;
+use Inertia\\Inertia;
+use Inertia\\Response;
 
 class AdminBusinessController
 {
@@ -58,8 +60,88 @@ class AdminBusinessController
         ]);
     }
 
+    public function show(string $businessPublicId): Response
+    {
+        $business = Business::query()
+            ->where('public_id', $businessPublicId)
+            ->firstOrFail();
+
+        $members = $business->members()
+            ->with('user:id,name,email')
+            ->orderBy('id')
+            ->get()
+            ->map(fn ($member): array => [
+                'name' => $member->user->name,
+                'email' => $member->user->email,
+                'role' => $member->role->value,
+                'joined_at' => $member->created_at?->toISOString(),
+            ]);
+
+        $owner = $members->firstWhere('role', 'owner');
+
+        $subscription = $business->subscriptions()
+            ->with('plan')
+            ->latest('id')
+            ->first();
+
+        $payments = Payment::query()
+            ->with(['targetPlan', 'reviewer:id,name'])
+            ->whereHas('subscription', fn (Builder $query) => $query->where('business_id', $business->getKey()))
+            ->latest('id')
+            ->limit(10)
+            ->get()
+            ->map(fn (Payment $payment): array => [
+                'id' => $payment->getKey(),
+                'plan' => $payment->targetPlan->name,
+                'amount' => $payment->amount,
+                'status' => $payment->status->value,
+                'bank_tracking_number' => $payment->bank_tracking_number,
+                'submitted_at' => $payment->submitted_at?->toISOString(),
+                'reviewed_at' => $payment->reviewed_at?->toISOString(),
+                'paid_at' => $payment->paid_at?->toISOString(),
+                'reviewer_name' => $payment->reviewer?->name,
+                'rejection_reason' => $payment->rejection_reason,
+                'receipt_url' => $payment->receipt_path !== null
+                    ? route('admin.payments.receipt', $payment)
+                    : null,
+            ]);
+
+        $events = SubscriptionEvent::query()
+            ->with('subscription.plan')
+            ->whereHas('subscription', fn (Builder $query) => $query->where('business_id', $business->getKey()))
+            ->latest('id')
+            ->limit(10)
+            ->get()
+            ->map(fn (SubscriptionEvent $event): array => [
+                'id' => $event->getKey(),
+                'type' => $event->event_type->value,
+                'plan' => $event->subscription->plan->name,
+                'created_at' => $event->created_at?->toISOString(),
+            ]);
+
+        return Inertia::render('Admin/Businesses/Show', [
+            'business' => [
+                'public_id' => $business->public_id,
+                'name' => $business->name,
+                'slug' => $business->slug,
+                'status' => $business->status->value,
+                'phone' => $business->phone,
+                'email' => $business->email,
+                'address' => $business->address,
+                'city' => $business->city,
+                'postal_code' => $business->postal_code,
+                'created_at' => $business->created_at?->toISOString(),
+            ],
+            'owner' => $owner,
+            'members' => $members,
+            'subscription' => $this->subscriptionSummary($subscription),
+            'payments' => $payments,
+            'events' => $events,
+        ]);
+    }
+
     /**
-     * @return array{status: string, plan: string, ends_at: string|null}|null
+     * @return array{status: string, plan: string, ends_at: string|null, trial_ends_at: string|null}|null
      */
     private function subscriptionSummary(?Subscription $subscription): ?array
     {
@@ -71,6 +153,7 @@ class AdminBusinessController
             'status' => $subscription->status->value,
             'plan' => $subscription->plan->name,
             'ends_at' => $subscription->current_period_ends_at?->toISOString(),
+            'trial_ends_at' => $subscription->trial_ends_at?->toISOString(),
         ];
     }
 }
