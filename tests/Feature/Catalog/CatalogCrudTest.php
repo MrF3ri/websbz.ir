@@ -3,6 +3,7 @@
 namespace Tests\Feature\Catalog;
 
 use App\Modules\Product\Enums\ProductStatus;
+use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -248,22 +249,21 @@ class CatalogCrudTest extends TestCase
         $this->createCatalogProduct($menu, $firstCategory, 'Second product');
         $this->createCatalogProduct($menu, $secondCategory, 'Third product');
 
-        DB::enableQueryLog();
-        DB::flushQueryLog();
+        $productAggregateQueries = [];
+
+        DB::listen(function (QueryExecuted $query) use (&$productAggregateQueries): void {
+            $sql = strtolower($query->sql);
+
+            if (str_contains($sql, 'products') && str_contains($sql, 'count(')) {
+                $productAggregateQueries[] = $sql;
+            }
+        });
 
         $response = $this->actingAs($user)->get(route('catalog.index'));
-        $queries = DB::getQueryLog();
 
-        DB::disableQueryLog();
-
-        $productPaginatorCountQueries = collect($queries)
-            ->filter(fn (array $query): bool => str_contains(
-                strtolower($query['query']),
-                'count(*) as aggregate',
-            ) && str_contains(strtolower($query['query']), '"products"'))
-            ->count();
-
-        $this->assertSame(1, $productPaginatorCountQueries);
+        // One correlated category products_count query and one paginator COUNT;
+        // there must not be a third standalone usage COUNT query.
+        $this->assertCount(2, $productAggregateQueries);
 
         $response
             ->assertOk()
