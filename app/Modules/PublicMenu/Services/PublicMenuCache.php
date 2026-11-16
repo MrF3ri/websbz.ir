@@ -10,12 +10,6 @@ class PublicMenuCache
 {
     private const TTL_MINUTES = 5;
 
-    /**
-     * @template TValue
-     *
-     * @param Closure(): TValue $resolver
-     * @return TValue
-     */
     public function remember(Menu $menu, Closure $resolver): mixed
     {
         return Cache::remember(
