@@ -185,14 +185,14 @@ class PostgresCatalogQueryPlanTest extends TestCase
 
     /**
      * @return array{
-     *     node_type: string,
-     *     execution_time_ms: float,
-     *     planning_time_ms: float,
-     *     actual_rows: int,
-     *     shared_hit_blocks: int,
+     *     node_type         : string,
+     *     execution_time_ms : float,
+     *     planning_time_ms  : float,
+     *     actual_rows       : int,
+     *     shared_hit_blocks : int,
      *     shared_read_blocks: int,
-     *     indexes: list<string>,
-     *     node_types: list<string>
+     *     indexes           : list<string>,
+     *     node_types        : list<string>
      * }
      */
     private function explain(Builder $query): array
