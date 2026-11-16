@@ -103,6 +103,7 @@ class ReviewManualPaymentAction
                 $subscription->status === SubscriptionStatus::Trialing
                 && $subscription->trial_ends_at !== null
                 && $subscription->trial_ends_at->greaterThan($now)
+                && $subscription->current_period_starts_at !== null
             ) || (
                 $subscription->status === SubscriptionStatus::Active
                 && $subscription->current_period_starts_at !== null
@@ -110,7 +111,7 @@ class ReviewManualPaymentAction
                 && $subscription->current_period_ends_at !== null
                 && $subscription->current_period_ends_at->greaterThan($now)
             );
-            $accessPeriodStartsAt = $preserveCurrentAccessPeriod
+            $accessPeriodStartsAt = $preserveCurrentAccessPeriod && $subscription->current_period_starts_at !== null
                 ? $subscription->current_period_starts_at
                 : $periodBase;
             $periodEndsAt = $periodBase->copy()->addMonth();
