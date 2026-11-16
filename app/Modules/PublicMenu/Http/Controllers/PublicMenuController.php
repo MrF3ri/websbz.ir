@@ -54,7 +54,7 @@ class PublicMenuController
             return [
                 'business' => [
                     'name' => $business->name,
-                    'slug' => $menu->business->slug,
+                    'slug' => $business->slug,
                 ],
                 'menu' => [
                     'title' => $menu->title,
