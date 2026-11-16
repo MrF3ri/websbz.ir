@@ -5,6 +5,7 @@ namespace Tests\Feature\Performance;
 use App\Modules\Business\Models\Business;
 use App\Modules\Menu\Enums\MenuStatus;
 use App\Modules\Menu\Models\Menu;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -194,7 +195,7 @@ class PostgresCatalogQueryPlanTest extends TestCase
      *     node_types: list<string>
      * }
      */
-    private function explain(\Illuminate\Database\Query\Builder $query): array
+    private function explain(Builder $query): array
     {
         $row = DB::select(
             'EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) '.$query->toSql(),
