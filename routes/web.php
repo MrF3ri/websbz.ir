@@ -8,6 +8,7 @@ use App\Modules\Menu\Http\Controllers\MenuPublicationController;
 use App\Modules\Platform\Http\Controllers\AdminBusinessController;
 use App\Modules\Platform\Http\Controllers\AdminDashboardController;
 use App\Modules\Platform\Http\Controllers\AdminPaymentController;
+use App\Modules\Platform\Http\Controllers\AdminSubscriptionController;
 use App\Modules\Platform\Http\Controllers\PlatformSettingsController;
 use App\Modules\Product\Http\Controllers\ProductController;
 use App\Modules\PublicMenu\Http\Controllers\PublicMenuController;
@@ -27,6 +28,7 @@ Route::middleware(['auth', 'verified', 'can:platform-admin'])
     ->group(function () {
         Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
         Route::get('/businesses', [AdminBusinessController::class, 'index'])->name('businesses.index');
+        Route::get('/subscriptions', [AdminSubscriptionController::class, 'index'])->name('subscriptions.index');
         Route::get('/payments', [AdminPaymentController::class, 'index'])->name('payments.index');
         Route::get('/payments/{payment}/receipt', [AdminPaymentController::class, 'receipt'])->name('payments.receipt');
         Route::post('/payments/{payment}/approve', [AdminPaymentController::class, 'approve'])->name('payments.approve');
