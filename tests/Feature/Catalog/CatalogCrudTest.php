@@ -237,6 +237,7 @@ class CatalogCrudTest extends TestCase
             $secondProduct->fresh()->sort_order,
         );
     }
+
     public function test_catalog_usage_counts_reuse_loaded_category_aggregates(): void
     {
         [$user, , $menu] = $this->createCatalogTenant();
@@ -270,5 +271,4 @@ class CatalogCrudTest extends TestCase
                 ->where('usage.categories', 2)
                 ->where('usage.products', 3));
     }
-
 }
