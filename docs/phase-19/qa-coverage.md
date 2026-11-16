@@ -14,6 +14,17 @@
 
 The scenario runs under both configured database test jobs. PostgreSQL remains mandatory for concurrency and database-specific guarantees.
 
+## Automated approval scenario added
+
+`ManualPaymentApprovalFlowTest` exercises the positive HTTP path:
+
+1. A business owner submits a receipt for the Professional plan.
+2. A Platform Admin approves the payment through the admin HTTP endpoint.
+3. The payment becomes `approved`, the subscription becomes active on the selected plan, and the paid period extends from the end of the still-valid trial.
+4. The billing page reflects the approved plan and payment.
+5. Both the owning tenant and Platform Admin can download the private receipt; another tenant receives 404.
+6. The audit record attributes the action to the admin and excludes the bank tracking number and receipt path.
+
 ## Remaining QA boundaries
 
 - This scenario does not replace the owner-controlled manual acceptance on a real deployment.
