@@ -9,9 +9,7 @@ use Illuminate\Support\Facades\DB;
 
 class PlatformSettingsService
 {
-    /**
-     * @return array{bank_name: string, card_number: string, card_holder: string}
-     */
+    /** @return array{bank_name: string, card_number: string, card_holder: string} */
     public function cardDetails(): array
     {
         $values = PlatformSetting::query()
@@ -25,9 +23,7 @@ class PlatformSettingsService
         ];
     }
 
-    /**
-     * @param  array{bank_name: string, card_number: string, card_holder: string}  $details
-     */
+    /** @param array{bank_name: string, card_number: string, card_holder: string} $details */
     public function updateCardDetails(array $details, User $actor): void
     {
         DB::transaction(function () use ($details, $actor): void {
@@ -63,10 +59,7 @@ class PlatformSettingsService
             && $details['card_holder'] !== '';
     }
 
-    /**
-     * @param  array{bank_name: string, card_number: string, card_holder: string}  $details
-     * @return array{bank_name: string, card_number_last4: string|null, card_holder: string}
-     */
+    /** @return array{bank_name: string, card_number_last4: string|null, card_holder: string} */
     private function auditSnapshot(array $details): array
     {
         $number = $details['card_number'];
