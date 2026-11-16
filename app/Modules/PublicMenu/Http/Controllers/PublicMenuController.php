@@ -30,7 +30,7 @@ class PublicMenuController
             ->where('status', MenuStatus::Published)
             ->firstOrFail();
 
-        $publicMenu = $this->publicMenuCache->remember($menu, function () use ($menu): array {
+        $publicMenu = $this->publicMenuCache->remember($menu, function () use ($menu, $business): array {
             $categories = $menu->categories()
                 ->where('is_active', true)
                 ->whereHas('products', function ($query) use ($menu): void {
@@ -53,7 +53,7 @@ class PublicMenuController
 
             return [
                 'business' => [
-                    'name' => $menu->business->name,
+                    'name' => $business->name,
                     'slug' => $menu->business->slug,
                 ],
                 'menu' => [
