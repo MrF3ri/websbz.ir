@@ -26,13 +26,14 @@ and node types.
   predicate. The category IDs are already scoped to one menu; the explicit
   predicate is measured as a defensive selectivity comparison.
 - Catalog product listing ordered by category order, product order, and ID.
+- Catalog substring search using the production query shape (`LOWER(name) LIKE '%term%'`), scoped to the selected menu and bounded to one page.
 - Category product-count subqueries with and without an explicit `menu_id`
   predicate.
 
 The query plans are observations, not performance assertions. Wall-clock
 thresholds are intentionally not asserted in CI because shared runner load and
 cache state make those values noisy. Compare plans, buffers, rows, and selected
-indexes before proposing schema changes.
+indexes before proposing schema changes. The search plan is included to determine whether the current substring search needs a PostgreSQL-specific index or a different search strategy; no index is assumed in advance.
 
 ## Run
 
