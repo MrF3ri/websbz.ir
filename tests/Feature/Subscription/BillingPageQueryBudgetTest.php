@@ -48,7 +48,7 @@ class BillingPageQueryBudgetTest extends TestCase
             ->assertInertia(fn (Assert $page) => $page
                 ->where('hasPendingReview', true)
                 ->has('payments', 10)
-                ->where('payments.0.bank_tracking_number', 'BILLING-QUERY-1'));
+                ->where('payments.0.bank_tracking_number', 'BILLING-QUERY-12'));
 
         // One correlated EXISTS in the subscription query and one bounded query
         // for the latest ten payments; no unbounded eager load or second history read.
