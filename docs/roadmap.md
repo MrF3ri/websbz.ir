@@ -64,7 +64,7 @@ These are intentionally not blockers for the first usable MVP unless the busines
 ## Platform Admin dashboard
 
 - Existing admin capabilities: manual payment review and platform card settings.
-- PR #39 adds the first real `/admin` overview with live business, active/trial subscription, pending payment, approved payment totals, and recent payment data. The current branch adds a searchable and filterable paginated business directory with each business's latest subscription summary. These are the first presentable dashboard slices, not the complete administrative console.
+- PR #39 adds the first real `/admin` overview with live business, active/trial subscription, pending payment, approved payment totals, and recent payment data. PR #40 adds a searchable and filterable paginated business directory with each business's latest subscription summary. The current branch adds a searchable, filterable subscription directory. These are the first presentable dashboard slices, not the complete administrative console.
 - Next dashboard slices: searchable/paginated business directory and business detail, subscription lifecycle view/actions, payment history and filters, operational/audit event feed, and platform configuration health. These remain gated by their own authorization and regression tests.
 
 ## Remaining release gates
