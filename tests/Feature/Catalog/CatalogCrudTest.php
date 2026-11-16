@@ -4,6 +4,7 @@ namespace Tests\Feature\Catalog;
 
 use App\Modules\Product\Enums\ProductStatus;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\Concerns\InteractsWithCatalog;
 use Tests\TestCase;
