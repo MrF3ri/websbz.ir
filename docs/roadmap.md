@@ -74,7 +74,7 @@ These are intentionally not blockers for the first usable MVP unless the busines
 
 ## Remaining release gates
 
-- **Phase 19 — QA:** run end-to-end acceptance tests on a clean PostgreSQL deployment, including payment receipt privacy and admin approval.
+- **Phase 19 — QA:** run end-to-end acceptance tests on a clean PostgreSQL deployment, including payment receipt privacy and admin approval. The current branch adds an HTTP-level submission-to-admin-rejection scenario that verifies the trial subscription and its period remain unchanged, the receipt remains private to the tenant, and the audit record excludes the tracking number, rejection reason, and receipt path. This is one covered scenario, not completion of Phase 19.
 - **Phase 20 — Performance:** PostgreSQL query-plan benchmark and explicit menu-scope optimization are merged (PR #35). Public-menu response caching with write-path invalidation is merged (PR #36). Billing history has a bounded query budget (PR #37). Catalog substring-search plan measurement is merged (PR #38); the observed CI sample did not justify adding a trigram index. Representative-load validation, image delivery, queue/connection review, and slow-query monitoring remain.
 - **Phase 21 — Security:** complete dependency review, authorization review, upload validation review, rate limits, and production secret review.
 - **Phase 22 — Production infrastructure:** validate image build and Compose config, provision host, DNS, TLS, SMTP, persistent volumes, and backups.
