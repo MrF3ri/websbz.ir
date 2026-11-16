@@ -48,7 +48,7 @@ class CategoryController
         $category = $this->resolveCategory($menu, $categoryPublicId);
         Gate::authorize('update', $category);
 
-        $category->update($request->validated());
+        $category->update($request->validated());\n        $publicMenuCache->forget($menu);
 
         return back()->with('success', 'دسته‌بندی با موفقیت ویرایش شد.');
     }
