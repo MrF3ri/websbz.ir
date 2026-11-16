@@ -1,16 +1,16 @@
 <?php
 
-namespace Tests\\Feature\\Platform;
+namespace Tests\Feature\Platform;
 
-use App\\Enums\\BusinessRole;
-use App\\Models\\User;
-use App\\Modules\\Subscription\\Enums\\PaymentStatus;
-use App\\Modules\\Subscription\\Enums\\SubscriptionEventType;
-use App\\Modules\\Subscription\\Models\\Plan;
-use Illuminate\\Foundation\\Testing\\RefreshDatabase;
-use Inertia\\Testing\\AssertableInertia as Assert;
-use Tests\\Concerns\\InteractsWithBusinesses;
-use Tests\\TestCase;
+use App\Enums\BusinessRole;
+use App\Models\User;
+use App\Modules\Subscription\Enums\PaymentStatus;
+use App\Modules\Subscription\Enums\SubscriptionEventType;
+use App\Modules\Subscription\Models\Plan;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Inertia\Testing\AssertableInertia as Assert;
+use Tests\Concerns\InteractsWithBusinesses;
+use Tests\TestCase;
 
 class AdminBusinessDetailsTest extends TestCase
 {

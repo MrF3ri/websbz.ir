@@ -1,17 +1,17 @@
 <?php
 
-namespace App\\Modules\\Platform\\Http\\Controllers;
+namespace App\Modules\Platform\Http\Controllers;
 
-use App\\Modules\\Business\\Models\\Business;
-use App\\Modules\\Subscription\\Models\\Payment;
-use App\\Modules\\Subscription\\Models\\Subscription;
-use App\\Modules\\Subscription\\Models\\SubscriptionEvent;
-use Illuminate\\Database\\Eloquent\\Builder;
-use Illuminate\\Database\\Eloquent\\Relations\\HasMany;
-use Illuminate\\Http\\Request;
-use Illuminate\\Validation\\Rule;
-use Inertia\\Inertia;
-use Inertia\\Response;
+use App\Modules\Business\Models\Business;
+use App\Modules\Subscription\Models\Payment;
+use App\Modules\Subscription\Models\Subscription;
+use App\Modules\Subscription\Models\SubscriptionEvent;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class AdminBusinessController
 {
