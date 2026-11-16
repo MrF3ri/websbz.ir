@@ -26,13 +26,14 @@ and node types.
   predicate. The category IDs are already scoped to one menu; the explicit
   predicate is measured as a defensive selectivity comparison.
 - Catalog product listing ordered by category order, product order, and ID.
+- Catalog substring search using the production query shape (`LOWER(name) LIKE '%term%'`), scoped to the selected menu and bounded to one page.
 - Category product-count subqueries with and without an explicit `menu_id`
   predicate.
 
 The query plans are observations, not performance assertions. Wall-clock
 thresholds are intentionally not asserted in CI because shared runner load and
 cache state make those values noisy. Compare plans, buffers, rows, and selected
-indexes before proposing schema changes.
+indexes before proposing schema changes. The search plan is included to determine whether the current substring search needs a PostgreSQL-specific index or a different search strategy; no index is assumed in advance.
 
 ## Run
 
@@ -103,6 +104,22 @@ A feature regression creates twelve payment rows and asserts:
   `EXISTS` and the bounded latest-ten query.
 - The page still reports a pending review when the newest payment is pending.
 - Only ten recent payment records are returned.
+
+
+## Catalog substring-search baseline (PostgreSQL 17 CI)
+
+On the 60,000-product synthetic dataset, the menu-scoped search query
+(`LOWER(name) LIKE '%product 12%'`, category ordering, limit 20) completed in
+0.766 ms in the warm-cache CI run. PostgreSQL returned 20 rows, recorded 415
+shared buffer hits and no shared reads. The plan used the existing
+`products_menu_name_idx` for the menu-scoped scan and the category key index
+for category ordering; it did not require a new trigram index for this measured
+workload.
+
+This is one CI sample with 3,000 products in the target menu, not a production
+latency guarantee. Revisit trigram/full-text search only if production query
+monitoring shows substring search becoming a material bottleneck at larger
+per-menu cardinalities.
 
 ## Safety
 

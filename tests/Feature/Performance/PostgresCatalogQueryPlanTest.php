@@ -135,6 +135,19 @@ class PostgresCatalogQueryPlanTest extends TestCase
             ->orderBy('products.sort_order')
             ->orderBy('products.id');
 
+        $catalogSearch = DB::table('products')
+            ->where('menu_id', $menuId)
+            ->whereRaw('LOWER(name) LIKE ?', ['%product 12%'])
+            ->orderBy(
+                DB::table('categories')
+                    ->select('sort_order')
+                    ->whereColumn('categories.id', 'products.category_id')
+                    ->limit(1),
+            )
+            ->orderBy('products.sort_order')
+            ->orderBy('products.id')
+            ->limit(20);
+
         $catalogCountsWithoutMenuScope = DB::table('categories')
             ->where('categories.menu_id', $menuId)
             ->select('categories.id')
@@ -161,6 +174,7 @@ class PostgresCatalogQueryPlanTest extends TestCase
             'public_products_without_menu_scope' => $this->explain($publicProductsWithoutMenuScope),
             'public_products_with_menu_scope' => $this->explain($publicProductsWithMenuScope),
             'catalog_products' => $this->explain($catalogProducts),
+            'catalog_search' => $this->explain($catalogSearch),
             'catalog_counts_without_menu_scope' => $this->explain($catalogCountsWithoutMenuScope),
             'catalog_counts_with_menu_scope' => $this->explain($catalogCountsWithMenuScope),
         ];
