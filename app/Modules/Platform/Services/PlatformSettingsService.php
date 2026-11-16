@@ -1,11 +1,11 @@
 <?php
 
-namespace App\\Modules\\Platform\\Services;
+namespace App\Modules\Platform\Services;
 
-use App\\Models\\User;
-use App\\Modules\\Platform\\Models\\PlatformAuditLog;
-use App\\Modules\\Platform\\Models\\PlatformSetting;
-use Illuminate\\Support\\Facades\\DB;
+use App\Models\User;
+use App\Modules\Platform\Models\PlatformAuditLog;
+use App\Modules\Platform\Models\PlatformSetting;
+use Illuminate\Support\Facades\DB;
 
 class PlatformSettingsService
 {
