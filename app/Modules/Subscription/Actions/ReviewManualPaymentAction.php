@@ -99,6 +99,20 @@ class ReviewManualPaymentAction
                 }
             }
 
+            $preserveCurrentAccessPeriod = (
+                $subscription->status === SubscriptionStatus::Trialing
+                && $subscription->trial_ends_at !== null
+                && $subscription->trial_ends_at->greaterThan($now)
+            ) || (
+                $subscription->status === SubscriptionStatus::Active
+                && $subscription->current_period_starts_at !== null
+                && $subscription->current_period_starts_at->lessThanOrEqualTo($now)
+                && $subscription->current_period_ends_at !== null
+                && $subscription->current_period_ends_at->greaterThan($now)
+            );
+            $accessPeriodStartsAt = $preserveCurrentAccessPeriod
+                ? $subscription->current_period_starts_at
+                : $periodBase;
             $periodEndsAt = $periodBase->copy()->addMonth();
 
             $lockedPayment->update([
@@ -117,7 +131,7 @@ class ReviewManualPaymentAction
                     json_encode($featuresSnapshot, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES),
                 ),
                 'status' => SubscriptionStatus::Active,
-                'current_period_starts_at' => $periodBase,
+                'current_period_starts_at' => $accessPeriodStartsAt,
                 'current_period_ends_at' => $periodEndsAt,
             ])->saveQuietly();
 
@@ -129,7 +143,8 @@ class ReviewManualPaymentAction
                     'bank_tracking_number' => $lockedPayment->bank_tracking_number,
                     'target_plan_id' => $targetPlan->getKey(),
                     'paid_at' => $now->toISOString(),
-                    'current_period_starts_at' => $periodBase->toISOString(),
+                    'current_period_starts_at' => $accessPeriodStartsAt->toISOString(),
+                    'paid_period_starts_at' => $periodBase->toISOString(),
                     'current_period_ends_at' => $periodEndsAt->toISOString(),
                     'reviewed_by' => $reviewer->getKey(),
                 ],
