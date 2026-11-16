@@ -10,6 +10,7 @@ use App\Modules\Product\Actions\CreateProductAction;
 use App\Modules\Product\Http\Requests\ReorderProductsRequest;
 use App\Modules\Product\Http\Requests\SaveProductRequest;
 use App\Modules\Product\Models\Product;
+use App\Modules\PublicMenu\Services\PublicMenuCache;
 use App\Modules\Subscription\Services\EnforcementService;
 use App\Modules\Subscription\Services\EntitlementService;
 use App\Modules\Tenancy\Services\CurrentBusiness;
@@ -25,6 +26,7 @@ class ProductController
         CurrentBusiness $currentBusiness,
         EnsurePrimaryMenuAction $ensurePrimaryMenu,
         CreateProductAction $createProduct,
+        PublicMenuCache $publicMenuCache,
     ): RedirectResponse {
         $business = $this->currentBusiness($currentBusiness);
         Gate::authorize('create', Product::class);
@@ -33,6 +35,7 @@ class ProductController
         $category = $this->resolveCategory($menu, $data['category_public_id']);
 
         $createProduct->execute($business, $menu, $category, $data);
+        $publicMenuCache->forget($menu);
 
         return back()->with('success', 'محصول با موفقیت ایجاد شد.');
     }
@@ -42,6 +45,7 @@ class ProductController
         string $productPublicId,
         CurrentBusiness $currentBusiness,
         EnsurePrimaryMenuAction $ensurePrimaryMenu,
+        PublicMenuCache $publicMenuCache,
     ): RedirectResponse {
         $business = $this->currentBusiness($currentBusiness);
         $menu = $this->currentMenu($currentBusiness, $ensurePrimaryMenu);
@@ -68,6 +72,7 @@ class ProductController
                 'status' => $data['status'],
             ]);
         });
+        $publicMenuCache->forget($menu);
 
         return back()->with('success', 'محصول با موفقیت ویرایش شد.');
     }
@@ -76,6 +81,7 @@ class ProductController
         string $productPublicId,
         CurrentBusiness $currentBusiness,
         EnsurePrimaryMenuAction $ensurePrimaryMenu,
+        PublicMenuCache $publicMenuCache,
     ): RedirectResponse {
         $menu = $this->currentMenu($currentBusiness, $ensurePrimaryMenu);
         $product = $this->resolveProduct($menu, $productPublicId);
@@ -85,6 +91,7 @@ class ProductController
             $lockedMenu = Menu::query()->whereKey($menu->getKey())->lockForUpdate()->firstOrFail();
             $lockedMenu->products()->whereKey($product->getKey())->firstOrFail()->delete();
         });
+        $publicMenuCache->forget($menu);
 
         return back()->with('success', 'محصول حذف شد.');
     }
@@ -94,6 +101,7 @@ class ProductController
         string $categoryPublicId,
         CurrentBusiness $currentBusiness,
         EnsurePrimaryMenuAction $ensurePrimaryMenu,
+        PublicMenuCache $publicMenuCache,
     ): RedirectResponse {
         $menu = $this->currentMenu($currentBusiness, $ensurePrimaryMenu);
         $category = $this->resolveCategory($menu, $categoryPublicId);
@@ -119,6 +127,7 @@ class ProductController
                 ]);
             }
         });
+        $publicMenuCache->forget($menu);
 
         return back()->with('success', 'ترتیب محصولات ذخیره شد.');
     }
