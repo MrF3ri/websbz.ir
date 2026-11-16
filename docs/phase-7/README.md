@@ -23,16 +23,23 @@
 - PR #25 (`fix/phase-7-business-receipt-access`) is merged. Business owners can download receipts from billing history through an authenticated tenant-scoped route; ownership is verified through the payment's subscription and current business. A cross-tenant receipt-access regression test covers denial of another business's receipt.
 - PR #27 adds deterministic PostgreSQL multi-process concurrency tests for catalog quota enforcement, rollback, and independent-business locking. These tests do not cover payment lifecycle races.
 - PR #28 (`fix/phase-7-lifecycle-completion`) is merged. Manual approval and verified gateway callback paths classify same-plan periods as `renewed`, lower-priced target plans as `downgraded`, and higher-priced target plans as `upgraded`, with downgrade regression tests.
+- PR #29 persists trial and paid-period expiration transitions, emits idempotent lifecycle events, and schedules the expiration command.
+- PR #30 adds PostgreSQL multi-process tests for delayed and concurrent manual-payment review.
+- PR #31 adds PostgreSQL multi-process tests for concurrent successful callbacks and the expiration/callback row-lock race.
+- The current renewal-access audit adds coverage for early manual and gateway renewals so an approved payment does not interrupt an unexpired trial or paid period.
 
 ## Remaining Phase 7 work
 
-Review the complete Phase 7 acceptance criteria in `docs/master-spec.md` and close the gaps deliberately:
+Automated lifecycle implementation and PostgreSQL race coverage are in place. The remaining Phase 7 release gate is owner-controlled end-to-end acceptance of the approved manual provider:
 
-1. Implement and test the persisted expired-subscription transition and access behavior after trial/paid period end, preserving customer data.
-2. Review plan-change feature-snapshot and effective-access behavior against the Phase 7 acceptance criteria. PR #28 implements event classification and downgrade regression tests; confirm the full plan-change behavior rather than treating event classification alone as completion.
-3. Add PostgreSQL integration coverage for concurrent/delayed payment review and renewal edge cases; the catalog concurrency suite in PR #27 does not cover these payment scenarios.
-4. Verify the manual provider end-to-end through owner acceptance: submit receipt, review as Platform Admin, approve/reject, and confirm subscription access and period.
-5. Keep online gateway callbacks separate from the manual provider. Do not add or assume real gateway credentials.
+1. Configure the platform card details as Platform Admin.
+2. Submit a real transfer receipt from a Business owner account and confirm it appears as `pending_review`.
+3. Review the private receipt as Platform Admin; exercise both rejection and approval using separate payment submissions.
+4. Confirm rejection leaves the subscription and entitlements unchanged.
+5. Confirm approval activates the selected plan, preserves uninterrupted access, records the reviewer/event, and extends the paid period exactly as shown in the billing UI.
+6. Confirm the Business owner can download only their own receipt and cannot access another Business's receipt.
+
+Keep online gateway callbacks separate from the approved manual provider. Do not add or assume real gateway credentials. Do not mark Phase 7 complete until the owner acceptance above has passed.
 
 ## Important invariants
 
