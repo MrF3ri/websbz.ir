@@ -133,4 +133,20 @@ class ManualPaymentSubmissionTest extends TestCase
 
         $this->assertSame(1, Payment::query()->count());
     }
+
+    public function test_payment_submission_endpoint_is_rate_limited_to_five_attempts_per_minute(): void
+    {
+        $user = User::factory()->create(['email_verified_at' => now()]);
+        $this->createBusinessFor($user);
+
+        for ($attempt = 0; $attempt < 5; $attempt++) {
+            $this->actingAs($user)
+                ->post(route('billing.payments.store'), [])
+                ->assertRedirect();
+        }
+
+        $this->actingAs($user)
+            ->post(route('billing.payments.store'), [])
+            ->assertTooManyRequests();
+    }
 }

@@ -43,7 +43,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::inertia('dashboard', 'Dashboard')->name('dashboard');
 
         Route::get('/billing', [BillingController::class, 'index'])->name('billing.index');
-        Route::post('/billing/payments', [ManualPaymentController::class, 'store'])->name('billing.payments.store');
+        Route::post('/billing/payments', [ManualPaymentController::class, 'store'])
+            ->middleware('throttle:5,1')
+            ->name('billing.payments.store');
         Route::get('/billing/payments/{payment}/receipt', [ManualPaymentController::class, 'receipt'])
             ->name('billing.payments.receipt');
 
