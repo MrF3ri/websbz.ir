@@ -8,11 +8,13 @@
 - `Permissions-Policy` disables camera and microphone access because the current application has no browser capture workflow.
 - `Strict-Transport-Security: max-age=31536000` is emitted only when Laravel considers the request secure, including correctly trusted forwarded-protocol requests.
 - Middleware is global, so the application health endpoint receives the same baseline headers.
+- Production Nginx emits the same policy for dynamic and static responses. It hides duplicate upstream Laravel headers on PHP responses, and the static-asset location repeats the policy because Nginx does not inherit parent `add_header` directives when a location defines its own `add_header`.
+- CI validates the Nginx configuration with `nginx -t` before building the production image.
 
 ## Deliberate boundaries
 
 - No Content Security Policy is emitted yet. A safe CSP needs an explicit nonce/hash strategy compatible with the current Vite/Inertia asset pipeline and any required external origins; adding a guessed policy could break the application or create a false sense of protection.
-- HSTS does not include `includeSubDomains` or `preload`; those require a verified domain/subdomain HTTPS inventory and an explicit rollout decision.
+- HSTS does not include `includeSubDomains` or `preload`; those require a verified domain/subdomain HTTPS inventory and an explicit rollout decision. The Nginx production policy has been aligned to the same host-only max-age.
 - These headers complement, but do not replace, authorization, tenant isolation, output escaping, upload validation, and production HTTPS configuration.
 
 ## Verification
