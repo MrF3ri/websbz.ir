@@ -64,7 +64,7 @@ These are intentionally not blockers for the first usable MVP unless the busines
 ## Remaining release gates
 
 - **Phase 19 — QA:** run end-to-end acceptance tests on a clean PostgreSQL deployment, including payment receipt privacy and admin approval.
-- **Phase 20 — Performance:** PostgreSQL query-plan benchmark and explicit menu-scope optimization are merged (PR #35). Public-menu response caching with write-path invalidation is in progress (current PR); representative-load validation, image delivery, queue/connection review, and slow-query monitoring remain.
+- **Phase 20 — Performance:** PostgreSQL query-plan benchmark and explicit menu-scope optimization are merged (PR #35). Public-menu response caching with write-path invalidation is merged (PR #36). Billing history now has a bounded query budget and avoids loading the payment history twice (current PR); representative-load validation, image delivery, queue/connection review, and slow-query monitoring remain.
 - **Phase 21 — Security:** complete dependency review, authorization review, upload validation review, rate limits, and production secret review.
 - **Phase 22 — Production infrastructure:** validate image build and Compose config, provision host, DNS, TLS, SMTP, persistent volumes, and backups.
 - **Phase 23 — CI/CD:** publish immutable images, deploy with reviewed migrations, and verify rollback procedure.
