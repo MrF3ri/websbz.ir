@@ -30,7 +30,10 @@ function save(): void {
                 <a href="/admin" class="mb-3 inline-block text-sm text-primary underline underline-offset-4">بازگشت به داشبورد مدیریت</a>
                 <h1 class="text-2xl font-bold">تنظیمات پلتفرم</h1>
                 <p class="mt-2 text-sm text-muted-foreground">اطلاعات کارت مقصد پرداخت دستی اشتراک‌ها را مدیریت کنید.</p>
-                <a href="/admin/payments" class="mt-2 inline-block text-sm text-primary underline underline-offset-4">صف بررسی پرداخت‌ها</a>
+                <div class="mt-2 flex flex-wrap gap-4 text-sm">
+                    <a href="/admin/payments" class="text-primary underline underline-offset-4">صف بررسی پرداخت‌ها</a>
+                    <a href="/admin/audit-logs" class="text-primary underline underline-offset-4">گزارش ممیزی مدیریت</a>
+                </div>
             </header>
 
             <form class="grid gap-4 rounded-xl border border-border bg-card p-5" @submit.prevent="save">
