@@ -3,7 +3,9 @@
 namespace Tests\Feature\Catalog;
 
 use App\Modules\Product\Enums\ProductStatus;
+use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\Concerns\InteractsWithCatalog;
 use Tests\TestCase;
@@ -235,5 +237,38 @@ class CatalogCrudTest extends TestCase
             $firstProduct->fresh()->sort_order,
             $secondProduct->fresh()->sort_order,
         );
+    }
+
+    public function test_catalog_usage_counts_reuse_loaded_category_aggregates(): void
+    {
+        [$user, , $menu] = $this->createCatalogTenant();
+        $firstCategory = $this->createCatalogCategory($menu, 'First category');
+        $secondCategory = $this->createCatalogCategory($menu, 'Second category');
+
+        $this->createCatalogProduct($menu, $firstCategory, 'First product');
+        $this->createCatalogProduct($menu, $firstCategory, 'Second product');
+        $this->createCatalogProduct($menu, $secondCategory, 'Third product');
+
+        $productAggregateQueries = [];
+
+        DB::listen(function (QueryExecuted $query) use (&$productAggregateQueries): void {
+            $sql = strtolower($query->sql);
+
+            if (str_contains($sql, 'products') && str_contains($sql, 'count(')) {
+                $productAggregateQueries[] = $sql;
+            }
+        });
+
+        $response = $this->actingAs($user)->get(route('catalog.index'));
+
+        // One correlated category products_count query and one paginator COUNT;
+        // there must not be a third standalone usage COUNT query.
+        $this->assertCount(2, $productAggregateQueries);
+
+        $response
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('usage.categories', 2)
+                ->where('usage.products', 3));
     }
 }

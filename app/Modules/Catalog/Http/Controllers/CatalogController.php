@@ -106,8 +106,10 @@ class CatalogController
                 ];
             }),
             'usage' => [
-                'categories' => $menu->categories()->count(),
-                'products' => $menu->products()->count(),
+                // The categories and their product counts are already loaded above.
+                // Reuse them instead of issuing two additional COUNT queries.
+                'categories' => $categories->count(),
+                'products' => $categories->sum('products_count'),
             ],
             'filters' => [
                 'search' => $search,
