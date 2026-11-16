@@ -27,7 +27,7 @@ The MVP manual card-to-card path is implemented on `main`:
 
 Automated Phase 7 lifecycle work is implemented and covered on `main`: persisted trial/paid expiration and scheduler (PR #29), delayed/concurrent manual review tests (PR #30), and concurrent gateway callback plus expiration/callback race tests (PR #31). The current audit also addresses uninterrupted entitlements during early payment/renewal; see `docs/phase-7/README.md`.
 
-**Phase 7 remains open only for owner-controlled end-to-end acceptance of manual card-to-card billing.** The owner must submit a real receipt, review it as Platform Admin, exercise approval and rejection, and verify the resulting subscription access, dates, and private receipt boundaries. Do not mark Phase 7 complete before this acceptance passes.
+**Phase 7 — complete:** the owner has confirmed successful end-to-end manual card-to-card acceptance, including real receipt submission, Platform Admin review, approval/rejection, and verification of subscription access and dates. This owner-controlled acceptance is no longer a release blocker.
 
 Merged supporting changes: PR #25 (tenant-scoped receipt access), PR #27 (catalog concurrency tests), PR #28 (plan-change event classification), PR #29 (persisted expiration), PR #30 (manual-payment concurrency), and PR #31 (gateway callback/expiration races).
 
