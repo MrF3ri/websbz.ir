@@ -23,6 +23,7 @@ Route::middleware(['auth', 'verified', 'can:platform-admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
+        Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
         Route::get('/payments', [AdminPaymentController::class, 'index'])->name('payments.index');
         Route::get('/payments/{payment}/receipt', [AdminPaymentController::class, 'receipt'])->name('payments.receipt');
         Route::post('/payments/{payment}/approve', [AdminPaymentController::class, 'approve'])->name('payments.approve');
