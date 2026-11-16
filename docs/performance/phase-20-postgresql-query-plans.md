@@ -10,7 +10,7 @@ The feature test creates:
 
 - 20 businesses and 20 published menus
 - 400 categories (20 per menu)
-- 120,000 products (150 per category)
+- 60,000 products (150 per category)
 - A mix of draft/published products and available/unavailable products
 
 The test prints a `POSTGRES_CATALOG_QUERY_PLANS` JSON document containing the
@@ -53,7 +53,7 @@ plans or buffer statistics.
 ## Safety
 
 Do not point this test at the development or production database. The test uses
-Laravel's `RefreshDatabase` trait and inserts 120,000 synthetic products.
+Laravel's `RefreshDatabase` trait and inserts 60,000 synthetic products.
 The Docker script verifies that its configured test database name differs
 from the running application's development database before invoking Artisan.
 No production migration or index is introduced by this benchmark.
