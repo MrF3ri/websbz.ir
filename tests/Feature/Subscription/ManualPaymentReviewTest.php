@@ -132,7 +132,10 @@ class ManualPaymentReviewTest extends TestCase
                 $freshSubscription->current_period_ends_at?->timestamp,
             );
 
-            $expectedLimit = $payment->target_features_snapshot['max_products'];
+            $targetFeaturesSnapshot = $payment->target_features_snapshot;
+            self::assertIsArray($targetFeaturesSnapshot);
+            $expectedLimit = $targetFeaturesSnapshot['max_products'] ?? null;
+            self::assertIsInt($expectedLimit);
             $this->assertSame(
                 $expectedLimit,
                 (new EntitlementService($business))->getLimit('max_products'),
@@ -144,6 +147,7 @@ class ManualPaymentReviewTest extends TestCase
                 (new EntitlementService($business))->getLimit('max_products'),
             );
 
+            self::assertNotNull($freshSubscription->current_period_ends_at);
             Carbon::setTestNow($freshSubscription->current_period_ends_at);
             $this->assertNull((new EntitlementService($business))->getLimit('max_products'));
         } finally {
@@ -186,8 +190,12 @@ class ManualPaymentReviewTest extends TestCase
                 $periodEndsAt->copy()->addMonth()->timestamp,
                 $freshSubscription->current_period_ends_at?->timestamp,
             );
+            $targetFeaturesSnapshot = $payment->target_features_snapshot;
+            self::assertIsArray($targetFeaturesSnapshot);
+            $expectedLimit = $targetFeaturesSnapshot['max_products'] ?? null;
+            self::assertIsInt($expectedLimit);
             $this->assertSame(
-                $payment->target_features_snapshot['max_products'],
+                $expectedLimit,
                 (new EntitlementService($business))->getLimit('max_products'),
             );
         } finally {
