@@ -61,10 +61,16 @@ These are intentionally not blockers for the first usable MVP unless the busines
 - **Phase 17:** Social links, contact, and location integrations.
 - **Phase 18:** Expanded notifications, audit logs, and operational events.
 
+## Platform Admin dashboard
+
+- Existing admin capabilities: manual payment review and platform card settings.
+- The current branch adds the first real `/admin` overview with live business, active/trial subscription, pending payment, approved payment totals, and recent payment data. This is the first presentable dashboard slice, not the complete administrative console.
+- Next dashboard slices: searchable/paginated business directory and business detail, subscription lifecycle view/actions, payment history and filters, operational/audit event feed, and platform configuration health. These remain gated by their own authorization and regression tests.
+
 ## Remaining release gates
 
 - **Phase 19 — QA:** run end-to-end acceptance tests on a clean PostgreSQL deployment, including payment receipt privacy and admin approval.
-- **Phase 20 — Performance:** PostgreSQL query-plan benchmark and explicit menu-scope optimization are merged (PR #35). Public-menu response caching with write-path invalidation is merged (PR #36). Billing history now has a bounded query budget and avoids loading the payment history twice (current PR); representative-load validation, image delivery, queue/connection review, and slow-query monitoring remain.
+- **Phase 20 — Performance:** PostgreSQL query-plan benchmark and explicit menu-scope optimization are merged (PR #35). Public-menu response caching with write-path invalidation is merged (PR #36). Billing history has a bounded query budget (PR #37). Catalog substring-search plan measurement is merged (PR #38); the observed CI sample did not justify adding a trigram index. Representative-load validation, image delivery, queue/connection review, and slow-query monitoring remain.
 - **Phase 21 — Security:** complete dependency review, authorization review, upload validation review, rate limits, and production secret review.
 - **Phase 22 — Production infrastructure:** validate image build and Compose config, provision host, DNS, TLS, SMTP, persistent volumes, and backups.
 - **Phase 23 — CI/CD:** publish immutable images, deploy with reviewed migrations, and verify rollback procedure.
