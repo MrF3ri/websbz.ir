@@ -39,12 +39,17 @@ class AdminEventController
                 $term = '%'.mb_strtolower($search).'%';
 
                 $query->whereHas('subscription', function (Builder $subscriptionQuery) use ($term): void {
-                    $subscriptionQuery
-                        ->whereHas('business', fn (Builder $businessQuery) => $businessQuery
-                            ->whereRaw('LOWER(name) LIKE ?', [$term])
-                            ->orWhereRaw('LOWER(slug) LIKE ?', [$term]))
-                        ->orWhereHas('plan', fn (Builder $planQuery) => $planQuery
-                            ->whereRaw('LOWER(name) LIKE ?', [$term]));
+                    $subscriptionQuery->where(function (Builder $matchingQuery) use ($term): void {
+                        $matchingQuery
+                            ->whereHas('business', fn (Builder $businessQuery) => $businessQuery
+                                ->where(function (Builder $identityQuery) use ($term): void {
+                                    $identityQuery
+                                        ->whereRaw('LOWER(name) LIKE ?', [$term])
+                                        ->orWhereRaw('LOWER(slug) LIKE ?', [$term]);
+                                }))
+                            ->orWhereHas('plan', fn (Builder $planQuery) => $planQuery
+                                ->whereRaw('LOWER(name) LIKE ?', [$term]));
+                    });
                 });
             })
             ->orderByDesc('created_at')
