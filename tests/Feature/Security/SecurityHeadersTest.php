@@ -2,6 +2,9 @@
 
 namespace Tests\Feature\Security;
 
+use App\Http\Middleware\SecurityHeaders;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 
 class SecurityHeadersTest extends TestCase
@@ -18,19 +21,26 @@ class SecurityHeadersTest extends TestCase
         }
     }
 
-    public function test_hsts_is_only_sent_for_secure_requests(): void
+    public function test_hsts_is_only_added_to_secure_requests(): void
     {
-        $this->get(route('home'))
-            ->assertOk()
-            ->assertHeaderMissing('Strict-Transport-Security');
+        $middleware = new SecurityHeaders;
+        $httpResponse = new Response('OK');
+        $httpsResponse = new Response('OK');
 
-        $this->withServerVariables([
-            'HTTPS' => 'on',
-            'SERVER_PORT' => 443,
-            'REQUEST_SCHEME' => 'https',
-        ])
-            ->get(route('home'))
-            ->assertOk()
-            ->assertHeader('Strict-Transport-Security', 'max-age=31536000');
+        $middleware->handle(
+            Request::create('http://example.test/'),
+            fn (): Response => $httpResponse,
+        );
+
+        $middleware->handle(
+            Request::create('https://example.test/'),
+            fn (): Response => $httpsResponse,
+        );
+
+        $this->assertNull($httpResponse->headers->get('Strict-Transport-Security'));
+        $this->assertSame(
+            'max-age=31536000',
+            $httpsResponse->headers->get('Strict-Transport-Security'),
+        );
     }
 }
