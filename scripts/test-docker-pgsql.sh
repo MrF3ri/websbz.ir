@@ -34,4 +34,4 @@ $COMPOSE exec -T \
   -e SESSION_DRIVER=array \
   -e CACHE_STORE=array \
   -e QUEUE_CONNECTION=sync \
-  app php artisan test
+  app php artisan test "$@"

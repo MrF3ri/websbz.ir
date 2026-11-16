@@ -5,7 +5,9 @@ namespace Tests\Feature\PublicMenu;
 use App\Enums\BusinessStatus;
 use App\Modules\Menu\Enums\MenuStatus;
 use App\Modules\Product\Enums\ProductStatus;
+use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\Concerns\InteractsWithCatalog;
 use Tests\TestCase;
@@ -54,8 +56,25 @@ class PublicMenuTest extends TestCase
 
         $menu->update(['status' => MenuStatus::Published]);
 
-        $this->get(route('public.menu.show', [$business->slug, $menu->slug]))
-            ->assertOk()
+        $productQueries = [];
+
+        DB::listen(function (QueryExecuted $query) use (&$productQueries): void {
+            $sql = strtolower($query->sql);
+
+            if (str_contains($sql, 'products') && str_contains($sql, 'select')) {
+                $productQueries[] = $sql;
+            }
+        });
+
+        $response = $this->get(route('public.menu.show', [$business->slug, $menu->slug]));
+
+        $this->assertNotEmpty($productQueries);
+
+        foreach ($productQueries as $sql) {
+            $this->assertStringContainsString('products"."menu_id', $sql);
+        }
+
+        $response->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('PublicMenu/Show', false)
                 ->where('business.name', $business->name)
