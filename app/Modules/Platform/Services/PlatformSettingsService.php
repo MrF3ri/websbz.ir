@@ -26,7 +26,7 @@ class PlatformSettingsService
     }
 
     /**
-     * @param array{bank_name: string, card_number: string, card_holder: string} $details
+     * @param  array{bank_name: string, card_number: string, card_holder: string} $details
      */
     public function updateCardDetails(array $details, User $actor): void
     {
@@ -66,7 +66,7 @@ class PlatformSettingsService
     /**
      * Card numbers are never persisted in audit snapshots; only their last four digits are retained.
      *
-     * @param array{bank_name: string, card_number: string, card_holder: string} $details
+     * @param  array{bank_name: string, card_number: string, card_holder: string} $details
      * @return array{bank_name: string, card_number_last4: string|null, card_holder: string}
      */
     private function auditSnapshot(array $details): array
