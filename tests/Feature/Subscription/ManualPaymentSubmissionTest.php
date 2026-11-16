@@ -22,6 +22,7 @@ class ManualPaymentSubmissionTest extends TestCase
     public function test_business_owner_can_submit_private_receipt_for_server_priced_plan(): void
     {
         Storage::fake('local');
+        Storage::fake('public');
 
         $user = User::factory()->create();
         $business = $this->createBusinessFor($user);
@@ -50,6 +51,90 @@ class ManualPaymentSubmissionTest extends TestCase
         $this->assertSame('BANK-TRACK-001', $payment->bank_tracking_number);
         $this->assertSame(SubscriptionStatus::Trialing, $subscription->fresh()->status);
         Storage::disk('local')->assertExists($payment->receipt_path);
+        $this->assertStringStartsWith('payment-receipts/'.$business->getKey().'/', $payment->receipt_path);
+        $this->assertNotSame('receipt.pdf', basename($payment->receipt_path));
+        Storage::disk('public')->assertMissing($payment->receipt_path);
+    }
+
+    public function test_receipt_rejects_content_with_a_mismatched_filename_extension(): void
+    {
+        Storage::fake('local');
+
+        $user = User::factory()->create();
+        $this->createBusinessFor($user);
+        $this->giveBusinessTrialSubscription($user->businesses()->firstOrFail(), 'economic');
+        $plan = Plan::query()->where('code', 'professional')->firstOrFail();
+
+        app(PlatformSettingsService::class)->updateCardDetails([
+            'bank_name' => 'ملت',
+            'card_number' => '1234567812345678',
+            'card_holder' => 'Platform Owner',
+        ], $user);
+
+        $this->actingAs($user)
+            ->post(route('billing.payments.store'), [
+                'plan_id' => $plan->getKey(),
+                'bank_tracking_number' => 'BANK-TRACK-BAD-EXT',
+                'receipt' => UploadedFile::fake()->createWithContent('receipt.txt', "%PDF-1.4\\nnot a valid uploaded extension"),
+            ])
+            ->assertSessionHasErrors('receipt');
+
+        $this->assertSame(0, Payment::query()->count());
+        $this->assertSame([], Storage::disk('local')->allFiles());
+    }
+
+    public function test_receipt_rejects_disallowed_mime_content_even_when_filename_is_allowed(): void
+    {
+        Storage::fake('local');
+
+        $user = User::factory()->create();
+        $business = $this->createBusinessFor($user);
+        $this->giveBusinessTrialSubscription($business, 'economic');
+        $plan = Plan::query()->where('code', 'professional')->firstOrFail();
+
+        app(PlatformSettingsService::class)->updateCardDetails([
+            'bank_name' => 'ملت',
+            'card_number' => '1234567812345678',
+            'card_holder' => 'Platform Owner',
+        ], $user);
+
+        $this->actingAs($user)
+            ->post(route('billing.payments.store'), [
+                'plan_id' => $plan->getKey(),
+                'bank_tracking_number' => 'BANK-TRACK-BAD-MIME',
+                'receipt' => UploadedFile::fake()->createWithContent('receipt.pdf', 'plain text, not a PDF'),
+            ])
+            ->assertSessionHasErrors('receipt');
+
+        $this->assertSame(0, Payment::query()->count());
+        $this->assertSame([], Storage::disk('local')->allFiles());
+    }
+
+    public function test_receipt_rejects_files_larger_than_five_megabytes(): void
+    {
+        Storage::fake('local');
+
+        $user = User::factory()->create();
+        $business = $this->createBusinessFor($user);
+        $this->giveBusinessTrialSubscription($business, 'economic');
+        $plan = Plan::query()->where('code', 'professional')->firstOrFail();
+
+        app(PlatformSettingsService::class)->updateCardDetails([
+            'bank_name' => 'ملت',
+            'card_number' => '1234567812345678',
+            'card_holder' => 'Platform Owner',
+        ], $user);
+
+        $this->actingAs($user)
+            ->post(route('billing.payments.store'), [
+                'plan_id' => $plan->getKey(),
+                'bank_tracking_number' => 'BANK-TRACK-TOO-LARGE',
+                'receipt' => UploadedFile::fake()->create('large.pdf', 5121, 'application/pdf'),
+            ])
+            ->assertSessionHasErrors('receipt');
+
+        $this->assertSame(0, Payment::query()->count());
+        $this->assertSame([], Storage::disk('local')->allFiles());
     }
 
     public function test_business_admin_can_download_own_receipt_but_not_another_business_receipt(): void
