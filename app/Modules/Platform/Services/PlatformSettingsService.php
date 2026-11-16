@@ -1,15 +1,17 @@
 <?php
 
-namespace App\Modules\Platform\Services;
+namespace App\\Modules\\Platform\\Services;
 
-use App\Models\User;
-use App\Modules\Platform\Models\PlatformAuditLog;
-use App\Modules\Platform\Models\PlatformSetting;
-use Illuminate\Support\Facades\DB;
+use App\\Models\\User;
+use App\\Modules\\Platform\\Models\\PlatformAuditLog;
+use App\\Modules\\Platform\\Models\\PlatformSetting;
+use Illuminate\\Support\\Facades\\DB;
 
 class PlatformSettingsService
 {
-    /** @return array{bank_name: string, card_number: string, card_holder: string} */
+    /**
+     * @return array{bank_name: string, card_number: string, card_holder: string}
+     */
     public function cardDetails(): array
     {
         $values = PlatformSetting::query()
@@ -23,7 +25,9 @@ class PlatformSettingsService
         ];
     }
 
-    /** @param array{bank_name: string, card_number: string, card_holder: string} $details */
+    /**
+     * @param array{bank_name: string, card_number: string, card_holder: string} $details
+     */
     public function updateCardDetails(array $details, User $actor): void
     {
         DB::transaction(function () use ($details, $actor): void {
