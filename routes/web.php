@@ -7,6 +7,7 @@ use App\Modules\Category\Http\Controllers\CategoryController;
 use App\Modules\Menu\Http\Controllers\MenuPublicationController;
 use App\Modules\Platform\Http\Controllers\AdminBusinessController;
 use App\Modules\Platform\Http\Controllers\AdminDashboardController;
+use App\Modules\Platform\Http\Controllers\AdminEventController;
 use App\Modules\Platform\Http\Controllers\AdminPaymentController;
 use App\Modules\Platform\Http\Controllers\AdminSubscriptionController;
 use App\Modules\Platform\Http\Controllers\PlatformSettingsController;
@@ -31,6 +32,7 @@ Route::middleware(['auth', 'verified', 'can:platform-admin'])
         Route::get('/businesses/{businessPublicId}', [AdminBusinessController::class, 'show'])
             ->name('businesses.show');
         Route::get('/subscriptions', [AdminSubscriptionController::class, 'index'])->name('subscriptions.index');
+        Route::get('/events', [AdminEventController::class, 'index'])->name('events.index');
         Route::get('/payments', [AdminPaymentController::class, 'index'])->name('payments.index');
         Route::get('/payments/{payment}/receipt', [AdminPaymentController::class, 'receipt'])->name('payments.receipt');
         Route::post('/payments/{payment}/approve', [AdminPaymentController::class, 'approve'])->name('payments.approve');

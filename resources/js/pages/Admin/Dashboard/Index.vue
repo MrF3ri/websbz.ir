@@ -70,6 +70,7 @@ function statusClass(status: string): string {
                 <nav aria-label="ناوبری مدیریت" class="flex flex-wrap gap-2 text-sm">
                     <a href="/admin/businesses" class="rounded-lg border border-border px-4 py-2 font-medium hover:bg-muted">کسب‌وکارها</a>
                     <a href="/admin/subscriptions" class="rounded-lg border border-border px-4 py-2 font-medium hover:bg-muted">اشتراک‌ها</a>
+                    <a href="/admin/events" class="rounded-lg border border-border px-4 py-2 font-medium hover:bg-muted">رویدادها</a>
                     <a href="/admin/payments" class="rounded-lg border border-border px-4 py-2 font-medium hover:bg-muted">
                         بررسی پرداخت‌ها
                         <span v-if="metrics.pending_payments > 0" class="mr-1 rounded-full bg-amber-500/15 px-2 py-0.5 text-amber-700">{{ numberFormatter.format(metrics.pending_payments) }}</span>
