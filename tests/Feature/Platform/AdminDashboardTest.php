@@ -6,9 +6,9 @@ use App\Models\User;
 use App\Modules\Platform\Services\PlatformSettingsService;
 use App\Modules\Subscription\Enums\PaymentStatus;
 use App\Modules\Subscription\Models\Plan;
+use Database\Seeders\PlanSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
-use Database\Seeders\PlanSeeder;
 use Tests\Concerns\InteractsWithBusinesses;
 use Tests\TestCase;
 
@@ -58,7 +58,6 @@ class AdminDashboardTest extends TestCase
                 ->where('recentPayments.0.status', PaymentStatus::Approved->value)
                 ->where('recentPayments.1.status', PaymentStatus::PendingReview->value));
     }
-
 
     public function test_dashboard_reports_configuration_health_without_exposing_sensitive_values(): void
     {
