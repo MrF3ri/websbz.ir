@@ -10,6 +10,7 @@ class PublicMenuCache
 {
     private const TTL_MINUTES = 5;
 
+    /** @param Closure(): mixed $resolver */
     public function remember(Menu $menu, Closure $resolver): mixed
     {
         return Cache::remember(
