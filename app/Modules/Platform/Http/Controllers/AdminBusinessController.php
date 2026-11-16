@@ -5,6 +5,7 @@ namespace App\Modules\Platform\Http\Controllers;
 use App\Modules\Business\Models\Business;
 use App\Modules\Subscription\Models\Subscription;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -23,7 +24,7 @@ class AdminBusinessController
 
         $businesses = Business::query()
             ->withCount('members')
-            ->with(['subscriptions' => fn (Builder $query) => $query
+            ->with(['subscriptions' => fn (HasMany $query) => $query
                 ->with('plan')
                 ->latest('id')
                 ->limit(1)])
