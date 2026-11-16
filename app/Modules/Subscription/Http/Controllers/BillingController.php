@@ -23,13 +23,20 @@ class BillingController
         Gate::authorize('update', $business);
 
         $subscription = $business->subscriptions()
-            ->with(['plan', 'payments.targetPlan'])
+            ->with('plan')
+            ->withExists(['payments as has_pending_review' => fn ($query) => $query->where('status', PaymentStatus::PendingReview->value)])
             ->latest('id')
             ->first();
 
         if ($subscription === null) {
             return redirect()->route('onboarding');
         }
+
+        $payments = $subscription->payments()
+            ->with('targetPlan')
+            ->latest('id')
+            ->limit(10)
+            ->get();
 
         $plans = Plan::query()
             ->where('is_active', true)
@@ -55,12 +62,8 @@ class BillingController
             ])->values(),
             'cardDetails' => $platformSettings->cardDetails(),
             'hasCardDetails' => $platformSettings->hasCardDetails(),
-            'hasPendingReview' => $subscription->payments()->where('status', PaymentStatus::PendingReview)->exists(),
-            'payments' => $subscription->payments()
-                ->with('targetPlan')
-                ->latest('id')
-                ->limit(10)
-                ->get()
+            'hasPendingReview' => (bool) $subscription->getAttribute('has_pending_review'),
+            'payments' => $payments
                 ->map(fn (Payment $payment): array => [
                     'id' => $payment->getKey(),
                     'amount' => $payment->amount,
