@@ -27,6 +27,7 @@ function save(): void {
     <main dir="rtl" class="min-h-screen bg-background px-4 py-8 text-right sm:px-6">
         <div class="mx-auto max-w-2xl space-y-6">
             <header>
+                <a href="/admin" class="mb-3 inline-block text-sm text-primary underline underline-offset-4">بازگشت به داشبورد مدیریت</a>
                 <h1 class="text-2xl font-bold">تنظیمات پلتفرم</h1>
                 <p class="mt-2 text-sm text-muted-foreground">اطلاعات کارت مقصد پرداخت دستی اشتراک‌ها را مدیریت کنید.</p>
                 <a href="/admin/payments" class="mt-2 inline-block text-sm text-primary underline underline-offset-4">صف بررسی پرداخت‌ها</a>
