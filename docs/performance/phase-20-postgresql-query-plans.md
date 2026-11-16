@@ -36,18 +36,15 @@ indexes before proposing schema changes.
 
 ## Run
 
-Run against the dedicated PostgreSQL test database only:
+Run the benchmark against the dedicated PostgreSQL test database only:
 
 ```sh
 ./scripts/test-docker-pgsql.sh --filter=PostgresCatalogQueryPlanTest
 ```
 
-The existing script currently forwards no arguments to PHPUnit. Until it is
-extended, run the full isolated PostgreSQL test suite using:
-
-```sh
-./scripts/test-docker-pgsql.sh
-```
+The script forwards PHPUnit arguments after verifying that the target database
+is not the development database. Run the full isolated PostgreSQL suite by
+omitting the filter.
 
 CI runs the same test in its ephemeral `websbz_test` PostgreSQL service.
 SQLite skips this benchmark because SQLite cannot provide PostgreSQL query
