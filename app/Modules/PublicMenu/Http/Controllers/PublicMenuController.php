@@ -27,8 +27,9 @@ class PublicMenuController
 
         $categories = $menu->categories()
             ->where('is_active', true)
-            ->whereHas('products', function ($query): void {
+            ->whereHas('products', function ($query) use ($menu): void {
                 $query
+                    ->where('products.menu_id', $menu->getKey())
                     ->where('status', ProductStatus::Published)
                     ->where('is_available', true);
             })
