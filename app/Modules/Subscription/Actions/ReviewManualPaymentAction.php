@@ -114,7 +114,7 @@ class ReviewManualPaymentAction
             $accessPeriodStartsAt = $preserveCurrentAccessPeriod
                 ? $subscription->current_period_starts_at
                 : $periodBase;
-            $periodEndsAt = $periodBase->copy()->addMonth();
+            $periodEndsAt = $periodBase->copy()->addMonthNoOverflow();
 
             $lockedPayment->update([
                 'status' => PaymentStatus::Approved,
