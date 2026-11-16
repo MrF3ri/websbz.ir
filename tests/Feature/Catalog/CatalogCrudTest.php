@@ -257,10 +257,10 @@ class CatalogCrudTest extends TestCase
         DB::disableQueryLog();
 
         $productPaginatorCountQueries = collect($queries)
-            ->filter(fn (array $query): bool => preg_match(
-                '/^select count\\(\\*\\) as aggregate from "products"/i',
-                $query['query'],
-            ) === 1)
+            ->filter(fn (array $query): bool => str_contains(
+                strtolower($query['query']),
+                'count(*) as aggregate',
+            ) && str_contains(strtolower($query['query']), '"products"'))
             ->count();
 
         $this->assertSame(1, $productPaginatorCountQueries);
