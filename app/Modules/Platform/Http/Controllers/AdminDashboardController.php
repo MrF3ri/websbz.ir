@@ -7,7 +7,6 @@ use App\Modules\Subscription\Enums\PaymentStatus;
 use App\Modules\Subscription\Enums\SubscriptionStatus;
 use App\Modules\Subscription\Models\Payment;
 use App\Modules\Subscription\Models\Subscription;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
