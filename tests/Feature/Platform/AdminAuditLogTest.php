@@ -4,7 +4,9 @@ namespace Tests\Feature\Platform;
 
 use App\Models\User;
 use App\Modules\Platform\Models\PlatformAuditLog;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
@@ -65,7 +67,7 @@ class AdminAuditLogTest extends TestCase
         $this->assertSame(1, PlatformAuditLog::query()->count());
     }
 
-    public function test_audit_records_cannot_be_updated_or_deleted_through_the_model(): void
+    public function test_audit_records_are_immutable_at_the_model_and_database_levels(): void
     {
         $log = PlatformAuditLog::query()->create([
             'action' => 'test.immutable',
@@ -81,10 +83,27 @@ class AdminAuditLogTest extends TestCase
         }
 
         try {
-            $log->delete();
-            $this->fail('Audit records must reject deletion.');
-        } catch (\LogicException) {
-            $this->assertDatabaseHas('platform_audit_logs', ['id' => $log->getKey()]);
+            DB::transaction(fn () => DB::table('platform_audit_logs')
+                ->where('id', $log->getKey())
+                ->update(['action' => 'query-builder-changed']));
+            $this->fail('Database triggers must reject query-builder updates.');
+        } catch (QueryException) {
+            $this->assertDatabaseHas('platform_audit_logs', [
+                'id' => $log->getKey(),
+                'action' => 'test.immutable',
+            ]);
+        }
+
+        try {
+            DB::transaction(fn () => DB::table('platform_audit_logs')
+                ->where('id', $log->getKey())
+                ->delete());
+            $this->fail('Database triggers must reject query-builder deletes.');
+        } catch (QueryException) {
+            $this->assertDatabaseHas('platform_audit_logs', [
+                'id' => $log->getKey(),
+                'action' => 'test.immutable',
+            ]);
         }
     }
 
