@@ -135,7 +135,6 @@ class PostgresCatalogQueryPlanTest extends TestCase
             ->orderBy('products.sort_order')
             ->orderBy('products.id');
 
-
         $catalogSearch = DB::table('products')
             ->where('menu_id', $menuId)
             ->whereRaw('LOWER(name) LIKE ?', ['%product 12%'])
