@@ -54,6 +54,7 @@ function reject(payment: Payment): void {
     <main dir="rtl" class="min-h-screen bg-background px-4 py-8 text-right sm:px-6">
         <div class="mx-auto max-w-5xl space-y-6">
             <header>
+                <a href="/admin" class="mb-3 inline-block text-sm text-primary underline underline-offset-4">بازگشت به داشبورد مدیریت</a>
                 <h1 class="text-2xl font-bold">بررسی پرداخت‌ها</h1>
                 <p class="mt-2 text-sm text-muted-foreground">رسیدهای در انتظار بررسی مدیر پلتفرم.</p>
                 <a href="/admin/settings" class="mt-2 inline-block text-sm text-primary underline underline-offset-4">تنظیمات کارت بانکی</a>
