@@ -114,7 +114,7 @@ class ProcessPaymentCallbackAction
             $accessPeriodStartsAt = $preserveCurrentAccessPeriod
                 ? $subscription->current_period_starts_at
                 : $periodBase;
-            $newPeriodEndsAt = $periodBase->copy()->addMonth();
+            $newPeriodEndsAt = $periodBase->copy()->addMonthNoOverflow();
 
             $payment->update([
                 'status' => PaymentStatus::Successful,
