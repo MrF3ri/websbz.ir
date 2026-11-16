@@ -80,19 +80,9 @@ class AdminEventCenterTest extends TestCase
             'slug' => 'second-event-cafe',
         ]);
 
-        $firstSubscription = $this->giveBusinessTrialSubscription($firstBusiness, 'economic');
-        $secondSubscription = $this->giveBusinessTrialSubscription($secondBusiness, 'economic');
-
-        $firstSubscription->events()->create([
-            'event_type' => SubscriptionEventType::TrialStarted,
-            'metadata' => [],
-            'created_at' => now(),
-        ]);
-        $secondSubscription->events()->create([
-            'event_type' => SubscriptionEventType::TrialStarted,
-            'metadata' => [],
-            'created_at' => now(),
-        ]);
+        // Starting each trial already records its TrialStarted event.
+        $this->giveBusinessTrialSubscription($firstBusiness, 'economic');
+        $this->giveBusinessTrialSubscription($secondBusiness, 'economic');
 
         $this->actingAs($admin)
             ->get(route('admin.events.index', ['search' => 'First Event']))
