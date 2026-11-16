@@ -24,7 +24,11 @@ class SecurityHeadersTest extends TestCase
             ->assertOk()
             ->assertHeaderMissing('Strict-Transport-Security');
 
-        $this->withServerVariables(['HTTPS' => 'on'])
+        $this->withServerVariables([
+            'HTTPS' => 'on',
+            'SERVER_PORT' => 443,
+            'REQUEST_SCHEME' => 'https',
+        ])
             ->get(route('home'))
             ->assertOk()
             ->assertHeader('Strict-Transport-Security', 'max-age=31536000');
