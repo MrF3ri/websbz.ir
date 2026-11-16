@@ -250,12 +250,17 @@ class CatalogCrudTest extends TestCase
         $this->createCatalogProduct($menu, $secondCategory, 'Third product');
 
         $productAggregateQueries = [];
+        $categoryProductCountQueries = [];
 
-        DB::listen(function (QueryExecuted $query) use (&$productAggregateQueries): void {
+        DB::listen(function (QueryExecuted $query) use (&$productAggregateQueries, &$categoryProductCountQueries): void {
             $sql = strtolower($query->sql);
 
             if (str_contains($sql, 'products') && str_contains($sql, 'count(')) {
                 $productAggregateQueries[] = $sql;
+            }
+
+            if (str_contains($sql, 'categories') && str_contains($sql, 'products') && str_contains($sql, 'count(')) {
+                $categoryProductCountQueries[] = $sql;
             }
         });
 
@@ -264,6 +269,8 @@ class CatalogCrudTest extends TestCase
         // One correlated category products_count query and one paginator COUNT;
         // there must not be a third standalone usage COUNT query.
         $this->assertCount(2, $productAggregateQueries);
+        $this->assertCount(1, $categoryProductCountQueries);
+        $this->assertStringContainsString('products"."menu_id', $categoryProductCountQueries[0]);
 
         $response
             ->assertOk()
