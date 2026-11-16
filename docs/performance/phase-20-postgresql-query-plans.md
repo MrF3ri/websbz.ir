@@ -105,6 +105,22 @@ A feature regression creates twelve payment rows and asserts:
 - The page still reports a pending review when the newest payment is pending.
 - Only ten recent payment records are returned.
 
+
+## Catalog substring-search baseline (PostgreSQL 17 CI)
+
+On the 60,000-product synthetic dataset, the menu-scoped search query
+(`LOWER(name) LIKE '%product 12%'`, category ordering, limit 20) completed in
+0.766 ms in the warm-cache CI run. PostgreSQL returned 20 rows, recorded 415
+shared buffer hits and no shared reads. The plan used the existing
+`products_menu_name_idx` for the menu-scoped scan and the category key index
+for category ordering; it did not require a new trigram index for this measured
+workload.
+
+This is one CI sample with 3,000 products in the target menu, not a production
+latency guarantee. Revisit trigram/full-text search only if production query
+monitoring shows substring search becoming a material bottleneck at larger
+per-menu cardinalities.
+
 ## Safety
 
 Do not point this test at the development or production database. The test uses
