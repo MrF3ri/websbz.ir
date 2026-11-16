@@ -1,18 +1,18 @@
 <?php
 
-namespace Tests\\Feature\\Subscription;
+namespace Tests\Feature\Subscription;
 
-use App\\Models\\User;
-use App\\Modules\\Platform\\Services\\PlatformSettingsService;
-use App\\Modules\\Subscription\\Enums\\PaymentStatus;
-use App\\Modules\\Subscription\\Enums\\SubscriptionStatus;
-use App\\Modules\\Subscription\\Models\\Payment;
-use App\\Modules\\Subscription\\Models\\Plan;
-use Illuminate\\Foundation\\Testing\\RefreshDatabase;
-use Illuminate\\Http\\UploadedFile;
-use Illuminate\\Support\\Facades\\Storage;
-use Tests\\Concerns\\InteractsWithBusinesses;
-use Tests\\TestCase;
+use App\Models\User;
+use App\Modules\Platform\Services\PlatformSettingsService;
+use App\Modules\Subscription\Enums\PaymentStatus;
+use App\Modules\Subscription\Enums\SubscriptionStatus;
+use App\Modules\Subscription\Models\Payment;
+use App\Modules\Subscription\Models\Plan;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Tests\Concerns\InteractsWithBusinesses;
+use Tests\TestCase;
 
 class ManualPaymentSubmissionTest extends TestCase
 {
