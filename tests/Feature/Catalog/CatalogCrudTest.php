@@ -237,4 +237,38 @@ class CatalogCrudTest extends TestCase
             $secondProduct->fresh()->sort_order,
         );
     }
+    public function test_catalog_usage_counts_reuse_loaded_category_aggregates(): void
+    {
+        [$user, , $menu] = $this->createCatalogTenant();
+        $firstCategory = $this->createCatalogCategory($menu, 'First category');
+        $secondCategory = $this->createCatalogCategory($menu, 'Second category');
+
+        $this->createCatalogProduct($menu, $firstCategory, 'First product');
+        $this->createCatalogProduct($menu, $firstCategory, 'Second product');
+        $this->createCatalogProduct($menu, $secondCategory, 'Third product');
+
+        DB::enableQueryLog();
+        DB::flushQueryLog();
+
+        $response = $this->actingAs($user)->get(route('catalog.index'));
+        $queries = DB::getQueryLog();
+
+        DB::disableQueryLog();
+
+        $productPaginatorCountQueries = collect($queries)
+            ->filter(fn (array $query): bool => preg_match(
+                '/^select count\\(\\*\\) as aggregate from "products"/i',
+                $query['query'],
+            ) === 1)
+            ->count();
+
+        $this->assertSame(1, $productPaginatorCountQueries);
+
+        $response
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('usage.categories', 2)
+                ->where('usage.products', 3));
+    }
+
 }
