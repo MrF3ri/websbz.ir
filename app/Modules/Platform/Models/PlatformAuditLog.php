@@ -10,6 +10,7 @@ use LogicException;
 /**
  * @property int $id
  * @property int|null $actor_id
+ * @property string|null $actor_label
  * @property string $action
  * @property string|null $target_type
  * @property string|null $target_id
