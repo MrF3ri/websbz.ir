@@ -37,6 +37,8 @@ return new class extends Migration
             $table->index(['business_id', 'status'], 'branches_business_status_idx');
         });
 
+        $this->enforcePrimaryBranchMarker();
+
         Schema::create('branch_category_settings', function (Blueprint $table): void {
             $table->id();
             $table->unsignedBigInteger('branch_id');
@@ -105,11 +107,60 @@ return new class extends Migration
     {
         Schema::dropIfExists('branch_product_settings');
         Schema::dropIfExists('branch_category_settings');
+        if (DB::getDriverName() === 'sqlite') {
+            DB::unprepared('DROP TRIGGER IF EXISTS branches_primary_marker_insert');
+            DB::unprepared('DROP TRIGGER IF EXISTS branches_primary_marker_update');
+        }
+
         Schema::dropIfExists('branches');
 
         Schema::table('products', function (Blueprint $table): void {
             $table->dropUnique('products_id_menu_unique');
         });
+    }
+
+    private function enforcePrimaryBranchMarker(): void
+    {
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement(<<<'SQL'
+                ALTER TABLE branches
+                ADD CONSTRAINT branches_primary_marker_check
+                CHECK (
+                    (is_primary = TRUE AND primary_business_id = business_id)
+                    OR (is_primary = FALSE AND primary_business_id IS NULL)
+                )
+                SQL);
+
+            return;
+        }
+
+        if (DB::getDriverName() === 'sqlite') {
+            DB::unprepared(<<<'SQL'
+                CREATE TRIGGER branches_primary_marker_insert
+                BEFORE INSERT ON branches
+                FOR EACH ROW
+                WHEN NOT (
+                    (NEW.is_primary = 1 AND NEW.primary_business_id = NEW.business_id)
+                    OR (NEW.is_primary = 0 AND NEW.primary_business_id IS NULL)
+                )
+                BEGIN
+                    SELECT RAISE(ABORT, 'branches primary marker must match business');
+                END
+                SQL);
+
+            DB::unprepared(<<<'SQL'
+                CREATE TRIGGER branches_primary_marker_update
+                BEFORE UPDATE OF business_id, is_primary, primary_business_id ON branches
+                FOR EACH ROW
+                WHEN NOT (
+                    (NEW.is_primary = 1 AND NEW.primary_business_id = NEW.business_id)
+                    OR (NEW.is_primary = 0 AND NEW.primary_business_id IS NULL)
+                )
+                BEGIN
+                    SELECT RAISE(ABORT, 'branches primary marker must match business');
+                END
+                SQL);
+        }
     }
 
     private function backfillPrimaryBranches(): void
