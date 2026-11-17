@@ -26,7 +26,7 @@ type Branch = {
 };
 type DayState = { closed: boolean; first: Period; secondEnabled: boolean; second: Period };
 
-const props = defineProps<{ branches: Branch[] }>();
+const props = defineProps<{ branches: Branch[]; canManage: boolean }>();
 const days: { key: Weekday; label: string }[] = [
     { key: 'sat', label: 'شنبه' }, { key: 'sun', label: 'یکشنبه' },
     { key: 'mon', label: 'دوشنبه' }, { key: 'tue', label: 'سه‌شنبه' },
@@ -155,13 +155,13 @@ function daySummary(branch: Branch): string {
                     <h1 class="text-2xl font-bold tracking-tight sm:text-3xl">شعبه‌های کسب‌وکار</h1>
                     <p class="max-w-2xl text-sm leading-6 text-muted-foreground">اطلاعات، وضعیت و ساعت کاری هر شعبه را مستقل مدیریت کنید. تغییرات هر شعبه روی شعبه‌های دیگر اثر نمی‌گذارد.</p>
                 </div>
-                <Button class="h-11 gap-2" @click="fillForm(null)"><Plus class="size-4" /> افزودن شعبه</Button>
+                <Button v-if="canManage" class="h-11 gap-2" @click="fillForm(null)"><Plus class="size-4" /> افزودن شعبه</Button>
             </header>
 
             <div v-if="successMessage" role="status" class="rounded-lg border border-emerald-500/20 bg-emerald-500/5 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-400">{{ successMessage }}</div>
             <div v-if="serverError" role="alert" class="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">{{ serverError }}</div>
 
-            <section v-if="showForm" class="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+            <section v-if="showForm && canManage" class="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
                 <div class="flex items-center justify-between border-b border-border px-5 py-4">
                     <div><h2 class="font-semibold">{{ formTitle }}</h2><p class="mt-1 text-xs text-muted-foreground">اطلاعات شعبه و تنظیمات منوی همان شعبه</p></div>
                     <Button variant="ghost" size="icon" aria-label="بستن فرم" @click="closeForm"><X class="size-4" /></Button>
@@ -215,7 +215,7 @@ function daySummary(branch: Branch): string {
                     <div class="mt-4 flex flex-wrap gap-2 text-xs"><span v-if="branch.is_primary" class="rounded-md bg-primary/10 px-2 py-1 text-primary">شعبه اصلی</span><span class="rounded-md bg-muted px-2 py-1 text-muted-foreground">{{ daySummary(branch) }}</span></div>
                     <p v-if="branch.address" class="mt-3 flex items-start gap-2 text-sm text-muted-foreground"><MapPin class="mt-0.5 size-4 shrink-0" />{{ branch.address }}</p>
                     <p v-if="branch.phone" dir="ltr" class="mt-2 text-left text-sm text-muted-foreground">{{ branch.phone }}</p>
-                    <div class="mt-5 flex flex-wrap gap-2 border-t border-border pt-4">
+                    <div v-if="canManage" class="mt-5 flex flex-wrap gap-2 border-t border-border pt-4">
                         <Button size="sm" variant="outline" @click="fillForm(branch)">ویرایش اطلاعات</Button>
                         <Button v-if="!branch.is_primary" size="sm" :variant="branch.status === 'active' ? 'destructive' : 'secondary'" @click="setStatus(branch)">{{ branch.status === 'active' ? 'غیرفعال‌سازی' : 'فعال‌سازی' }}</Button>
                     </div>
