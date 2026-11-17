@@ -4,6 +4,7 @@ namespace App\Actions\Business;
 
 use App\Enums\BusinessRole;
 use App\Models\User;
+use App\Modules\Branch\Actions\EnsurePrimaryBranchAction;
 use App\Modules\Business\Models\Business;
 use App\Modules\Menu\Actions\EnsurePrimaryMenuAction;
 use App\Modules\Subscription\Actions\StartTrialAction;
@@ -18,6 +19,7 @@ class CreateBusinessAction
     public function __construct(
         private readonly StartTrialAction $startTrialAction,
         private readonly EnsurePrimaryMenuAction $ensurePrimaryMenuAction,
+        private readonly EnsurePrimaryBranchAction $ensurePrimaryBranchAction,
     ) {}
 
     /**
@@ -61,6 +63,7 @@ class CreateBusinessAction
 
                     // Keep primary menu, membership and trial creation atomic.
                     $this->ensurePrimaryMenuAction->execute($business);
+                    $this->ensurePrimaryBranchAction->execute($business);
                     $this->startTrialAction->execute($business, $plan);
 
                     return $business;
