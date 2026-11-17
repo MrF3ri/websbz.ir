@@ -123,12 +123,12 @@ class BranchLifecycleTest extends TestCase
     public function test_reactivating_a_branch_backfills_missing_catalog_assignments_without_resetting_overrides(): void
     {
         [, $business, $menu] = $this->createCatalogTenant('top');
+        $existingCategory = $this->createCatalogCategory($menu, 'Existing');
+        $existingProduct = $this->createCatalogProduct($menu, $existingCategory, 'Local Favorite');
         $branch = app(CreateBranchAction::class)->execute($business, [
             'name' => 'East Branch',
             'slug' => 'east',
         ]);
-        $existingCategory = $this->createCatalogCategory($menu, 'Existing');
-        $existingProduct = $this->createCatalogProduct($menu, $existingCategory, 'Local Favorite');
 
         $branch->productSettings()->where('product_id', $existingProduct->getKey())->update([
             'is_visible' => false,
