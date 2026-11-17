@@ -5,6 +5,7 @@ namespace Tests\Feature\Branch;
 use App\Modules\Branch\Actions\CreateBranchAction;
 use App\Modules\Branch\Actions\EnsurePrimaryBranchAction;
 use App\Modules\Branch\Actions\SetBranchStatusAction;
+use App\Modules\Branch\Actions\UpdateBranchAction;
 use App\Modules\Branch\Models\Branch;
 use App\Modules\Business\Models\Business;
 use App\Modules\Category\Actions\CreateCategoryAction;
@@ -191,7 +192,7 @@ class BranchLifecycleTest extends TestCase
 
         $this->expectException(ModelNotFoundException::class);
 
-        app(\App\Modules\Branch\Actions\UpdateBranchAction::class)->execute(
+        app(UpdateBranchAction::class)->execute(
             $businessA,
             $branchB,
             ['name' => 'Intrusion', 'slug' => 'intrusion'],
