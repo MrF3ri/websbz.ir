@@ -4,6 +4,7 @@ namespace App\Modules\Business\Models;
 
 use App\Enums\BusinessStatus;
 use App\Models\User;
+use App\Modules\Branch\Models\Branch;
 use App\Modules\Menu\Models\Menu;
 use App\Modules\Subscription\Models\Subscription;
 use Database\Factories\BusinessFactory;
@@ -113,6 +114,26 @@ class Business extends Model
     public function menu(): HasOne
     {
         return $this->hasOne(Menu::class);
+    }
+
+    /**
+     * Get the branches owned by the business.
+     *
+     * @return HasMany<Branch, $this>
+     */
+    public function branches(): HasMany
+    {
+        return $this->hasMany(Branch::class);
+    }
+
+    /**
+     * Get the primary branch.
+     *
+     * @return HasOne<Branch, $this>
+     */
+    public function primaryBranch(): HasOne
+    {
+        return $this->hasOne(Branch::class)->where('is_primary', true);
     }
 
     /**
