@@ -10,10 +10,39 @@ use App\Modules\Branch\Models\Branch;
 use App\Modules\Business\Models\Business;
 use App\Modules\Tenancy\Services\CurrentBusiness;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class BranchController
 {
+    public function manage(CurrentBusiness $currentBusiness): Response
+    {
+        $business = $this->resolveBusiness($currentBusiness);
+        Gate::authorize('view', $business);
+
+        return Inertia::render('Branches/Index', [
+            'branches' => $business->branches()
+                ->orderByDesc('is_primary')
+                ->orderBy('id')
+                ->get([
+                    'public_id',
+                    'name',
+                    'slug',
+                    'status',
+                    'is_primary',
+                    'phone',
+                    'email',
+                    'address',
+                    'latitude',
+                    'longitude',
+                    'timezone',
+                    'opening_hours',
+                ]),
+        ]);
+    }
+
     public function index(CurrentBusiness $currentBusiness): JsonResponse
     {
         $business = $this->resolveBusiness($currentBusiness);
@@ -35,6 +64,7 @@ class BranchController
                     'latitude',
                     'longitude',
                     'timezone',
+                    'opening_hours',
                 ]),
         ]);
     }
@@ -43,11 +73,11 @@ class BranchController
         SaveBranchRequest $request,
         CurrentBusiness $currentBusiness,
         CreateBranchAction $createBranch,
-    ): JsonResponse {
+    ): RedirectResponse {
         $business = $this->resolveBusiness($currentBusiness);
-        $branch = $createBranch->execute($business, $request->validated());
+        $createBranch->execute($business, $request->validated());
 
-        return response()->json(['data' => $this->branchData($branch)], 201);
+        return to_route('business.branches.manage')->with('success', 'شعبه جدید با موفقیت ایجاد شد.');
     }
 
     public function update(
@@ -55,40 +85,38 @@ class BranchController
         string $branchPublicId,
         CurrentBusiness $currentBusiness,
         UpdateBranchAction $updateBranch,
-    ): JsonResponse {
+    ): RedirectResponse {
         $business = $this->resolveBusiness($currentBusiness);
         $branch = $this->resolveBranch($business, $branchPublicId);
-        $updated = $updateBranch->execute($business, $branch, $request->validated());
+        $updateBranch->execute($business, $branch, $request->validated());
 
-        return response()->json(['data' => $this->branchData($updated)]);
+        return to_route('business.branches.manage')->with('success', 'اطلاعات شعبه ذخیره شد.');
     }
 
     public function activate(
         string $branchPublicId,
         CurrentBusiness $currentBusiness,
         SetBranchStatusAction $setBranchStatus,
-    ): JsonResponse {
+    ): RedirectResponse {
         $business = $this->resolveBusiness($currentBusiness);
         Gate::authorize('update', $business);
         $branch = $this->resolveBranch($business, $branchPublicId);
+        $setBranchStatus->execute($business, $branch, true);
 
-        return response()->json([
-            'data' => $this->branchData($setBranchStatus->execute($business, $branch, true)),
-        ]);
+        return to_route('business.branches.manage')->with('success', 'شعبه فعال شد.');
     }
 
     public function deactivate(
         string $branchPublicId,
         CurrentBusiness $currentBusiness,
         SetBranchStatusAction $setBranchStatus,
-    ): JsonResponse {
+    ): RedirectResponse {
         $business = $this->resolveBusiness($currentBusiness);
         Gate::authorize('update', $business);
         $branch = $this->resolveBranch($business, $branchPublicId);
+        $setBranchStatus->execute($business, $branch, false);
 
-        return response()->json([
-            'data' => $this->branchData($setBranchStatus->execute($business, $branch, false)),
-        ]);
+        return to_route('business.branches.manage')->with('success', 'شعبه غیرفعال شد.');
     }
 
     private function resolveBusiness(CurrentBusiness $currentBusiness): Business
@@ -102,25 +130,5 @@ class BranchController
     private function resolveBranch(Business $business, string $publicId): Branch
     {
         return $business->branches()->where('public_id', $publicId)->firstOrFail();
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function branchData(Branch $branch): array
-    {
-        return $branch->only([
-            'public_id',
-            'name',
-            'slug',
-            'status',
-            'is_primary',
-            'phone',
-            'email',
-            'address',
-            'latitude',
-            'longitude',
-            'timezone',
-        ]);
     }
 }

@@ -29,7 +29,7 @@ class UpdateBranchAction
                 'slug' => $data['slug'],
             ];
 
-            foreach (['phone', 'email', 'address', 'latitude', 'longitude', 'timezone'] as $field) {
+            foreach (['phone', 'email', 'address', 'latitude', 'longitude', 'timezone', 'opening_hours'] as $field) {
                 if (array_key_exists($field, $data)) {
                     $attributes[$field] = $data[$field];
                 }

@@ -41,6 +41,7 @@ class CreateBranchAction
                 'latitude' => $data['latitude'] ?? null,
                 'longitude' => $data['longitude'] ?? null,
                 'timezone' => $data['timezone'] ?? 'Asia/Tehran',
+                'opening_hours' => $data['opening_hours'] ?? null,
             ]);
 
             $this->catalogAssignments->initialize($branch);
