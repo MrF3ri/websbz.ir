@@ -49,6 +49,12 @@ class CreateBusinessActionTest extends TestCase
             'business_id' => $business->getKey(),
             'slug' => 'main',
         ]);
+        $this->assertDatabaseHas('branches', [
+            'business_id' => $business->getKey(),
+            'slug' => 'main',
+            'is_primary' => true,
+            'primary_business_id' => $business->getKey(),
+        ]);
     }
 
     public function test_membership_failure_rolls_back_business_creation_without_an_orphan(): void
