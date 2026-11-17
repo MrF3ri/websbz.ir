@@ -45,6 +45,10 @@ class Branch extends Model
 
     protected static function booted(): void
     {
+        static::saving(function (self $branch): void {
+            $branch->primary_business_id = $branch->is_primary ? $branch->business_id : null;
+        });
+
         static::creating(function (self $branch): void {
             if (blank($branch->public_id)) {
                 $branch->public_id = (string) Str::ulid();
