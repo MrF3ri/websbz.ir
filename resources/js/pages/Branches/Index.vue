@@ -51,8 +51,8 @@ const numberFormatter = new Intl.NumberFormat('fa-IR');
 function blankDay(): DayState {
     return {
         closed: false,
-        first: { open: '09:00', close: '13:00' },
-        secondEnabled: true,
+        first: { open: '09:00', close: '22:00' },
+        secondEnabled: false,
         second: { open: '17:00', close: '22:00' },
     };
 }

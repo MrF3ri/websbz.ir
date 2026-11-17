@@ -59,7 +59,7 @@ class SaveBranchRequest extends FormRequest
         ];
     }
 
-    public function withValidator($validator): void
+    public function withValidator(Validator $validator): void
     {
         $validator->after(function ($validator): void {
             $schedule = $this->input('opening_hours');
