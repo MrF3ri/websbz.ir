@@ -24,16 +24,18 @@ class UpdateBranchAction
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            $lockedBranch->update([
+            $attributes = [
                 'name' => $data['name'],
                 'slug' => $data['slug'],
-                'phone' => $data['phone'] ?? null,
-                'email' => $data['email'] ?? null,
-                'address' => $data['address'] ?? null,
-                'latitude' => $data['latitude'] ?? null,
-                'longitude' => $data['longitude'] ?? null,
-                'timezone' => $data['timezone'] ?? 'Asia/Tehran',
-            ]);
+            ];
+
+            foreach (['phone', 'email', 'address', 'latitude', 'longitude', 'timezone'] as $field) {
+                if (array_key_exists($field, $data)) {
+                    $attributes[$field] = $data[$field];
+                }
+            }
+
+            $lockedBranch->update($attributes);
 
             return $lockedBranch->refresh();
         });
