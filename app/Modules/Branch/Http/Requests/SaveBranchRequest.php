@@ -5,8 +5,8 @@ namespace App\Modules\Branch\Http\Requests;
 use App\Modules\Business\Models\Business;
 use App\Modules\Tenancy\Services\CurrentBusiness;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class SaveBranchRequest extends FormRequest
 {
