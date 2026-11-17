@@ -91,6 +91,26 @@ class BranchFoundationTest extends TestCase
         ]);
     }
 
+    public function test_database_rejects_a_primary_branch_without_its_unique_business_marker(): void
+    {
+        [, $business] = $this->createCatalogTenant();
+
+        $this->expectException(QueryException::class);
+
+        DB::table('branches')->insert([
+            'public_id' => (string) \Illuminate\Support\Str::ulid(),
+            'business_id' => $business->getKey(),
+            'name' => 'Invalid primary',
+            'slug' => 'invalid-primary',
+            'status' => 'active',
+            'is_primary' => true,
+            'primary_business_id' => null,
+            'timezone' => 'Asia/Tehran',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+    }
+
     public function test_database_rejects_branch_category_setting_from_another_business(): void
     {
         [, $businessA, $menuA] = $this->createCatalogTenant();
