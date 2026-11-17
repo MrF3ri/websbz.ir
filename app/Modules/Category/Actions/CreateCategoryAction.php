@@ -24,16 +24,22 @@ class CreateCategoryAction
             $name,
             $isActive,
         ): Category {
+            // Coordinate catalog writes with branch creation on the same tenant row.
+            $lockedBusiness = Business::query()
+                ->whereKey($business->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
+
             $lockedMenu = Menu::query()
                 ->whereKey($menu->getKey())
-                ->where('business_id', $business->getKey())
+                ->where('business_id', $lockedBusiness->getKey())
                 ->lockForUpdate()
                 ->firstOrFail();
 
             $currentCount = $lockedMenu->categories()->count();
 
-            (new EnforcementService(new EntitlementService($business)))
-                ->requireLimit($business, 'max_categories', $currentCount);
+            (new EnforcementService(new EntitlementService($lockedBusiness)))
+                ->requireLimit($lockedBusiness, 'max_categories', $currentCount);
 
             $sortOrder = (int) ($lockedMenu->categories()->max('sort_order') ?? -1) + 1;
 
@@ -44,7 +50,7 @@ class CreateCategoryAction
             ]);
 
             app(SyncBranchCatalogAssignmentsAction::class)
-                ->category($business, $lockedMenu, $category);
+                ->category($lockedBusiness, $lockedMenu, $category);
 
             return $category;
         });

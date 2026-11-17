@@ -62,6 +62,25 @@ class BranchLifecycleTest extends TestCase
         ]);
     }
 
+    public function test_inactive_branches_still_count_toward_the_branch_entitlement(): void
+    {
+        [, $business] = $this->createCatalogTenant('top');
+        $createBranch = app(CreateBranchAction::class);
+        $setStatus = app(SetBranchStatusAction::class);
+        $branch = $createBranch->execute($business, [
+            'name' => 'Temporary Branch',
+            'slug' => 'temporary',
+        ]);
+        $setStatus->execute($business, $branch, false);
+
+        $this->expectException(AccessDeniedHttpException::class);
+
+        $createBranch->execute($business, [
+            'name' => 'Third Branch',
+            'slug' => 'third',
+        ]);
+    }
+
     public function test_new_categories_and_products_are_assigned_to_each_active_branch(): void
     {
         [, $business, $menu] = $this->createCatalogTenant('top');
@@ -101,20 +120,36 @@ class BranchLifecycleTest extends TestCase
         }
     }
 
-    public function test_new_catalog_items_do_not_reactivate_or_repopulate_an_inactive_branch(): void
+    public function test_reactivating_a_branch_backfills_missing_catalog_assignments_without_resetting_overrides(): void
     {
         [, $business, $menu] = $this->createCatalogTenant('top');
         $branch = app(CreateBranchAction::class)->execute($business, [
             'name' => 'East Branch',
             'slug' => 'east',
         ]);
-        app(SetBranchStatusAction::class)->execute($business, $branch, false);
+        $existingCategory = $this->createCatalogCategory($menu, 'Existing');
+        $existingProduct = $this->createCatalogProduct($menu, $existingCategory, 'Local Favorite');
 
-        $category = app(CreateCategoryAction::class)->execute($business, $menu, 'Seasonal');
+        $branch->productSettings()->where('product_id', $existingProduct->getKey())->update([
+            'is_visible' => false,
+            'name_override' => 'Branch-only name',
+        ]);
 
-        $this->assertDatabaseMissing('branch_category_settings', [
+        $setStatus = app(SetBranchStatusAction::class);
+        $setStatus->execute($business, $branch, false);
+        $newCategory = app(CreateCategoryAction::class)->execute($business, $menu, 'Added while inactive');
+        $setStatus->execute($business, $branch, true);
+
+        $this->assertDatabaseHas('branch_category_settings', [
             'branch_id' => $branch->getKey(),
-            'category_id' => $category->getKey(),
+            'category_id' => $newCategory->getKey(),
+            'is_visible' => true,
+        ]);
+        $this->assertDatabaseHas('branch_product_settings', [
+            'branch_id' => $branch->getKey(),
+            'product_id' => $existingProduct->getKey(),
+            'is_visible' => false,
+            'name_override' => 'Branch-only name',
         ]);
     }
 
@@ -130,7 +165,7 @@ class BranchLifecycleTest extends TestCase
             $this->assertArrayHasKey('branch', $exception->errors());
         }
 
-        $this->assertSame('active', $primary->fresh()->status);
+        $this->assertSame('active', $primary->fresh()?->status);
     }
 
     public function test_branch_from_another_business_cannot_be_updated_through_the_current_tenant(): void

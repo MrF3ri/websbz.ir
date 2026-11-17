@@ -28,9 +28,15 @@ class CreateProductAction
             $category,
             $data,
         ): Product {
+            // Coordinate catalog writes with branch creation on the same tenant row.
+            $lockedBusiness = Business::query()
+                ->whereKey($business->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
+
             $lockedMenu = Menu::query()
                 ->whereKey($menu->getKey())
-                ->where('business_id', $business->getKey())
+                ->where('business_id', $lockedBusiness->getKey())
                 ->lockForUpdate()
                 ->firstOrFail();
 
@@ -38,19 +44,19 @@ class CreateProductAction
                 ->whereKey($category->getKey())
                 ->firstOrFail();
 
-            $enforcement = new EnforcementService(new EntitlementService($business));
+            $enforcement = new EnforcementService(new EntitlementService($lockedBusiness));
             $enforcement->requireLimit(
-                $business,
+                $lockedBusiness,
                 'max_products',
                 $lockedMenu->products()->count(),
             );
 
             if (($data['discount_price'] ?? null) !== null) {
-                $enforcement->requireFeature($business, 'product_discount');
+                $enforcement->requireFeature($lockedBusiness, 'product_discount');
             }
 
             if (($data['is_available'] ?? true) === false) {
-                $enforcement->requireFeature($business, 'product_availability_toggle');
+                $enforcement->requireFeature($lockedBusiness, 'product_availability_toggle');
             }
 
             $sortOrder = (int) ($lockedCategory->products()->max('sort_order') ?? -1) + 1;
@@ -67,7 +73,7 @@ class CreateProductAction
             ]);
 
             app(SyncBranchCatalogAssignmentsAction::class)
-                ->product($business, $lockedMenu, $product);
+                ->product($lockedBusiness, $lockedMenu, $product);
 
             return $product;
         });
