@@ -3,10 +3,14 @@
 namespace Tests\Feature\Branch;
 
 use App\Modules\Branch\Actions\CreateBranchAction;
+use App\Modules\Branch\Actions\EnsurePrimaryBranchAction;
 use App\Modules\Branch\Actions\SetBranchStatusAction;
+use App\Modules\Branch\Models\Branch;
+use App\Modules\Business\Models\Business;
 use App\Modules\Category\Actions\CreateCategoryAction;
 use App\Modules\Product\Actions\CreateProductAction;
 use App\Modules\Product\Enums\ProductStatus;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -23,6 +27,7 @@ class BranchLifecycleTest extends TestCase
         [, $business, $menu] = $this->createCatalogTenant('top');
         $category = $this->createCatalogCategory($menu, 'Breakfast', 3);
         $product = $this->createCatalogProduct($menu, $category, 'Omelette', 2, 180000, 150000);
+        $this->ensurePrimaryBranch($business);
 
         $branch = app(CreateBranchAction::class)->execute($business, [
             'name' => 'North Branch',
@@ -53,6 +58,7 @@ class BranchLifecycleTest extends TestCase
     public function test_professional_plan_cannot_create_a_second_branch(): void
     {
         [, $business] = $this->createCatalogTenant('professional');
+        $this->ensurePrimaryBranch($business);
 
         $this->expectException(AccessDeniedHttpException::class);
 
@@ -65,6 +71,7 @@ class BranchLifecycleTest extends TestCase
     public function test_inactive_branches_still_count_toward_the_branch_entitlement(): void
     {
         [, $business] = $this->createCatalogTenant('top');
+        $this->ensurePrimaryBranch($business);
         $createBranch = app(CreateBranchAction::class);
         $setStatus = app(SetBranchStatusAction::class);
         $branch = $createBranch->execute($business, [
@@ -84,6 +91,7 @@ class BranchLifecycleTest extends TestCase
     public function test_new_categories_and_products_are_assigned_to_each_active_branch(): void
     {
         [, $business, $menu] = $this->createCatalogTenant('top');
+        $this->ensurePrimaryBranch($business);
         $branch = app(CreateBranchAction::class)->execute($business, [
             'name' => 'West Branch',
             'slug' => 'west',
@@ -123,6 +131,7 @@ class BranchLifecycleTest extends TestCase
     public function test_reactivating_a_branch_backfills_missing_catalog_assignments_without_resetting_overrides(): void
     {
         [, $business, $menu] = $this->createCatalogTenant('top');
+        $this->ensurePrimaryBranch($business);
         $existingCategory = $this->createCatalogCategory($menu, 'Existing');
         $existingProduct = $this->createCatalogProduct($menu, $existingCategory, 'Local Favorite');
         $branch = app(CreateBranchAction::class)->execute($business, [
@@ -156,6 +165,7 @@ class BranchLifecycleTest extends TestCase
     public function test_primary_branch_cannot_be_deactivated(): void
     {
         [, $business] = $this->createCatalogTenant('top');
+        $this->ensurePrimaryBranch($business);
         $primary = $business->primaryBranch()->firstOrFail();
 
         try {
@@ -172,17 +182,24 @@ class BranchLifecycleTest extends TestCase
     {
         [, $businessA] = $this->createCatalogTenant('top');
         [, $businessB] = $this->createCatalogTenant('top');
+        $this->ensurePrimaryBranch($businessA);
+        $this->ensurePrimaryBranch($businessB);
         $branchB = app(CreateBranchAction::class)->execute($businessB, [
             'name' => 'Private Branch',
             'slug' => 'private',
         ]);
 
-        $this->expectException(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
+        $this->expectException(ModelNotFoundException::class);
 
         app(\App\Modules\Branch\Actions\UpdateBranchAction::class)->execute(
             $businessA,
             $branchB,
             ['name' => 'Intrusion', 'slug' => 'intrusion'],
         );
+    }
+
+    private function ensurePrimaryBranch(Business $business): Branch
+    {
+        return app(EnsurePrimaryBranchAction::class)->execute($business);
     }
 }
