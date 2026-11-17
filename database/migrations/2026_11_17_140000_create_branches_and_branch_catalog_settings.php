@@ -126,7 +126,7 @@ return new class extends Migration
                 ALTER TABLE branches
                 ADD CONSTRAINT branches_primary_marker_check
                 CHECK (
-                    (is_primary = TRUE AND primary_business_id = business_id)
+                    (is_primary = TRUE AND primary_business_id IS NOT NULL AND primary_business_id = business_id)
                     OR (is_primary = FALSE AND primary_business_id IS NULL)
                 )
                 SQL);
@@ -139,9 +139,12 @@ return new class extends Migration
                 CREATE TRIGGER branches_primary_marker_insert
                 BEFORE INSERT ON branches
                 FOR EACH ROW
-                WHEN NOT (
-                    (NEW.is_primary = 1 AND NEW.primary_business_id = NEW.business_id)
-                    OR (NEW.is_primary = 0 AND NEW.primary_business_id IS NULL)
+                WHEN (
+                    (NEW.is_primary = 1 AND (
+                        NEW.primary_business_id IS NULL
+                        OR NEW.primary_business_id != NEW.business_id
+                    ))
+                    OR (NEW.is_primary = 0 AND NEW.primary_business_id IS NOT NULL)
                 )
                 BEGIN
                     SELECT RAISE(ABORT, 'branches primary marker must match business');
