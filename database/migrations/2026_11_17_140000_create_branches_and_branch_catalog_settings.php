@@ -155,9 +155,12 @@ return new class extends Migration
                 CREATE TRIGGER branches_primary_marker_update
                 BEFORE UPDATE OF business_id, is_primary, primary_business_id ON branches
                 FOR EACH ROW
-                WHEN NOT (
-                    (NEW.is_primary = 1 AND NEW.primary_business_id = NEW.business_id)
-                    OR (NEW.is_primary = 0 AND NEW.primary_business_id IS NULL)
+                WHEN (
+                    (NEW.is_primary = 1 AND (
+                        NEW.primary_business_id IS NULL
+                        OR NEW.primary_business_id != NEW.business_id
+                    ))
+                    OR (NEW.is_primary = 0 AND NEW.primary_business_id IS NOT NULL)
                 )
                 BEGIN
                     SELECT RAISE(ABORT, 'branches primary marker must match business');
