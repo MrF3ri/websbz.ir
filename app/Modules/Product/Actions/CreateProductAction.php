@@ -2,6 +2,7 @@
 
 namespace App\Modules\Product\Actions;
 
+use App\Modules\Branch\Actions\SyncBranchCatalogAssignmentsAction;
 use App\Modules\Business\Models\Business;
 use App\Modules\Category\Models\Category;
 use App\Modules\Menu\Models\Menu;
@@ -27,9 +28,15 @@ class CreateProductAction
             $category,
             $data,
         ): Product {
+            // Coordinate catalog writes with branch creation on the same tenant row.
+            $lockedBusiness = Business::query()
+                ->whereKey($business->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
+
             $lockedMenu = Menu::query()
                 ->whereKey($menu->getKey())
-                ->where('business_id', $business->getKey())
+                ->where('business_id', $lockedBusiness->getKey())
                 ->lockForUpdate()
                 ->firstOrFail();
 
@@ -37,24 +44,24 @@ class CreateProductAction
                 ->whereKey($category->getKey())
                 ->firstOrFail();
 
-            $enforcement = new EnforcementService(new EntitlementService($business));
+            $enforcement = new EnforcementService(new EntitlementService($lockedBusiness));
             $enforcement->requireLimit(
-                $business,
+                $lockedBusiness,
                 'max_products',
                 $lockedMenu->products()->count(),
             );
 
             if (($data['discount_price'] ?? null) !== null) {
-                $enforcement->requireFeature($business, 'product_discount');
+                $enforcement->requireFeature($lockedBusiness, 'product_discount');
             }
 
             if (($data['is_available'] ?? true) === false) {
-                $enforcement->requireFeature($business, 'product_availability_toggle');
+                $enforcement->requireFeature($lockedBusiness, 'product_availability_toggle');
             }
 
             $sortOrder = (int) ($lockedCategory->products()->max('sort_order') ?? -1) + 1;
 
-            return $lockedCategory->products()->create([
+            $product = $lockedCategory->products()->create([
                 'menu_id' => $lockedMenu->getKey(),
                 'name' => $data['name'],
                 'description' => $data['description'] ?? null,
@@ -64,6 +71,11 @@ class CreateProductAction
                 'status' => $data['status'],
                 'sort_order' => $sortOrder,
             ]);
+
+            app(SyncBranchCatalogAssignmentsAction::class)
+                ->product($lockedBusiness, $lockedMenu, $product);
+
+            return $product;
         });
     }
 }
