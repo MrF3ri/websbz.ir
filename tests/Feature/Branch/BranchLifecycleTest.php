@@ -179,6 +179,27 @@ class BranchLifecycleTest extends TestCase
         $this->assertSame('active', $primary->fresh()?->status);
     }
 
+    public function test_partial_branch_profile_updates_preserve_omitted_optional_fields(): void
+    {
+        [, $business] = $this->createCatalogTenant('top');
+        $this->ensurePrimaryBranch($business);
+        $branch = app(CreateBranchAction::class)->execute($business, [
+            'name' => 'Original Branch',
+            'slug' => 'original',
+            'phone' => '+989120000000',
+            'timezone' => 'Europe/Baku',
+        ]);
+
+        $updated = app(UpdateBranchAction::class)->execute($business, $branch, [
+            'name' => 'Renamed Branch',
+            'slug' => 'renamed',
+        ]);
+
+        $this->assertSame('Renamed Branch', $updated->name);
+        $this->assertSame('+989120000000', $updated->phone);
+        $this->assertSame('Europe/Baku', $updated->timezone);
+    }
+
     public function test_branch_from_another_business_cannot_be_updated_through_the_current_tenant(): void
     {
         [, $businessA] = $this->createCatalogTenant('top');
