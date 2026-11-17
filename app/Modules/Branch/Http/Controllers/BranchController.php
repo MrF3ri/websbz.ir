@@ -47,7 +47,7 @@ class BranchController
         $business = $this->resolveBusiness($currentBusiness);
         $branch = $createBranch->execute($business, $request->validated());
 
-        return response()->json(['data' => $branch], 201);
+        return response()->json(['data' => $this->branchData($branch)], 201);
     }
 
     public function update(
@@ -60,7 +60,7 @@ class BranchController
         $branch = $this->resolveBranch($business, $branchPublicId);
         $updated = $updateBranch->execute($business, $branch, $request->validated());
 
-        return response()->json(['data' => $updated]);
+        return response()->json(['data' => $this->branchData($updated)]);
     }
 
     public function activate(
@@ -73,7 +73,7 @@ class BranchController
         $branch = $this->resolveBranch($business, $branchPublicId);
 
         return response()->json([
-            'data' => $setBranchStatus->execute($business, $branch, true),
+            'data' => $this->branchData($setBranchStatus->execute($business, $branch, true)),
         ]);
     }
 
@@ -87,7 +87,7 @@ class BranchController
         $branch = $this->resolveBranch($business, $branchPublicId);
 
         return response()->json([
-            'data' => $setBranchStatus->execute($business, $branch, false),
+            'data' => $this->branchData($setBranchStatus->execute($business, $branch, false)),
         ]);
     }
 
@@ -102,5 +102,25 @@ class BranchController
     private function resolveBranch(Business $business, string $publicId): Branch
     {
         return $business->branches()->where('public_id', $publicId)->firstOrFail();
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function branchData(Branch $branch): array
+    {
+        return $branch->only([
+            'public_id',
+            'name',
+            'slug',
+            'status',
+            'is_primary',
+            'phone',
+            'email',
+            'address',
+            'latitude',
+            'longitude',
+            'timezone',
+        ]);
     }
 }
