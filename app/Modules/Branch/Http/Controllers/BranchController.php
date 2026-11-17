@@ -23,6 +23,7 @@ class BranchController
         Gate::authorize('view', $business);
 
         return Inertia::render('Branches/Index', [
+            'canManage' => Gate::allows('update', $business),
             'branches' => $business->branches()
                 ->orderByDesc('is_primary')
                 ->orderBy('id')
