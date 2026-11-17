@@ -7,6 +7,7 @@ use App\Modules\Branch\Models\Branch;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Tests\Concerns\InteractsWithCatalog;
 use Tests\TestCase;
 
@@ -98,7 +99,7 @@ class BranchFoundationTest extends TestCase
         $this->expectException(QueryException::class);
 
         DB::table('branches')->insert([
-            'public_id' => (string) \Illuminate\Support\Str::ulid(),
+            'public_id' => (string) Str::ulid(),
             'business_id' => $business->getKey(),
             'name' => 'Invalid primary',
             'slug' => 'invalid-primary',
