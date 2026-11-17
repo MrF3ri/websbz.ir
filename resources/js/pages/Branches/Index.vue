@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { Building2, Clock3, MapPin, Plus, Save, Store, X } from '@lucide/vue';
 import { Button } from '@/components/ui/button';
@@ -32,14 +32,6 @@ const days: { key: Weekday; label: string }[] = [
     { key: 'mon', label: 'دوشنبه' }, { key: 'tue', label: 'سه‌شنبه' },
     { key: 'wed', label: 'چهارشنبه' }, { key: 'thu', label: 'پنجشنبه' },
     { key: 'fri', label: 'جمعه' },
-];
-const timezoneOptions = [
-    { value: 'Asia/Tehran', label: 'تهران' },
-    { value: 'Asia/Dubai', label: 'دبی' },
-    { value: 'Europe/Istanbul', label: 'استانبول' },
-    { value: 'Asia/Baku', label: 'باکو' },
-    { value: 'Asia/Riyadh', label: 'ریاض' },
-    { value: 'UTC', label: 'UTC' },
 ];
 const selected = ref<Branch | null>(null);
 const showForm = ref(false);
@@ -183,7 +175,7 @@ function daySummary(branch: Branch): string {
                         <div class="grid gap-2 sm:col-span-2"><Label for="branch-address">نشانی</Label><textarea id="branch-address" v-model="form.address" rows="2" class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" :disabled="form.processing" /><p v-if="form.errors.address" class="text-sm text-destructive">{{ form.errors.address }}</p></div>
                         <div class="grid gap-2"><Label for="branch-latitude">عرض جغرافیایی</Label><Input id="branch-latitude" v-model="form.latitude" dir="ltr" inputmode="decimal" placeholder="35.6892" :disabled="form.processing" /><p v-if="form.errors.latitude" class="text-sm text-destructive">{{ form.errors.latitude }}</p></div>
                         <div class="grid gap-2"><Label for="branch-longitude">طول جغرافیایی</Label><Input id="branch-longitude" v-model="form.longitude" dir="ltr" inputmode="decimal" placeholder="51.3890" :disabled="form.processing" /><p v-if="form.errors.longitude" class="text-sm text-destructive">{{ form.errors.longitude }}</p></div>
-                        <div class="grid gap-2 sm:col-span-2"><Label for="branch-timezone">منطقه زمانی</Label><select id="branch-timezone" v-model="form.timezone" class="h-10 rounded-md border border-input bg-background px-3 text-sm" :disabled="form.processing"><option v-for="option in timezoneOptions" :key="option.value" :value="option.value">{{ option.label }} ({{ option.value }})</option></select><p v-if="form.errors.timezone" class="text-sm text-destructive">{{ form.errors.timezone }}</p></div>
+                        <div class="grid gap-2 sm:col-span-2"><Label for="branch-timezone">منطقه زمانی (IANA)</Label><Input id="branch-timezone" v-model="form.timezone" dir="ltr" placeholder="Asia/Tehran" :disabled="form.processing" /><p class="text-xs text-muted-foreground">شناسه منطقه زمانی شعبه؛ مثلاً Asia/Tehran یا Europe/Istanbul</p><p v-if="form.errors.timezone" class="text-sm text-destructive">{{ form.errors.timezone }}</p></div>
                     </div>
 
                     <section class="space-y-4 rounded-lg border border-border p-4">
