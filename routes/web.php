@@ -1,5 +1,6 @@
 <?php
 
+use App\Modules\Branch\Http\Controllers\BranchController;
 use App\Modules\Business\Http\Controllers\BusinessOnboardingController;
 use App\Modules\Business\Http\Controllers\BusinessSettingsController;
 use App\Modules\Catalog\Http\Controllers\CatalogController;
@@ -66,6 +67,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::put('/business/settings', [BusinessSettingsController::class, 'update'])
             ->name('business.settings.update');
+
+        Route::get('/business/branches', [BranchController::class, 'index'])
+            ->name('business.branches.index');
+        Route::post('/business/branches', [BranchController::class, 'store'])
+            ->name('business.branches.store');
+        Route::put('/business/branches/{branchPublicId}', [BranchController::class, 'update'])
+            ->name('business.branches.update');
+        Route::post('/business/branches/{branchPublicId}/activate', [BranchController::class, 'activate'])
+            ->name('business.branches.activate');
+        Route::post('/business/branches/{branchPublicId}/deactivate', [BranchController::class, 'deactivate'])
+            ->name('business.branches.deactivate');
 
         Route::get('/catalog', [CatalogController::class, 'index'])
             ->name('catalog.index');

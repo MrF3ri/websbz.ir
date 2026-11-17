@@ -2,6 +2,7 @@
 
 namespace App\Modules\Product\Actions;
 
+use App\Modules\Branch\Actions\SyncBranchCatalogAssignmentsAction;
 use App\Modules\Business\Models\Business;
 use App\Modules\Category\Models\Category;
 use App\Modules\Menu\Models\Menu;
@@ -54,7 +55,7 @@ class CreateProductAction
 
             $sortOrder = (int) ($lockedCategory->products()->max('sort_order') ?? -1) + 1;
 
-            return $lockedCategory->products()->create([
+            $product = $lockedCategory->products()->create([
                 'menu_id' => $lockedMenu->getKey(),
                 'name' => $data['name'],
                 'description' => $data['description'] ?? null,
@@ -64,6 +65,11 @@ class CreateProductAction
                 'status' => $data['status'],
                 'sort_order' => $sortOrder,
             ]);
+
+            app(SyncBranchCatalogAssignmentsAction::class)
+                ->product($business, $lockedMenu, $product);
+
+            return $product;
         });
     }
 }
