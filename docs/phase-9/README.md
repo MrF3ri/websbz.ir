@@ -2,7 +2,7 @@
 
 Status: In progress  
 Current increment: 9.3 — Branch-specific public menu QR  
-Implementation branch: `feat/phase-9-branch-public-read`  
+Implementation branch: `feat/phase-9-branch-menu-qr`  
 Approved model: Hybrid shared catalog with branch-level overrides (ADR 0014)
 
 ## Delivered foundation
@@ -34,10 +34,9 @@ Approved model: Hybrid shared catalog with branch-level overrides (ADR 0014)
 ## Remaining Phase 9 work
 
 1. Add tenant-scoped management UI and actions for category/product branch settings, including explicit clear/inherit semantics and validation of effective discounts and stock.
-2. Complete branch catalog settings management UI and actions, including explicit clear/inherit semantics and validation of effective discounts and stock.
-3. Audit every canonical and branch-specific write path for correct branch-cache invalidation.
-4. Add PostgreSQL concurrency coverage for branch quota and settings writes.
-5. Complete owner-driven end-to-end acceptance: create a second branch, customize it, scan its QR, and verify the primary branch is unchanged.
+2. Audit every canonical and branch-specific write path for correct branch-cache invalidation.
+3. Add PostgreSQL concurrency coverage for branch quota and settings writes.
+4. Complete owner-driven end-to-end acceptance: create a second branch, customize it, scan its QR, and verify the primary branch is unchanged.
 
 ## Effective product rules
 
