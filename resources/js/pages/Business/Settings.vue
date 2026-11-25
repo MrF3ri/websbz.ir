@@ -19,7 +19,7 @@ interface Business {
 
 const props = defineProps<{
     business: Business;
-    features: { business_logo: boolean; can_manage_logo: boolean; business_introduction: boolean };
+    features: { business_logo: boolean; can_manage_logo: boolean; business_introduction: boolean; can_manage_business: boolean };
 }>();
 
 defineOptions({
@@ -234,13 +234,13 @@ function submit() {
                             rows="4"
                             maxlength="1200"
                             class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm leading-6 outline-none focus-visible:ring-2 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-60"
-                            :readonly="!features.business_introduction && Boolean(form.introduction)"
-                            :disabled="!features.business_introduction && !form.introduction"
+                             :readonly="!features.can_manage_business || (!features.business_introduction && Boolean(form.introduction))"
+                             :disabled="!features.can_manage_business || (!features.business_introduction && !form.introduction)"
                             :aria-invalid="Boolean(form.errors.introduction)"
                         />
                         <p v-if="form.errors.introduction" class="text-sm text-destructive" role="alert">{{ form.errors.introduction }}</p>
                         <p v-if="!features.business_introduction" class="text-xs text-muted-foreground">معرفی کسب‌وکار در طرح فعلی قابل ویرایش نیست. متن قبلی حفظ می‌شود؛ می‌توانید آن را حذف کنید.</p>
-                        <Button v-if="!features.business_introduction && form.introduction" type="button" variant="outline" size="sm" @click="form.introduction = ''">حذف معرفی قبلی</Button>
+                        <Button v-if="features.can_manage_business && !features.business_introduction && form.introduction" type="button" variant="outline" size="sm" @click="form.introduction = ''">حذف معرفی قبلی</Button>
                     </div>
                 </section>
 
