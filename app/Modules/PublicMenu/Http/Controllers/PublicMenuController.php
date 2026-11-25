@@ -238,7 +238,7 @@ class PublicMenuController
                 ->map(function (Category $category) use ($categorySettings, $productSettings, $resolver): ?array {
                     $categorySetting = $categorySettings->get($category->getKey());
 
-                    if ($categorySetting !== null && !$categorySetting->is_visible) {
+                    if ($categorySetting !== null && $categorySetting->is_visible === false) {
                         return null;
                     }
 
@@ -247,7 +247,7 @@ class PublicMenuController
                             $setting = $productSettings->get($product->getKey());
                             $effective = $resolver->resolve($product, $setting);
 
-                            if (!$effective['is_visible'] || !$effective['is_available']) {
+                            if ($effective['is_visible'] === false || $effective['is_available'] === false) {
                                 return null;
                             }
 
@@ -345,10 +345,10 @@ class PublicMenuController
                 $category['products'] = array_map(function (array $product) use ($locale): array {
                     $translation = $product['translations'][$locale] ?? null;
                     if (is_array($translation)) {
-                        if (!$product['branch_name_override']) {
+                        if ($product['branch_name_override'] === false) {
                             $product['name'] = $translation['name'] ?? $product['name'];
                         }
-                        if (!$product['branch_description_override']) {
+                        if ($product['branch_description_override'] === false) {
                             $product['description'] = $translation['description'] ?? $product['description'];
                         }
                     }
