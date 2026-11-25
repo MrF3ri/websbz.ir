@@ -53,12 +53,14 @@ class MenuThemeController
         return Inertia::render('Menu/Theme', [
             'menu' => [
                 'theme' => $theme,
+                'advertising_banner' => $menu->advertising_banner,
             ],
             'templates' => $templates,
             'features' => [
                 'custom_colors' => $entitlements->hasFeature('custom_colors'),
                 'font_selection' => $entitlements->hasFeature('font_selection'),
                 'dark_mode' => $entitlements->hasFeature('dark_mode'),
+                'advertising_banner' => $entitlements->hasFeature('advertising_banner'),
             ],
         ]);
     }
