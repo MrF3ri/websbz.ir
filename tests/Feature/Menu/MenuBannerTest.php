@@ -133,6 +133,29 @@ class MenuBannerTest extends TestCase
         $this->assertSame($banner, $menu->fresh()->advertising_banner);
     }
 
+    public function test_public_renderer_drops_unsafe_stored_cta_urls_and_unknown_fields(): void
+    {
+        [, $business, $menu] = $this->createCatalogTenant('professional');
+        $menu->update([
+            'status' => MenuStatus::Published,
+            'advertising_banner' => [
+                'title' => 'عنوان امن',
+                'message' => 'متن امن',
+                'cta_label' => 'کلیک',
+                'cta_url' => 'javascript:alert(1)',
+                'unsafe_html' => '<script>alert(1)</script>',
+            ],
+        ]);
+
+        $this->get(route('public.menu.show', [$business->slug, $menu->slug]))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('menu.advertising_banner.title', 'عنوان امن')
+                ->where('menu.advertising_banner.cta_label', null)
+                ->where('menu.advertising_banner.cta_url', null)
+                ->missing('menu.advertising_banner.unsafe_html'));
+    }
+
     public function test_advertising_banner_rejects_non_https_call_to_action_urls(): void
     {
         [$user] = $this->createCatalogTenant('professional');
