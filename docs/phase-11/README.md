@@ -54,7 +54,7 @@ Pull request: #76 (Draft)
 - Add tests for Professional/Economic access, downgrade behavior, and public rendering.
 - Record the behavior in ADR 0019.
 
-## Delivered in increment 11.6 (implementation in progress)
+## Delivered in increment 11.6
 
 - Add a fixed-field advertising banner to menu settings: title, message, CTA label, and HTTPS CTA URL.
 - Gate new or changed banner content through the `advertising_banner` subscription snapshot.
@@ -127,4 +127,10 @@ Pull request: #76 (Draft)
 
 ### Increment 11.6 — PR #76
 
-- GitHub Actions verification is pending for the current branch head.
+- SQLite: 244 passed, 7 skipped.
+- PostgreSQL test suite: passed.
+- MenuBannerTest: plan gating, downgrade preservation/removal, HTTPS validation, and public rendering passed.
+- Backblaze B2 S3 integration: passed in both database jobs.
+- Frontend test files: 2 passed; Vue/TypeScript checks passed.
+- PHPStan reported no errors; all CI quality checks passed.
+- Production image build, Compose validation, and Nginx validation: passed.
