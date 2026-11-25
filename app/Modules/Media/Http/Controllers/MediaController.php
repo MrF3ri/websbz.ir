@@ -97,7 +97,7 @@ class MediaController
             $lockedProduct = Product::query()->whereKey($product->getKey())->lockForUpdate()->firstOrFail();
             $images = $lockedProduct->images()->whereHas('media', fn ($query) => $query->whereIn('public_id', $publicIds))->with('media')->get();
 
-            if ($images->count() !== count($publicIds)) {
+            if ($images->count() !== count($publicIds) || $images->count() !== $lockedProduct->images()->count()) {
                 abort(404);
             }
 
