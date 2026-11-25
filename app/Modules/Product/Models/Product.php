@@ -5,6 +5,7 @@ namespace App\Modules\Product\Models;
 use App\Modules\Category\Models\Category;
 use App\Modules\Media\Models\ProductImage;
 use App\Modules\Menu\Models\Menu;
+use App\Modules\Product\Enums\ProductLabel;
 use App\Modules\Product\Enums\ProductStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -18,6 +19,7 @@ use Illuminate\Support\Str;
  * @property int $category_id
  * @property string $name
  * @property string|null $description
+ * @property ProductLabel|null $label
  * @property int $base_price
  * @property int|null $discount_price
  * @property bool $is_available
@@ -31,6 +33,7 @@ class Product extends Model
         'category_id',
         'name',
         'description',
+        'label',
         'base_price',
         'discount_price',
         'is_available',
@@ -79,6 +82,7 @@ class Product extends Model
             'discount_price' => 'integer',
             'is_available' => 'boolean',
             'status' => ProductStatus::class,
+            'label' => ProductLabel::class,
             'sort_order' => 'integer',
         ];
     }
