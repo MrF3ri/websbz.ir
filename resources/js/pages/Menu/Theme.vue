@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { Head, useForm } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { Button } from '@/components/ui/button';\nimport { ref } from 'vue';
+import { Button } from '@/components/ui/button';
+import { ref } from 'vue';
 
 type Template = { name: string; description: string; layout: string };
 
@@ -18,7 +19,18 @@ const form = useForm({
     mode: props.menu.theme.mode,
 });
 
-const previewMode = ref<'mobile' | 'desktop'>('mobile');\n\nconst previewClasses: Record<string, string> = {\n    classic: 'rounded-xl border border-stone-200 bg-white shadow-sm',\n    minimal: 'rounded-lg border-0 bg-white shadow-none',\n    editorial: 'rounded-none border-y border-stone-300 bg-white',\n    modern: 'rounded-2xl border-2 border-stone-200 bg-white shadow-lg',\n    cafe: 'rounded-[1.5rem] border border-amber-200 bg-amber-50',\n    contrast: 'rounded-md border-2 border-stone-900 bg-white shadow-md',\n};\n\nfunction save(): void {
+const previewMode = ref<'mobile' | 'desktop'>('mobile');
+
+const previewClasses: Record<string, string> = {
+    classic: 'rounded-xl border border-stone-200 bg-white shadow-sm',
+    minimal: 'rounded-lg border-0 bg-white shadow-none',
+    editorial: 'rounded-none border-y border-stone-300 bg-white',
+    modern: 'rounded-2xl border-2 border-stone-200 bg-white shadow-lg',
+    cafe: 'rounded-[1.5rem] border border-amber-200 bg-amber-50',
+    contrast: 'rounded-md border-2 border-stone-900 bg-white shadow-md',
+};
+
+function save(): void {
     form.put('/catalog/menu/theme', { preserveScroll: true });
 }
 </script>
