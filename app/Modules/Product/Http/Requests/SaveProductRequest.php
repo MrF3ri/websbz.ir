@@ -29,7 +29,7 @@ class SaveProductRequest extends FormRequest
             'category_public_id' => ['required', 'string', 'size:26'],
             'name' => ['required', 'string', 'max:180'],
             'description' => ['nullable', 'string', 'max:5000'],
-            'label' => ['nullable', Rule::enum(ProductLabel::class)],
+            'label' => ['sometimes', 'nullable', Rule::enum(ProductLabel::class)],
             'base_price' => ['required', 'integer', 'min:0'],
             'discount_price' => ['nullable', 'integer', 'min:0', 'lt:base_price'],
             'is_available' => ['sometimes', 'boolean'],
