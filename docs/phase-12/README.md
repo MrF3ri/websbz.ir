@@ -1,8 +1,8 @@
 # Phase 12 — Localization and Translation Management
 
 Status: In progress  
-Current increment: 12.3 — Public menu locale resolution and rendering  
-Implementation branch: `feat/phase-12-public-menu-locales`
+Current increment: 12.4 — Translation completeness and validation  
+Implementation branch: `feat/phase-12-translation-completeness`
 
 ## Approved scope
 
@@ -32,24 +32,28 @@ Economic and Professional remain single-language. Locale availability is control
 - Add a Top-only translation editor with source-text context, locale direction, and completion progress.
 - Show the translation navigation item only when `max_languages` exceeds one.
 
-## Increment 12.3 — public menu locale resolution and rendering
+## Delivered in increment 12.3 — merged PR #85
 
-- Resolve the requested public locale from the `lang` query parameter against the current subscription snapshot on every request.
-- Keep the public menu path stable; locale selection does not alter business/menu resolution or public identifiers.
-- Render translated menu, category, product-name, and product-description fields.
-- Fall back independently per field to the source-language value when a translation is missing.
-- Expose only the currently entitled locale options to the public language switcher.
-- Set the document language and text direction from the server-resolved locale metadata.
-- Localize the public menu's interface labels and number formatting for Persian, English, and Arabic.
-- Keep prices, discounts, availability, labels, images, and branch overrides language-neutral.
-- Bump the public-menu cache payload version so pre-localization cached payloads cannot be reused.
+- Resolve the optional `lang` query parameter against the current business `max_languages` snapshot on every public-menu request.
+- Keep the public menu path stable and expose only server-authorized locale choices.
+- Render translated menu, category, product-name, and product-description fields with independent source-field fallback.
+- Set document language and text direction from the locale registry.
+- Add a Persian/English/Arabic language switcher and localized public-menu labels/number formatting.
+- Keep translation records out of the browser payload after locale resolution.
+- Version the locale-neutral public-menu cache payload.
+
+## Increment 12.4 — translation completeness and validation
+
+- Count a product-description translation as required for completeness only when its source description is non-empty.
+- Keep the progress calculation in a pure typed helper with unit coverage for complete, incomplete, optional, and whitespace-only values.
+- Show completed, total, and remaining field counts in the translation editor.
+- Add a request-level regression test proving blank required menu/category/product text is rejected before any translation rows are persisted.
 
 ## Remaining Phase 12 work
 
-1. Add validation and translation completeness indicators for menu/category/product text.
-2. Review translation behavior for banner and business-introduction fields; these fields are not part of the approved normalized translation tables yet.
-3. Add broader SQLite/PostgreSQL coverage for concurrent translation writes and tenant isolation.
-4. Reconcile the phase roadmap and run the full repository Release Gate when all product phases are complete.
+1. Review translation behavior for banner and business-introduction fields; these fields are not part of the approved normalized translation tables yet.
+2. Add broader SQLite/PostgreSQL coverage for concurrent translation writes and tenant isolation.
+3. Reconcile the phase roadmap and run the full repository Release Gate when all product phases are complete.
 
 ## Acceptance criteria
 
