@@ -250,13 +250,13 @@ class BusinessLogoTest extends TestCase
         $oldMedia = $business->fresh()->logo()->with('media')->firstOrFail()->media;
         $newPath = 'businesses/'.$business->public_id.'/logo/replacement.png';
 
-        $disk = \\Mockery::mock(FilesystemAdapter::class);
+        $disk = \Mockery::mock(FilesystemAdapter::class);
         $disk->shouldReceive('putFileAs')
             ->once()
             ->with(
                 'businesses/'.$business->public_id.'/logo',
-                \\Mockery::type(UploadedFile::class),
-                \\Mockery::type('string'),
+                \Mockery::type(UploadedFile::class),
+                \Mockery::type('string'),
             )
             ->andReturn($newPath);
         $disk->shouldReceive('exists')->once()->with($oldMedia->path)->andReturn(true);
@@ -284,7 +284,7 @@ class BusinessLogoTest extends TestCase
 
         $media = $business->fresh()->logo()->with('media')->firstOrFail()->media;
 
-        $disk = \\Mockery::mock(FilesystemAdapter::class);
+        $disk = \Mockery::mock(FilesystemAdapter::class);
         $disk->shouldReceive('exists')->once()->with($media->path)->andReturn(true);
         $disk->shouldReceive('delete')->once()->with($media->path)->andReturn(false);
         Storage::shouldReceive('disk')->once()->with('media')->andReturn($disk);
