@@ -74,11 +74,6 @@ class PublicMenuController
                             'width' => $image->media->width,
                             'height' => $image->media->height,
                         ])->values()->all(),
-                        'images' => $product->images->map(fn ($image): array => [
-                            'url' => route('media.public', $image->media->public_id),
-                            'width' => $image->media->width,
-                            'height' => $image->media->height,
-                        ])->values()->all(),
                     ])->values()->all(),
                 ])->values()->all(),
             ];
