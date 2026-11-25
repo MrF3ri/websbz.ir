@@ -6,6 +6,7 @@ use App\Enums\BusinessStatus;
 use App\Modules\Business\Models\Business;
 use App\Modules\Category\Models\Category;
 use App\Modules\Menu\Enums\MenuStatus;
+use App\Modules\Media\Models\ProductImage;
 use App\Modules\Product\Enums\ProductStatus;
 use App\Modules\Product\Models\Product;
 use App\Modules\PublicMenu\Services\PublicMenuCache;
@@ -46,7 +47,7 @@ class PublicMenuController
                         ->where('is_available', true)
                         ->orderBy('sort_order')
                         ->orderBy('id');
-                }])
+                }, 'products.images.media'])
                 ->orderBy('sort_order')
                 ->orderBy('id')
                 ->get();
@@ -67,7 +68,17 @@ class PublicMenuController
                         'name' => $product->name,
                         'description' => $product->description,
                         'price' => $product->base_price,
-                        'discount_price' => $product->discount_price,\n                        'images' => $product->images->map(fn ($image): array => [\n                            'url' => route('media.public', $image->media->public_id),\n                            'width' => $image->media->width,\n                            'height' => $image->media->height,\n                        ])->values()->all(),
+                        'discount_price' => $product->discount_price,
+                        'images' => $product->images->map(fn (ProductImage $image): array => [
+                            'url' => route('media.public', $image->media->public_id),
+                            'width' => $image->media->width,
+                            'height' => $image->media->height,
+                        ])->values()->all(),
+                        'images' => $product->images->map(fn ($image): array => [
+                            'url' => route('media.public', $image->media->public_id),
+                            'width' => $image->media->width,
+                            'height' => $image->media->height,
+                        ])->values()->all(),
                     ])->values()->all(),
                 ])->values()->all(),
             ];
