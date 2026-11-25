@@ -115,7 +115,7 @@ class MenuThemeController
                 abort_unless(isset($availableTemplates[$validated['template']]), 403);
             }
 
-            $theme = array_merge(self::DEFAULT_THEME, $menu->theme ?? []);
+            $theme = array_merge(self::DEFAULT_THEME, array_intersect_key($menu->theme ?? [], self::DEFAULT_THEME));
             $theme['template'] = $validated['template'];
 
             $primaryColor = strtoupper($validated['primary_color']);
