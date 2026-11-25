@@ -74,6 +74,12 @@ class Product extends Model
         return $this->hasMany(ProductImage::class)->orderBy('sort_order')->orderBy('id');
     }
 
+    /** @return HasMany<ProductTranslation, $this> */
+    public function translations(): HasMany
+    {
+        return $this->hasMany(ProductTranslation::class);
+    }
+
     /** @return array<string, string> */
     protected function casts(): array
     {
