@@ -4,6 +4,8 @@ namespace Tests\Feature\Business;
 
 use App\Modules\Menu\Enums\MenuStatus;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
+use Inertia\Testing\AssertableInertia as Assert;
 use Tests\Concerns\InteractsWithCatalog;
 use Tests\TestCase;
 
@@ -88,7 +90,7 @@ class BusinessIntroductionTest extends TestCase
     public function test_public_menu_hides_existing_introduction_after_downgrade_without_stale_cache(): void
     {
         config(['cache.default' => 'array']);
-        cache()->store('array')->flush();
+        Cache::store('array')->flush();
 
         [$user, $business, $menu] = $this->createCatalogTenant('professional');
         $introduction = 'معرفی عمومی کافه';
@@ -102,7 +104,7 @@ class BusinessIntroductionTest extends TestCase
 
         $this->get($url)
             ->assertOk()
-            ->assertInertia(fn ($page) => $page
+            ->assertInertia(fn (Assert $page) => $page
                 ->where('business.introduction', $introduction));
 
         $subscription = $business->subscriptions()->latest('id')->firstOrFail();
