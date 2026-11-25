@@ -69,14 +69,14 @@ This snapshot records the operational state reported and verified during the own
 
 ## Current product phase
 
-- **Phase 12 — Localization and Translation Management:** in progress. PR #83 merged the locale registry and normalized translation schema; PR #84 merged Top-only tenant-scoped translation management; PR #85 merged public-menu locale resolution, translated rendering, direction metadata, and source-field fallback. Increment 12.4 merged translation completeness accounting and required-field validation; increment 12.5 is adding tenant-isolation and warm-cache invalidation regression coverage. Only Top supports `fa`, `en`, and `ar`; Economic and Professional remain single-language. See `docs/phase-12/README.md`.
+- **Phase 12 — Localization and Translation Management:** in progress. PRs #83–#87 delivered the locale registry/schema, Top-only translation management, public-menu locale rendering, translation completeness, and tenant/cache regression coverage. Remaining: decide whether banner and business-introduction fields enter the approved translation model, then complete the repository-wide Release Gate. Only Top supports `fa`, `en`, and `ar`; Economic and Professional remain single-language. See `docs/phase-12/README.md`.
+- **Phase 9 — Branch Management:** implementation resumed. The branch schema/lifecycle foundation is already merged; increment 9.1 centralizes canonical-to-branch product value resolution. The public branch read path, branch catalog settings UI, branch-specific URLs/QR, and PostgreSQL concurrency acceptance remain. See `docs/phase-9/README.md`.
 - **Phase 11 — Menu Customization and Visual Templates:** complete and merged through PR #82. See `docs/phase-11/README.md` for increment-level implementation and CI history.
 
 ## Deferred product phases
 
 These are intentionally separate from the current localization increment:
 
-- **Phase 9:** Branch management and mixed product settings.
 - **Phase 10:** Media and product image management.
 - **Phase 15:** Top-plan advanced features (video, reviews/ratings, likes, Instagram API, Excel export, backup/restore, notifications/customer communication, initial setup service).
 - **Phase 16:** Custom domains and HTTPS per tenant.

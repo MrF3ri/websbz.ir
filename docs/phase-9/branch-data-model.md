@@ -1,6 +1,6 @@
 # Phase 9 — Branch Management: Data Model and Implementation Contract
 
-- Status: Design approved; implementation not started
+- Status: Design approved; schema, lifecycle, and resolver foundation partially implemented
 - Decision: ADR 0014
 - Owner-approved model: Hybrid shared catalog with branch-level overrides
 - Related issue: #64
