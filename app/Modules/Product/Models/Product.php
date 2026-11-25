@@ -2,8 +2,8 @@
 
 namespace App\Modules\Product\Models;
 
-use App\Modules\Category\Models\Category;
 use App\Modules\Branch\Models\BranchProductSetting;
+use App\Modules\Category\Models\Category;
 use App\Modules\Media\Models\ProductImage;
 use App\Modules\Menu\Models\Menu;
 use App\Modules\Product\Enums\ProductLabel;
