@@ -5,14 +5,16 @@ namespace App\Modules\Business\Models;
 use App\Enums\BusinessStatus;
 use App\Models\User;
 use App\Modules\Branch\Models\Branch;
-use App\Modules\Menu\Models\Menu;\nuse App\Modules\Media\Models\Media;
+use App\Modules\Menu\Models\Menu;
+use App\Modules\Media\Models\Media;
 use App\Modules\Subscription\Models\Subscription;
 use Database\Factories\BusinessFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;\nuse Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Str;
@@ -27,7 +29,8 @@ use Illuminate\Support\Str;
  * @property string|null $email
  * @property string|null $address
  * @property string|null $city
- * @property string|null $postal_code\n * @property int|null $logo_media_id
+ * @property string|null $postal_code
+ * @property int|null $logo_media_id
  *
  * @method static Builder<static> query()
  */
@@ -49,7 +52,8 @@ class Business extends Model
         'email',
         'address',
         'city',
-        'postal_code',\n        'logo_media_id',
+        'postal_code',
+        'logo_media_id',
     ];
 
     /**
@@ -111,6 +115,11 @@ class Business extends Model
      *
      * @return HasOne<Menu, $this>
      */
+    public function logo(): BelongsTo
+    {
+        return $this->belongsTo(Media::class, 'logo_media_id');
+    }
+
     public function menu(): HasOne
     {
         return $this->hasOne(Menu::class);
