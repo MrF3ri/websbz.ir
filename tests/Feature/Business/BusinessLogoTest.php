@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use RuntimeException;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\Concerns\InteractsWithCatalog;
 use Tests\TestCase;
@@ -289,11 +290,16 @@ class BusinessLogoTest extends TestCase
         $disk->shouldReceive('delete')->once()->with($media->path)->andReturn(false);
         Storage::shouldReceive('disk')->once()->with('media')->andReturn($disk);
 
-        $this->actingAs($user)
-            ->delete(route('business.logo.destroy'))
-            ->assertRedirect();
+        $this->withoutExceptionHandling();
 
-        $this->assertFalse($business->fresh()->logo()->exists());
+        try {
+            $this->actingAs($user)->delete(route('business.logo.destroy'));
+            $this->fail('A storage deletion failure must roll back the logo association.');
+        } catch (RuntimeException $exception) {
+            $this->assertSame('Unable to delete business logo from storage.', $exception->getMessage());
+        }
+
+        $this->assertTrue($business->fresh()->logo()->exists());
         $this->assertDatabaseHas('media', ['id' => $media->getKey(), 'path' => $media->path]);
     }
 
