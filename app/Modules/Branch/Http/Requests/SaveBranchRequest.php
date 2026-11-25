@@ -35,12 +35,10 @@ class SaveBranchRequest extends FormRequest
             $branch = $business->branches()->where('public_id', $publicId)->firstOrFail();
         }
 
-        $slugRule = Rule::unique('branches', 'slug')
-            ->where(fn ($query) => $query->where('business_id', $business->getKey()));
-
-        if ($branch !== null) {
-            $slugRule->ignore($branch->getKey());
-        }
+        $slugRule = $branch === null
+            ? Rule::unique('branches', 'slug')
+                ->where(fn ($query) => $query->where('business_id', $business->getKey()))
+            : Rule::in([$branch->slug]);
 
         return [
             'name' => ['required', 'string', 'max:160'],
