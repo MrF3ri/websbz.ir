@@ -3,6 +3,7 @@
 namespace App\Modules\Business\Actions;
 
 use App\Modules\Business\Models\Business;
+use App\Modules\Media\Models\BusinessLogo;
 use App\Modules\Media\Models\Media;
 use App\Modules\Subscription\Services\EntitlementService;
 use Illuminate\Http\UploadedFile;
@@ -79,7 +80,8 @@ class UploadBusinessLogoAction
                     throw new RuntimeException('Unable to store business logo.');
                 }
 
-                $oldMedia = $lockedBusiness->logo()->lockForUpdate()->first();
+                $oldLogo = $lockedBusiness->logo()->lockForUpdate()->first();
+                $oldMedia = $oldLogo?->media()->lockForUpdate()->first();
 
                 $media = Media::query()->create([
                     'business_id' => $lockedBusiness->getKey(),
@@ -91,7 +93,11 @@ class UploadBusinessLogoAction
                     'height' => (int) $dimensions[1],
                 ]);
 
-                $lockedBusiness->update(['logo_media_id' => $media->getKey()]);
+                if ($oldLogo instanceof BusinessLogo) {
+                    $oldLogo->update(['media_id' => $media->getKey()]);
+                } else {
+                    $lockedBusiness->logo()->create(['media_id' => $media->getKey()]);
+                }
 
                 return $media;
             });
