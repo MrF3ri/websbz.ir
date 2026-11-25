@@ -48,6 +48,8 @@ class BranchPublicMenuTest extends TestCase
             'slug' => 'north',
         ]);
 
+        $product->translations()->create(['locale' => 'en', 'name' => 'Translated canonical espresso']);
+
         $secondary->productSettings()->where('product_id', $product->getKey())->update([
             'name_override' => 'North espresso',
             'description_override' => 'North-only description',
@@ -76,6 +78,13 @@ class BranchPublicMenuTest extends TestCase
                 ->where('categories.0.products.0.description', 'North-only description')
                 ->where('categories.0.products.0.price', 145000)
                 ->where('categories.0.products.0.discount_price', null));
+
+        $this->get(route('public.menu.branch.show', [$business->slug, $menu->slug, $secondary->slug]).'?lang=en')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('menu.locale', 'en')
+                ->where('categories.0.products.0.name', 'North espresso')
+                ->where('categories.0.products.0.description', 'North-only description'));
 
         $this->assertSame('Canonical espresso', $product->fresh()->name);
         $this->assertSame(120000, $product->fresh()->base_price);
