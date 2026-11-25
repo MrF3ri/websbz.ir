@@ -10,6 +10,7 @@ use App\Modules\Media\Models\Media;
 use App\Modules\PublicMenu\Services\PublicMenuCache;
 use App\Modules\Tenancy\Services\CurrentBusiness;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
@@ -27,7 +28,9 @@ class BusinessLogoController
         PublicMenuCache $publicMenuCache,
     ): RedirectResponse {
         $business = $this->business($currentBusiness);
-        $upload->execute($business, $request->file('logo'));
+        $file = $request->file('logo');
+        abort_unless($file instanceof UploadedFile, 422);
+        $upload->execute($business, $file);
         $this->forgetPublicMenu($business, $publicMenuCache);
 
         return back()->with('success', 'لوگوی کسب‌وکار با موفقیت به‌روزرسانی شد.');
