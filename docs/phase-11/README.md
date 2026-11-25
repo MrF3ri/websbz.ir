@@ -88,4 +88,10 @@ Pull request: #74 (Draft)
 
 ### Increment 11.4 — PR #74
 
-- GitHub Actions verification is pending for the current branch head.
+- SQLite: 234 passed, 7 skipped (522 assertions).
+- PostgreSQL test suite: passed.
+- PublicMenuTest image-slider entitlement/cache coverage: passed.
+- Backblaze B2 S3 integration: passed in both database jobs.
+- Frontend unit tests: 7 passed; Vue/TypeScript checks passed.
+- Pint: 238 files passed; PHPStan reported no errors.
+- Production image build, Compose validation, and Nginx validation: passed.
