@@ -159,10 +159,31 @@ class PublicMenuController
             : null;
     }
 
-    public function show(
+    public function showPrimary(
         string $businessSlug,
         string $menuSlug,
-        ?string $branchSlug = null,
+        PublicMenuCache $publicMenuCache,
+        Request $request,
+        LocaleRegistry $localeRegistry,
+    ): Response {
+        return $this->renderMenu($businessSlug, $menuSlug, null, $publicMenuCache, $request, $localeRegistry);
+    }
+
+    public function showBranch(
+        string $businessSlug,
+        string $menuSlug,
+        string $branchSlug,
+        PublicMenuCache $publicMenuCache,
+        Request $request,
+        LocaleRegistry $localeRegistry,
+    ): Response {
+        return $this->renderMenu($businessSlug, $menuSlug, $branchSlug, $publicMenuCache, $request, $localeRegistry);
+    }
+
+    private function renderMenu(
+        string $businessSlug,
+        string $menuSlug,
+        ?string $branchSlug,
         PublicMenuCache $publicMenuCache,
         Request $request,
         LocaleRegistry $localeRegistry,
