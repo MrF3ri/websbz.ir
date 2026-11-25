@@ -42,7 +42,7 @@ class CatalogController
             ->get(['id', 'public_id', 'name', 'sort_order', 'is_active']);
 
         $productsQuery = $menu->products()
-            ->with('category:id,public_id,name')
+            ->with(['category:id,public_id,name', 'images.media'])
             ->orderBy(
                 Category::query()
                     ->select('sort_order')
@@ -106,6 +106,12 @@ class CatalogController
                     'is_available' => $product->is_available,
                     'status' => $product->status->value,
                     'sort_order' => $product->sort_order,
+                    'images' => $product->images->map(fn ($image): array => [
+                        'public_id' => $image->media->public_id,
+                        'url' => route('media.public', $image->media->public_id),
+                        'width' => $image->media->width,
+                        'height' => $image->media->height,
+                    ])->values()->all(),
                 ];
             }),
             'usage' => [
