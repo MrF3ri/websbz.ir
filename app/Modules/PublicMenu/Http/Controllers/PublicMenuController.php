@@ -25,6 +25,20 @@ class PublicMenuController
         ];
     }
 
+    /**
+     * @return array{name: string, description: string|null, price: int, discount_price: int|null, images: array<int, array{url: string, width: int, height: int}>}
+     */
+    private function productData(Product $product): array
+    {
+        return [
+            'name' => $product->name,
+            'description' => $product->description,
+            'price' => $product->base_price,
+            'discount_price' => $product->discount_price,
+            'images' => $product->images->map(fn (ProductImage $image): array => $this->imageData($image))->values()->all(),
+        ];
+    }
+
     public function show(
         string $businessSlug,
         string $menuSlug,
@@ -73,13 +87,7 @@ class PublicMenuController
                 ],
                 'categories' => $categories->map(fn (Category $category): array => [
                     'name' => $category->name,
-                    'products' => $category->products->map(fn (Product $product): array => [
-                        'name' => $product->name,
-                        'description' => $product->description,
-                        'price' => $product->base_price,
-                        'discount_price' => $product->discount_price,
-                        'images' => $product->images->map(fn (ProductImage $image): array => $this->imageData($image))->values()->all(),
-                    ])->values()->all(),
+                    'products' => $category->products->map(fn (Product $product): array => $this->productData($product))->values()->all(),
                 ])->values()->all(),
             ];
         });
