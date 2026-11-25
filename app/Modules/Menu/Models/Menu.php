@@ -19,6 +19,7 @@ use Illuminate\Support\Str;
  * @property string $slug
  * @property MenuStatus $status
  * @property string $default_locale
+ * @property array<string, string>|null $theme
  */
 class Menu extends Model
 {
@@ -28,6 +29,7 @@ class Menu extends Model
         'slug',
         'status',
         'default_locale',
+        'theme',
     ];
 
     protected $attributes = [
@@ -65,6 +67,9 @@ class Menu extends Model
     /** @return array<string, string> */
     protected function casts(): array
     {
-        return ['status' => MenuStatus::class];
+        return [
+            'status' => MenuStatus::class,
+            'theme' => 'array',
+        ];
     }
 }
