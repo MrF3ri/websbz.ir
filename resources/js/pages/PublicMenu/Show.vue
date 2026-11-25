@@ -42,10 +42,10 @@ defineProps<{
 const copyByLocale = {
     fa: {
         officialMenu: 'منوی رسمی',
-        emptyMenu: '{{ copy.emptyMenu }}',
+        emptyMenu: 'در حال حاضر محصولی برای نمایش وجود ندارد.',
         previous: 'قبلی',
         next: 'بعدی',
-        digitalMenu: '{{ copy.digitalMenu }}',
+        digitalMenu: 'منوی دیجیتال',
         logoOf: 'لوگوی ',
         imageOf: 'تصویر ',
         category: 'دسته‌بندی ',
@@ -227,7 +227,7 @@ function formatPrice(value: number): string {
             </section>
 
             <div v-if="categories.length === 0" role="status" aria-live="polite" class="rounded-2xl border border-dashed border-stone-300 bg-white px-6 py-12 text-center text-sm text-stone-500 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-400">
-                در حال حاضر محصولی برای نمایش وجود ندارد.
+                {{ copy.emptyMenu }}
             </div>
 
             <div v-else class="space-y-8">
@@ -299,7 +299,7 @@ function formatPrice(value: number): string {
             </div>
 
             <footer class="pt-2 text-center text-xs text-stone-400">
-                منوی دیجیتال
+                {{ copy.digitalMenu }}
             </footer>
         </div>
     </main>
