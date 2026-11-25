@@ -5,19 +5,26 @@ namespace App\Modules\Media\Actions;
 use App\Modules\Business\Models\Business;
 use App\Modules\Media\Models\Media;
 use App\Modules\Media\Models\ProductImage;
+use App\Modules\Media\Services\ProductImageVariantGenerator;
 use App\Modules\Menu\Models\Menu;
 use App\Modules\Product\Models\Product;
 use App\Modules\Subscription\Services\EnforcementService;
 use App\Modules\Subscription\Services\EntitlementService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use RuntimeException;
 use Throwable;
 
 class UploadProductImageAction
 {
+    public function __construct(
+        private readonly ProductImageVariantGenerator $variantGenerator,
+    ) {}
+
     public function execute(Business $business, Product $product, UploadedFile $file): ProductImage
     {
         $mimeType = (new \finfo(FILEINFO_MIME_TYPE))->file($file->getPathname());
@@ -53,7 +60,7 @@ class UploadProductImageAction
 
         $disk = (string) config('filesystems.media_disk', 'media');
         $publicId = (string) Str::ulid();
-        $path = null;
+        $storedPaths = [];
 
         try {
             return DB::transaction(function () use (
@@ -66,7 +73,7 @@ class UploadProductImageAction
                 $dimensions,
                 $disk,
                 $publicId,
-                &$path,
+                &$storedPaths,
             ): ProductImage {
                 $lockedBusiness = Business::query()
                     ->whereKey($business->getKey())
@@ -98,10 +105,19 @@ class UploadProductImageAction
                     $lockedProduct->public_id,
                 );
                 $filename = $publicId.'.'.$extension;
-                $path = Storage::disk($disk)->putFileAs($directory, $file, $filename);
+                $path = $directory.'/'.$filename;
+                $storedPaths[] = $path;
+                $storedPath = Storage::disk($disk)->putFileAs($directory, $file, $filename);
 
-                if (! is_string($path) || $path === '') {
-                    throw new \RuntimeException('Unable to store product image.');
+                if (! is_string($storedPath) || $storedPath === '') {
+                    throw new RuntimeException('Unable to store product image.');
+                }
+
+                $path = $storedPath;
+                $variants = $this->variantGenerator->generate($file, $mimeType, $directory, $publicId, $disk);
+
+                foreach ($variants as $variant) {
+                    $storedPaths[] = $variant['path'];
                 }
 
                 $media = Media::query()->create([
@@ -112,6 +128,7 @@ class UploadProductImageAction
                     'size' => $file->getSize(),
                     'width' => (int) $dimensions[0],
                     'height' => (int) $dimensions[1],
+                    'variants' => $variants,
                 ]);
 
                 $sortOrder = (int) ($lockedProduct->images()->max('sort_order') ?? -1) + 1;
@@ -124,8 +141,23 @@ class UploadProductImageAction
                 ]);
             });
         } catch (Throwable $exception) {
-            if (is_string($path) && $path !== '') {
-                Storage::disk($disk)->delete($path);
+            foreach (array_reverse($storedPaths) as $storedPath) {
+                try {
+                    $cleanupDisk = Storage::disk($disk);
+
+                    if ($cleanupDisk->exists($storedPath) && ! $cleanupDisk->delete($storedPath)) {
+                        Log::warning('Failed to remove a stored product image after a database error.', [
+                            'disk' => $disk,
+                            'path' => $storedPath,
+                        ]);
+                    }
+                } catch (Throwable $cleanupException) {
+                    Log::warning('Failed to clean up a product image upload after an error.', [
+                        'disk' => $disk,
+                        'path' => $storedPath,
+                        'exception' => $cleanupException::class,
+                    ]);
+                }
             }
 
             throw $exception;

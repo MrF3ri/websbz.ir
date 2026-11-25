@@ -6,6 +6,7 @@ use App\Modules\Business\Models\Business;
 use App\Modules\Media\Actions\UploadProductImageAction;
 use App\Modules\Media\Http\Requests\ReorderProductImagesRequest;
 use App\Modules\Media\Http\Requests\UploadProductImageRequest;
+use App\Modules\Media\Models\Media;
 use App\Modules\Media\Models\ProductImage;
 use App\Modules\Menu\Actions\EnsurePrimaryMenuAction;
 use App\Modules\Menu\Enums\MenuStatus;
@@ -14,10 +15,12 @@ use App\Modules\Product\Models\Product;
 use App\Modules\PublicMenu\Services\PublicMenuCache;
 use App\Modules\Tenancy\Services\CurrentBusiness;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
+use RuntimeException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class MediaController
@@ -59,22 +62,41 @@ class MediaController
 
         $image = $product->images()
             ->whereHas('media', fn ($query) => $query->where('public_id', $mediaPublicId))
-            ->with('media')
             ->firstOrFail();
 
-        $media = $image->media;
+        DB::transaction(function () use ($image): void {
+            $lockedImage = ProductImage::query()
+                ->whereKey($image->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
+            $media = Media::query()
+                ->whereKey($lockedImage->media_id)
+                ->lockForUpdate()
+                ->firstOrFail();
 
-        DB::transaction(function () use ($image, $media): void {
-            $image->delete();
+            $lockedImage->delete();
 
-            if (! $media->productImages()->exists()) {
-                $media->delete();
+            if ($media->productImages()->exists()) {
+                return;
             }
+
+            $paths = [$media->path];
+
+            foreach ($media->variants ?? [] as $variant) {
+                $paths[] = $variant['path'];
+            }
+
+            foreach ($paths as $path) {
+                $disk = Storage::disk($media->disk);
+
+                if ($disk->exists($path) && ! $disk->delete($path)) {
+                    throw new RuntimeException('Unable to delete product image from storage.');
+                }
+            }
+
+            $media->delete();
         });
 
-        if (! $media->fresh()) {
-            Storage::disk($media->disk)->delete($media->path);
-        }
         $publicMenuCache->forget($menu);
 
         return back()->with('success', 'تصویر محصول حذف شد.');
@@ -112,8 +134,11 @@ class MediaController
         return back()->with('success', 'ترتیب تصاویر ذخیره شد.');
     }
 
-    public function publicImage(string $mediaPublicId): StreamedResponse
+    public function publicImage(string $mediaPublicId, Request $request): StreamedResponse
     {
+        $variantName = $request->query('variant', 'original');
+        abort_unless(is_string($variantName) && in_array($variantName, ['thumbnail', 'medium', 'original'], true), 404);
+
         $image = ProductImage::query()
             ->with(['media', 'product.menu.business'])
             ->whereHas('media', fn ($query) => $query->where('public_id', $mediaPublicId))
@@ -130,10 +155,21 @@ class MediaController
             ->firstOrFail();
 
         $media = $image->media;
-        abort_unless(Storage::disk($media->disk)->exists($media->path), 404);
+        $path = $media->path;
+        $mimeType = $media->mime_type;
 
-        return Storage::disk($media->disk)->response($media->path, basename($media->path), [
-            'Content-Type' => $media->mime_type,
+        if ($variantName !== 'original') {
+            $variant = $media->variants[$variantName] ?? null;
+            abort_unless(is_array($variant), 404);
+            $path = $variant['path'];
+            $mimeType = $variant['mime_type'];
+        }
+
+        $disk = Storage::disk($media->disk);
+        abort_unless($disk->exists($path), 404);
+
+        return $disk->response($path, basename($path), [
+            'Content-Type' => $mimeType,
             'X-Content-Type-Options' => 'nosniff',
             'Cache-Control' => 'public, max-age=86400, immutable',
         ]);

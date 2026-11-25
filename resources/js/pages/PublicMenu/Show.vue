@@ -3,7 +3,7 @@ import { Head } from '@inertiajs/vue3';
 
 type PublicProduct = {
     name: string;
-    images: { url: string; width: number; height: number }[];
+    images: { url: string; srcset: string; sizes: string; width: number; height: number }[];
     description: string | null;
     price: number;
     discount_price: number | null;
@@ -14,7 +14,7 @@ type PublicCategory = {
     products: PublicProduct[];
 };
 
-const props = defineProps<{
+defineProps<{
     business: {
         name: string;
         slug: string;
@@ -32,16 +32,16 @@ const tomanFormatter = new Intl.NumberFormat('fa-IR', {
 });
 
 function formatPrice(value: number): string {
-    return `${tomanFormatter.format(value)} تومان`;
+    return tomanFormatter.format(value) + ' تومان';
 }
 </script>
 
 <template>
-    <Head :title="`${business.name} | ${menu.title}`">
+    <Head :title="business.name + ' | ' + menu.title">
         <meta
             head-key="description"
             name="description"
-            :content="`منوی ${business.name} - ${menu.title}`"
+            :content="'منوی ' + business.name + ' - ' + menu.title"
         />
         <meta head-key="robots" name="robots" content="index,follow" />
     </Head>
@@ -67,7 +67,7 @@ function formatPrice(value: number): string {
             <div v-else class="space-y-8">
                 <section
                     v-for="(category, index) in categories"
-                    :key="`${category.name}-${index}`"
+                    :key="category.name + '-' + index"
                     class="space-y-3"
                 >
                     <div class="flex items-center gap-3">
@@ -78,32 +78,40 @@ function formatPrice(value: number): string {
                     <div class="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm dark:border-stone-800 dark:bg-stone-900">
                         <article
                             v-for="(product, productIndex) in category.products"
-                            :key="`${product.name}-${productIndex}`"
-                            class="flex items-start justify-between gap-4 px-5 py-4"
+                            :key="product.name + '-' + productIndex"
+                            class="px-5 py-4"
                             :class="{ 'border-t border-stone-100 dark:border-stone-800': productIndex > 0 }"
                         >
-                            <img
-                                v-if="product.images[0]"
-                                :src="product.images[0].url"
-                                :alt="`تصویر ${product.name}`"
-                                :width="product.images[0].width"
-                                :height="product.images[0].height"
-                                loading="lazy"
-                                class="size-20 shrink-0 rounded-xl object-cover sm:size-24"
-                            />
-                            <div class="min-w-0 flex-1">
-                                <h3 class="font-semibold">{{ product.name }}</h3>
-                                <p v-if="product.description" class="mt-1 whitespace-pre-line text-sm leading-6 text-stone-500 dark:text-stone-400">
-                                    {{ product.description }}
-                                </p>
+                            <div v-if="product.images.length" class="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                                <img
+                                    v-for="image in product.images"
+                                    :key="image.url"
+                                    :src="image.url"
+                                    :srcset="image.srcset"
+                                    :sizes="image.sizes"
+                                    :alt="'تصویر ' + product.name"
+                                    :width="image.width"
+                                    :height="image.height"
+                                    loading="lazy"
+                                    decoding="async"
+                                    class="aspect-[4/3] w-full rounded-xl object-cover"
+                                />
                             </div>
-                            <div class="shrink-0 text-left">
-                                <p v-if="product.discount_price !== null" class="text-sm font-bold text-emerald-700 dark:text-emerald-400">
-                                    {{ formatPrice(product.discount_price) }}
-                                </p>
-                                <p :class="product.discount_price !== null ? 'mt-1 text-xs text-stone-400 line-through' : 'text-sm font-bold'">
-                                    {{ formatPrice(product.price) }}
-                                </p>
+                            <div class="flex items-start justify-between gap-4">
+                                <div class="min-w-0 flex-1">
+                                    <h3 class="font-semibold">{{ product.name }}</h3>
+                                    <p v-if="product.description" class="mt-1 whitespace-pre-line text-sm leading-6 text-stone-500 dark:text-stone-400">
+                                        {{ product.description }}
+                                    </p>
+                                </div>
+                                <div class="shrink-0 text-left">
+                                    <p v-if="product.discount_price !== null" class="text-sm font-bold text-emerald-700 dark:text-emerald-400">
+                                        {{ formatPrice(product.discount_price) }}
+                                    </p>
+                                    <p :class="product.discount_price !== null ? 'mt-1 text-xs text-stone-400 line-through' : 'text-sm font-bold'">
+                                        {{ formatPrice(product.price) }}
+                                    </p>
+                                </div>
                             </div>
                         </article>
                     </div>

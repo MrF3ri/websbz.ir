@@ -12,7 +12,9 @@
 - Tenant-authorized upload, deletion, and image ordering endpoints.
 - Public image delivery only when the business is active, the menu is published, and the product is published and available.
 - Public-menu cache invalidation after image upload/deletion/reordering and product deletion cleanup.
-- Catalog image upload/delete/order controls and public-menu first-image rendering.
+- Catalog image upload/delete/order controls.
+- Generated thumbnail and medium variants (where smaller than the original) plus original-image delivery through a responsive srcset.
+- Public-menu multi-image gallery rendering for all images attached to a published product.
 
 ## Required verification
 
@@ -20,11 +22,8 @@ The GitHub Actions jobs and owner-side local suite must pass. PostgreSQL is requ
 
 ## Remaining work
 
-- Generate responsive variants (thumbnail / medium / original) and serve an appropriate srcset.
-- Complete multi-image gallery presentation on the public menu.
-- Verify S3-compatible storage against a real non-production bucket and document lifecycle/retention policy.
-- Add a PostgreSQL multi-process concurrency test for simultaneous image uploads at the exact plan quota boundary.
-- Validate file deletion recovery/cleanup for storage-provider failures.
+- Responsive-variant, gallery, storage-failure, and PostgreSQL multi-process concurrency tests pass in CI on PR head d37c5b4d. Owner-side local acceptance remains a separate project sign-off.
+- The S3 adapter is now included in composer.json and composer.lock. Run the opt-in S3 integration test against a real non-production bucket and apply the lifecycle policy in S3-VERIFICATION.md. This requires owner-provisioned credentials and endpoint configuration; it cannot be certified using a fake disk.
 - Run the full Release Gate separately; Phase 10 completion alone does not make the product production-ready.
 
 ## Security notes
