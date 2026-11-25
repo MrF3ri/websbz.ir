@@ -5,6 +5,7 @@ namespace App\Modules\Branch\Actions;
 use App\Modules\Branch\Models\Branch;
 use App\Modules\Business\Models\Business;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class UpdateBranchAction
 {
