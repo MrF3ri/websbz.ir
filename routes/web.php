@@ -1,8 +1,8 @@
 <?php
 
 use App\Modules\Branch\Http\Controllers\BranchController;
-use App\Modules\Business\Http\Controllers\BusinessOnboardingController;
 use App\Modules\Business\Http\Controllers\BusinessLogoController;
+use App\Modules\Business\Http\Controllers\BusinessOnboardingController;
 use App\Modules\Business\Http\Controllers\BusinessSettingsController;
 use App\Modules\Catalog\Http\Controllers\CatalogController;
 use App\Modules\Category\Http\Controllers\CategoryController;
