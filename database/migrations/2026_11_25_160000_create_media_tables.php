@@ -8,14 +8,6 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('menus', function (Blueprint $table): void {
-            $table->unique(['id', 'business_id'], 'menus_id_business_unique');
-        });
-
-        Schema::table('products', function (Blueprint $table): void {
-            $table->unique(['id', 'menu_id'], 'products_id_menu_unique');
-        });
-
         Schema::create('media', function (Blueprint $table): void {
             $table->id();
             $table->ulid('public_id')->unique();
@@ -64,12 +56,5 @@ return new class extends Migration
         Schema::dropIfExists('product_images');
         Schema::dropIfExists('media');
 
-        Schema::table('products', function (Blueprint $table): void {
-            $table->dropUnique('products_id_menu_unique');
-        });
-
-        Schema::table('menus', function (Blueprint $table): void {
-            $table->dropUnique('menus_id_business_unique');
-        });
     }
 };
