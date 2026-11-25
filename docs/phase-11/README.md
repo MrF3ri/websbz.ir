@@ -45,7 +45,7 @@ Pull request: #75 (Draft)
 - Add coverage for entitlement changes while the public-menu catalog cache remains warm.
 - Record the behavior in ADR 0018.
 
-## Delivered in increment 11.5 (implementation in progress)
+## Delivered in increment 11.5
 
 - Add a 1200-character plain-text business introduction field to business settings.
 - Gate new or changed introductions through the `business_introduction` subscription snapshot.
@@ -108,4 +108,10 @@ Pull request: #75 (Draft)
 
 ### Increment 11.5 — PR #75
 
-- GitHub Actions verification is pending for the current branch head.
+- SQLite: 238 passed, 7 skipped (553 assertions).
+- PostgreSQL: 245 passed (636 assertions).
+- BusinessIntroductionTest, downgrade preservation, and public-menu entitlement tests: passed.
+- Backblaze B2 S3 integration: passed in both database jobs.
+- Frontend test files: 2 passed; Vue/TypeScript checks passed.
+- PHPStan reported no errors; all CI quality checks passed.
+- Production image build, Compose validation, and Nginx validation: passed.
