@@ -1,8 +1,8 @@
 # Phase 9 — Branch Management
 
 Status: In progress  
-Current increment: 9.4 — Branch catalog settings management  
-Implementation branch: `feat/phase-9-branch-catalog-settings`  
+Current increment: 9.5 — Public-menu cache invalidation audit  
+Implementation branch: `test/phase-9-cache-invalidation-audit`  
 Approved model: Hybrid shared catalog with branch-level overrides (ADR 0014)
 
 ## Delivered foundation
@@ -32,12 +32,27 @@ Approved model: Hybrid shared catalog with branch-level overrides (ADR 0014)
 - Branch slugs are immutable after creation so previously printed branch QR codes keep resolving to the same branch.
 - Preserve the existing primary-menu QR in the catalog page for backward compatibility.
 
-## Increment 9.4 — Branch catalog settings management (in review)\n\n- Add a tenant-scoped branch catalog settings page linked from each branch.\n- Manage branch category visibility/order and product visibility, availability, ordering, name/description overrides, base price, discount inheritance/set/clear, and optional manual stock counts.\n- Preserve canonical catalog records; only branch settings rows are changed.\n- Resolve the selected branch through the current tenant and validate every category/product public identifier against that tenant's canonical menu.\n- Validate effective discounts against effective base prices and enforce consistent stock-tracking state.\n- Serialize updates in a transaction coordinated by the Business row lock and invalidate the affected branch public-menu cache after a successful write.\n- Add HTTP regression coverage for tenant isolation, override persistence, invalid discounts, and stock validation.\n\n## Remaining Phase 9 work
+## Increment 9.4 — Branch catalog settings management (delivered)
 
-1. Add tenant-scoped management UI and actions for category/product branch settings, including explicit clear/inherit semantics and validation of effective discounts and stock.
-2. Audit every canonical and branch-specific write path for correct branch-cache invalidation.
-3. Add PostgreSQL concurrency coverage for branch quota and settings writes.
-4. Complete owner-driven end-to-end acceptance: create a second branch, customize it, scan its QR, and verify the primary branch is unchanged.
+- Add a tenant-scoped branch catalog settings page linked from each branch.
+- Manage branch category visibility/order and product visibility, availability, ordering, name/description overrides, base price, discount inheritance/set/clear, and optional manual stock counts.
+- Preserve canonical catalog records; only branch settings rows are changed.
+- Resolve the selected branch through the current tenant and validate every category/product public identifier against that tenant's canonical menu.
+- Validate effective discounts against effective base prices and enforce consistent stock-tracking state.
+- Serialize updates in a transaction coordinated by the Business row lock and invalidate the affected branch public-menu cache after a successful write.
+- Add HTTP regression coverage for tenant isolation, override persistence, invalid discounts, and stock validation.
+
+## Increment 9.5 — Public-menu cache invalidation audit (in review)
+
+- Audit canonical writes for categories, products, product images, menu translations/theme/banner/publication, and business profile/logo data. Their controllers call `forget($menu)`, which clears the legacy primary-menu key and every branch-specific key for that menu.
+- Audit branch-only writes. Branch profile updates and branch catalog settings updates call `forget($menu, $branch)`, preserving other branches' cached projections.
+- Branch creation starts with a new branch identifier and therefore has no prior cache key to invalidate. Activation/deactivation is checked before cache access and status is not part of the cached public projection.
+- Add regression tests proving canonical invalidation clears the primary and branch projections, branch-scoped invalidation preserves the primary projection, and a canonical product update refreshes both public routes.
+
+## Remaining Phase 9 work
+
+1. Add PostgreSQL concurrency coverage for branch quota and settings writes.
+2. Complete owner-driven end-to-end acceptance: create a second branch, customize it, scan its QR, and verify the primary branch is unchanged.
 
 ## Effective product rules
 
