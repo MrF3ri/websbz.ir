@@ -1,9 +1,8 @@
 # Phase 11 — Public Menu Customization
 
 Status: In progress  
-Current increment: 11.7 — Top-only controlled custom design  
-Implementation branch: `feat/phase-11-top-custom-design`  
-Pull request: #77 (Draft)
+Current increment: 11.8 — Template preview visual regression coverage  
+Implementation branch: `feat/phase-11-template-preview-tests`
 
 ## Delivered in increment 11.1
 
@@ -64,7 +63,7 @@ Pull request: #77 (Draft)
 - Add tests for plan access, HTTPS validation, downgrade behavior, and public rendering.
 - Record the decision in ADR 0020.
 
-## Delivered in increment 11.7 (implementation in progress)
+## Delivered in increment 11.7 — merged PR #77
 
 - Add Top-only controlled design tokens for density, product card style, and heading size.
 - Enforce `custom_design` from the current subscription snapshot on the server.
@@ -74,10 +73,17 @@ Pull request: #77 (Draft)
 - Add tests for Top access, Professional denial, downgrade preservation/reset, and public renderer fallbacks.
 - Record the behavior in ADR 0021.
 
+## Delivered in increment 11.8 (implementation in progress)
+
+- Extract the six template preview styles into a typed, allow-listed presentation module.
+- Make each template preview visually distinct at the frame, heading, and product-card levels.
+- Keep mobile and desktop preview widths explicit and testable.
+- Add frontend regression tests for complete template coverage, distinct frames, responsive widths, and unknown-template fallback.
+- Add accessible pressed state and grouping semantics to the mobile/desktop preview controls.
+
 ## Remaining Phase 11 work
 
-1. Add visual regression coverage for all template previews and test mobile/desktop breakpoints.
-2. Verify accessibility, cache invalidation, tenant isolation, storage-failure recovery, and SQLite/PostgreSQL parity for all new features.
+1. Verify accessibility, cache invalidation, tenant isolation, storage-failure recovery, and SQLite/PostgreSQL parity for all new features.
 
 ## Operational constraints
 
@@ -144,6 +150,15 @@ Pull request: #77 (Draft)
 - PHPStan reported no errors; all CI quality checks passed.
 - Production image build, Compose validation, and Nginx validation: passed.
 
-### Increment 11.7 — PR #77
+### Increment 11.7 — merged PR #77
 
-- GitHub Actions verification is pending for the current branch head.
+- SQLite: 248 passed, 7 skipped.
+- PostgreSQL: 255 passed.
+- `MenuThemeTest` and Backblaze B2 S3 integration passed in both database jobs.
+- Frontend unit tests: 2 files passed; Vue/TypeScript checks passed.
+- PHPStan reported no errors.
+- Production image build, Compose validation, and Nginx validation passed.
+
+### Increment 11.8 — current branch
+
+- Template preview presentation module and frontend regression tests are in progress; CI verification is pending.
