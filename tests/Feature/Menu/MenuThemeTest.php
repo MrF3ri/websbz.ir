@@ -72,6 +72,30 @@ class MenuThemeTest extends TestCase
         $this->assertNull($menu->fresh()->theme);
     }
 
+    public function test_economic_plan_can_preserve_a_previously_selected_template(): void
+    {
+        [$user, , $menu] = $this->createCatalogTenant('economic');
+        $menu->update([
+            'theme' => [
+                'template' => 'editorial',
+                'primary_color' => '#365B4A',
+                'font' => 'system',
+                'mode' => 'light',
+            ],
+        ]);
+
+        $this->actingAs($user)
+            ->put(route('catalog.menu.theme.update'), [
+                'template' => 'editorial',
+                'primary_color' => '#365B4A',
+                'font' => 'system',
+                'mode' => 'light',
+            ])
+            ->assertRedirect();
+
+        $this->assertSame('editorial', $menu->fresh()->theme['template']);
+    }
+
     public function test_economic_plan_cannot_change_custom_colors_or_font(): void
     {
         [$user] = $this->createCatalogTenant('economic');
