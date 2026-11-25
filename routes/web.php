@@ -1,7 +1,7 @@
 <?php
 
-use App\Modules\Branch\Http\Controllers\BranchController;
 use App\Modules\Branch\Http\Controllers\BranchCatalogController;
+use App\Modules\Branch\Http\Controllers\BranchController;
 use App\Modules\Business\Http\Controllers\BusinessLogoController;
 use App\Modules\Business\Http\Controllers\BusinessOnboardingController;
 use App\Modules\Business\Http\Controllers\BusinessSettingsController;
