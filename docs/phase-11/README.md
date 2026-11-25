@@ -26,7 +26,16 @@ Pull request: #73 (Draft)
 - Invalidate public-menu cache after logo changes and clean up replaced media objects.
 - Add ADR 0016 for the private logo storage and tenant isolation contract.
 
-## Delivered in increment 11.3 (implementation in progress)\n\n- Add a server-owned product-label registry (`new`, `popular`, `recommended`, `chef_special`).\n- Gate new and changed labels through the `product_labels` subscription snapshot on the server.\n- Preserve existing labels across downgrade when product details are edited; allow label removal without the feature.\n- Display labels in the catalog editor and public menu using fixed text and styles.\n- Add SQLite/PostgreSQL tests for entitlement enforcement, downgrade behavior, and public rendering.\n- Record the allow-list and downgrade behavior in ADR 0017.\n\n## Remaining Phase 11 work
+## Delivered in increment 11.3 (implementation in progress)
+
+- Add a server-owned product-label registry (`new`, `popular`, `recommended`, `chef_special`).
+- Gate new and changed labels through the `product_labels` subscription snapshot on the server.
+- Preserve existing labels across downgrade when product details are edited; allow label removal without the feature.
+- Display labels in the catalog editor and public menu using fixed text and styles.
+- Add SQLite/PostgreSQL tests for entitlement enforcement, downgrade behavior, and public rendering.
+- Record the allow-list and downgrade behavior in ADR 0017.
+
+## Remaining Phase 11 work
 
 1. Add visual regression coverage for all template previews and test mobile/desktop breakpoints.
 2. Add plan-gated public-menu components: image slider, advertising banner, and business introduction.
