@@ -3,7 +3,7 @@
 Status: In progress  
 Current increment: 11.2 — Responsive previews and private business logos  
 Implementation branch: `feat/phase-11-logo-and-previews`  
-Pull request: #71 (Draft)
+Pull request: #72 (Draft)
 
 ## Delivered in increment 11.1
 
@@ -28,11 +28,10 @@ Pull request: #71 (Draft)
 
 ## Remaining Phase 11 work
 
-1. Add preview cards and responsive previews for every template, with visual regression coverage.
-2. Complete the logo workflow using private media storage, tenant ownership checks, replacement cleanup, and entitlement enforcement.
-3. Add plan-gated public-menu features: product labels, image slider, advertising banner, and business introduction.
-4. Add Top-plan controlled custom-design settings without arbitrary user HTML, CSS, or JavaScript.
-5. Verify accessibility, mobile behavior, cache invalidation, tenant isolation, and SQLite/PostgreSQL parity for all new features.
+1. Add visual regression coverage for all template previews and test mobile/desktop breakpoints.
+2. Add plan-gated public-menu features: product labels, image slider, advertising banner, and business introduction.
+3. Add Top-plan controlled custom-design settings without arbitrary user HTML, CSS, or JavaScript.
+4. Verify accessibility, cache invalidation, tenant isolation, storage-failure recovery, and SQLite/PostgreSQL parity for all new features.
 
 ## Operational constraints
 
@@ -41,8 +40,15 @@ Pull request: #71 (Draft)
 - Keep private media private and serve it only through authorized application routes.
 - Release remains blocked until the repository-wide Release Gate and owner sign-off are complete.
 
-## CI verification for the current PR head
+## CI verification
+
+### Increment 11.1 — merged PR #71
 
 - SQLite test suite and quality checks: passed (221 passed, 7 skipped).
 - PostgreSQL test suite: passed (228 passed).
+- Backblaze B2 S3 integration: passed in both database jobs.
 - Production image, Compose, and Nginx validation: passed.
+
+### Increment 11.2 — PR #72
+
+- GitHub Actions verification is pending for the current branch head.
