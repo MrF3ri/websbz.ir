@@ -15,7 +15,6 @@ use Tests\TestCase;
 class MenuThemeTest extends TestCase
 {
     use InteractsWithCatalog;
-
     use RefreshDatabase;
 
     protected function setUp(): void
