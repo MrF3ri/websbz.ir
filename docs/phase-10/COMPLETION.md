@@ -13,15 +13,12 @@ This is an implementation checklist, not a production-release approval.
 - Install and lock the S3 Flysystem adapter; add an opt-in real non-production S3 integration test and document private-bucket/lifecycle requirements.
 - Wire optional GitHub Actions secrets for the real-bucket integration test.
 
-## CI verification passed on PR head d37c5b4d
+## CI verification passed on merged PR #70 head `92e9007e1042da83729b6c3f278d36038f70bd83`
 
-- SQLite: 214 passed, 8 skipped, 1,396 assertions.
-- PostgreSQL: 221 passed, 1 skipped, 1,479 assertions. The multi-process quota-boundary test passed.
-- Pint: 226 files passed.
-- PHPStan: no errors.
-- Frontend checks: 7 unit tests passed; type checks passed.
-- Composer and npm dependency audits passed.
-- Production image build and Compose/Nginx validation passed.
+- SQLite suite and quality checks passed.
+- PostgreSQL suite passed, including the multi-process quota-boundary test.
+- Frontend unit/type checks, Pint, PHPStan, Composer/npm dependency audits, and production image/Compose validation passed.
+- The real Backblaze B2 non-production S3 integration test executed and passed for upload, responsive variants, authorized delivery, and deletion.
 
 Workflow runs:
 - Tests: https://github.com/MrF3ri/websbz.ir/actions/runs/45651880192
@@ -29,8 +26,8 @@ Workflow runs:
 
 ## Still requires external verification
 
-- The S3 integration test was skipped because no non-production bucket credentials/opt-in secrets are configured. Run it against an owner-provisioned non-production bucket and apply the lifecycle policy in S3-VERIFICATION.md.
 - Owner-side local acceptance of image upload, gallery rendering, and deletion remains required if the project checklist calls for local sign-off.
+- Review/apply the documented S3 lifecycle policy to owner-managed buckets; do not expire current objects.
 
 ## Not a production-release approval
 
