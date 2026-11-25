@@ -88,7 +88,7 @@ class ProductImageConcurrencyTest extends TestCase
             $children[] = $pid;
         }
 
-        foreach ($children as $pid) {
+        foreach ($children as $index => $pid) {
             $status = 0;
             $waitedPid = pcntl_waitpid($pid, $status);
             $this->assertSame($pid, $waitedPid);

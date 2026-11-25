@@ -83,9 +83,7 @@ class MediaController
             $paths = [$media->path];
 
             foreach ($media->variants ?? [] as $variant) {
-                if (isset($variant['path']) && is_string($variant['path'])) {
-                    $paths[] = $variant['path'];
-                }
+                $paths[] = $variant['path'];
             }
 
             foreach ($paths as $path) {
@@ -162,13 +160,7 @@ class MediaController
 
         if ($variantName !== 'original') {
             $variant = $media->variants[$variantName] ?? null;
-            abort_unless(
-                is_array($variant)
-                && isset($variant['path'], $variant['mime_type'])
-                && is_string($variant['path'])
-                && is_string($variant['mime_type']),
-                404,
-            );
+            abort_unless(is_array($variant), 404);
             $path = $variant['path'];
             $mimeType = $variant['mime_type'];
         }

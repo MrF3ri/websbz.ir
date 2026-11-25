@@ -26,7 +26,7 @@ class PublicMenuController
         foreach (['thumbnail', 'medium'] as $variantName) {
             $variant = $media->variants[$variantName] ?? null;
 
-            if (is_array($variant) && isset($variant['width']) && $variant['width'] < $media->width) {
+            if (is_array($variant) && $variant['width'] < $media->width) {
                 $srcset[] = route('media.public', [
                     'mediaPublicId' => $media->public_id,
                     'variant' => $variantName,

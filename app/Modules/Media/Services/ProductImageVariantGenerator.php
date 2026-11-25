@@ -72,10 +72,7 @@ class ProductImageVariantGenerator
                     imagefilledrectangle($target, 0, 0, $width, $height, $transparent);
                 }
 
-                if (! imagecopyresampled($target, $source, 0, 0, 0, 0, $width, $height, $sourceWidth, $sourceHeight)) {
-                    imagedestroy($target);
-                    throw new RuntimeException('Unable to resize product image.');
-                }
+                imagecopyresampled($target, $source, 0, 0, 0, 0, $width, $height, $sourceWidth, $sourceHeight);
 
                 ob_start();
                 $encoded = match ($mimeType) {
