@@ -2,8 +2,8 @@
 
 namespace App\Modules\Category\Models;
 
-use App\Modules\Menu\Models\Menu;
 use App\Modules\Branch\Models\BranchCategorySetting;
+use App\Modules\Menu\Models\Menu;
 use App\Modules\Product\Models\Product;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
