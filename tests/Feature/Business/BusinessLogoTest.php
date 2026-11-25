@@ -6,6 +6,7 @@ use App\Enums\BusinessRole;
 use App\Modules\Menu\Enums\MenuStatus;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -202,4 +203,38 @@ class BusinessLogoTest extends TestCase
         $this->assertDatabaseCount('media', 0);
         Storage::disk('media')->assertDirectoryEmpty('businesses');
     }
+
+    public function test_logo_upload_and_removal_invalidate_a_warm_public_menu_cache(): void
+    {
+        config(['cache.default' => 'array']);
+        Cache::store('array')->flush();
+
+        [$user, $business, $menu] = $this->createCatalogTenant('professional');
+        $menu->update(['status' => MenuStatus::Published]);
+        $url = route('public.menu.show', [$business->slug, $menu->slug]);
+
+        $this->get($url)
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->where('business.logo_url', null));
+
+        $this->actingAs($user)->post(route('business.logo.store'), [
+            'logo' => UploadedFile::fake()->image('brand.png', 128, 128),
+        ])->assertRedirect();
+
+        $media = $business->fresh()->logo()->with('media')->firstOrFail()->media;
+        $logoUrl = route('media.business-logo', [$business->public_id, $media->public_id]);
+
+        $this->get($url)
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->where('business.logo_url', $logoUrl));
+
+        $this->actingAs($user)
+            ->delete(route('business.logo.destroy'))
+            ->assertRedirect();
+
+        $this->get($url)
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->where('business.logo_url', null));
+    }
+
 }
