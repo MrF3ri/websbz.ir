@@ -13,6 +13,7 @@ use App\Modules\Product\Models\Product;
 use App\Modules\PublicMenu\Services\PublicMenuCache;
 use App\Modules\Tenancy\Services\CurrentBusiness;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
@@ -34,7 +35,9 @@ class MediaController
 
         Gate::authorize('update', $product);
 
-        $upload->execute($business, $product, $request->file('image'));
+        $file = $request->file('image');
+        abort_unless($file instanceof UploadedFile, 422);
+        $upload->execute($business, $product, $file);
         $publicMenuCache->forget($menu);
 
         return back()->with('success', 'تصویر محصول با موفقیت بارگذاری شد.');
