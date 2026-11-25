@@ -4,6 +4,7 @@ namespace Tests\Feature\Branch;
 
 use App\Modules\Branch\Actions\CreateBranchAction;
 use App\Modules\Branch\Actions\EnsurePrimaryBranchAction;
+use App\Modules\Product\Enums\ProductStatus;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Inertia\Testing\AssertableInertia as Assert;
