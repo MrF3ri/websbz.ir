@@ -30,7 +30,9 @@ Route::inertia('/', 'Welcome')->name('home');
 Route::get('/media/{mediaPublicId}', [MediaController::class, 'publicImage'])->name('media.public');
 Route::get('/media/business-logo/{businessPublicId}/{mediaPublicId}', [BusinessLogoController::class, 'public'])->name('media.business-logo');
 
-Route::get('/menu/{businessSlug}/{menuSlug}', [PublicMenuController::class, 'show'])
+Route::get('/menu/{businessSlug}/{menuSlug}/{branchSlug}', [PublicMenuController::class, 'showBranch'])
+    ->name('public.menu.branch.show');
+Route::get('/menu/{businessSlug}/{menuSlug}', [PublicMenuController::class, 'showPrimary'])
     ->name('public.menu.show');
 
 Route::middleware(['auth', 'verified', 'can:platform-admin'])
