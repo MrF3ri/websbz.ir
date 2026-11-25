@@ -181,4 +181,33 @@ class ProductImageUploadTest extends TestCase
         $this->assertDatabaseCount('media', 0);
         Storage::disk('media')->assertMissing($path);
     }
+    public function test_owner_can_reorder_all_images_for_a_product(): void
+    {
+        [$user, , $menu] = $this->createCatalogTenant('top');
+        $category = $this->createCatalogCategory($menu);
+        $product = $this->createCatalogProduct($menu, $category);
+
+        foreach (['first.jpg', 'second.jpg'] as $name) {
+            $this->actingAs($user)
+                ->post(route('catalog.products.images.store', $product->public_id), [
+                    'image' => UploadedFile::fake()->image($name, 100, 100),
+                ])
+                ->assertRedirect();
+        }
+
+        $images = $product->images()->with('media')->orderBy('sort_order')->get();
+        $ids = $images->pluck('media.public_id')->all();
+
+        $this->actingAs($user)
+            ->put(route('catalog.products.images.reorder', $product->public_id), [
+                'media_public_ids' => array_reverse($ids),
+            ])
+            ->assertRedirect();
+
+        $this->assertSame(
+            array_reverse($ids),
+            $product->images()->with('media')->orderBy('sort_order')->get()->pluck('media.public_id')->all(),
+        );
+    }
+
 }
