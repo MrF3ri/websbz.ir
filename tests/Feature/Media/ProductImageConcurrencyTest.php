@@ -96,6 +96,8 @@ class ProductImageConcurrencyTest extends TestCase
             $this->assertSame(0, pcntl_wexitstatus($status));
         }
 
+        DB::purge();
+
         $results = array_map(
             static fn (string $path): string => (string) file_get_contents($path),
             $resultPaths,
