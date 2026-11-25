@@ -116,7 +116,7 @@ class TranslationPostgresConcurrencyTest extends TestCase
         );
 
         $this->assertSame('error', $failedEnglish['status']);
-        $this->assertStringContainsString('Intentional failure after acquiring', $failedEnglish['message']);
+        $this->assertStringContainsString('Intentional failure after acquiring', ($failedEnglish['message'] ?? ''));
         $this->assertSame('success', $savedArabic['status']);
 
         $this->assertDatabaseMissing('menu_translations', [
