@@ -60,6 +60,12 @@ const form = useForm({
 
 const formTitle = computed(() => selected.value ? 'ویرایش شعبه' : 'افزودن شعبه');
 
+function openingHoursError(path: string): string | undefined {
+    const error = Object.entries(form.errors).find(([key]) => key === path)?.[1];
+
+    return typeof error === 'string' ? error : undefined;
+}
+
 function hydrateSchedule(hours: OpeningHours | null): void {
     const fresh = blankSchedule();
     hasSchedule.value = hours !== null;
@@ -192,8 +198,8 @@ function daySummary(branch: Branch): string {
                                     <div class="flex items-center gap-2"><label class="flex shrink-0 items-center gap-1 text-xs text-muted-foreground"><input v-model="schedule[day.key].secondEnabled" type="checkbox" class="size-4 accent-primary" /> بازه دوم</label><template v-if="schedule[day.key].secondEnabled"><input v-model="schedule[day.key].second.open" type="time" class="h-9 min-w-0 flex-1 rounded-md border border-input bg-background px-2 text-sm" /><span>تا</span><input v-model="schedule[day.key].second.close" type="time" class="h-9 min-w-0 flex-1 rounded-md border border-input bg-background px-2 text-sm" /></template></div>
                                 </div>
                                 <span v-else class="text-xs text-muted-foreground">در این روز تعطیل است</span>
-                                <div v-if="form.errors[`opening_hours.${day.key}.0.close`]" class="text-xs text-destructive sm:col-start-3">{{ form.errors[`opening_hours.${day.key}.0.close`] }}</div>
-                                <div v-if="form.errors[`opening_hours.${day.key}.1.open`]" class="text-xs text-destructive sm:col-start-3">{{ form.errors[`opening_hours.${day.key}.1.open`] }}</div>
+                                <div v-if="openingHoursError(`opening_hours.${day.key}.0.close`)" class="text-xs text-destructive sm:col-start-3">{{ openingHoursError(`opening_hours.${day.key}.0.close`) }}</div>
+                                <div v-if="openingHoursError(`opening_hours.${day.key}.1.open`)" class="text-xs text-destructive sm:col-start-3">{{ openingHoursError(`opening_hours.${day.key}.1.open`) }}</div>
                             </div>
                         </div>
                         <p v-if="form.errors.opening_hours" class="text-sm text-destructive">{{ form.errors.opening_hours }}</p>
