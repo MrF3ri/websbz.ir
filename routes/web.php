@@ -81,6 +81,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/catalog/products', [ProductController::class, 'store'])->name('catalog.products.store');
         Route::post('/catalog/products/{productPublicId}/images', [MediaController::class, 'store'])->name('catalog.products.images.store');
         Route::delete('/catalog/products/{productPublicId}/images/{mediaPublicId}', [MediaController::class, 'destroy'])->name('catalog.products.images.destroy');
+        Route::put('/catalog/products/{productPublicId}/images/reorder', [MediaController::class, 'reorder'])->name('catalog.products.images.reorder');
         Route::put('/catalog/categories/{categoryPublicId}/products/reorder', [ProductController::class, 'reorder'])->name('catalog.products.reorder');
         Route::put('/catalog/products/{productPublicId}', [ProductController::class, 'update'])->name('catalog.products.update');
         Route::delete('/catalog/products/{productPublicId}', [ProductController::class, 'destroy'])->name('catalog.products.destroy');
