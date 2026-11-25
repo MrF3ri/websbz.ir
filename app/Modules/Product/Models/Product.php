@@ -3,8 +3,8 @@
 namespace App\Modules\Product\Models;
 
 use App\Modules\Category\Models\Category;
-use App\Modules\Menu\Models\Menu;
 use App\Modules\Media\Models\ProductImage;
+use App\Modules\Menu\Models\Menu;
 use App\Modules\Product\Enums\ProductStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
