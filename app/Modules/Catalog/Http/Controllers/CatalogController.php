@@ -4,6 +4,7 @@ namespace App\Modules\Catalog\Http\Controllers;
 
 use App\Modules\Business\Models\Business;
 use App\Modules\Category\Models\Category;
+use App\Modules\Media\Models\ProductImage;
 use App\Modules\Menu\Actions\EnsurePrimaryMenuAction;
 use App\Modules\Product\Enums\ProductStatus;
 use App\Modules\Product\Models\Product;
@@ -106,7 +107,7 @@ class CatalogController
                     'is_available' => $product->is_available,
                     'status' => $product->status->value,
                     'sort_order' => $product->sort_order,
-                    'images' => $product->images->map(fn ($image): array => [
+                    'images' => $product->images->map(fn (ProductImage $image): array => [
                         'public_id' => $image->media->public_id,
                         'url' => route('media.public', $image->media->public_id),
                         'width' => $image->media->width,
