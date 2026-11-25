@@ -11,6 +11,7 @@ use App\Modules\Menu\Models\Menu;
 use App\Modules\Product\Enums\ProductStatus;
 use App\Modules\Product\Models\Product;
 use App\Modules\PublicMenu\Services\PublicMenuCache;
+use App\Modules\Subscription\Services\EntitlementService;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -78,11 +79,12 @@ class PublicMenuController
     }
 
     /**
-     * @return array{name: string, description: string|null, label: string|null, price: int, discount_price: int|null, images: array<int, array{url: string, srcset: string, sizes: string, width: int, height: int}>}
+     * @return array{public_id: string, name: string, description: string|null, label: string|null, price: int, discount_price: int|null, images: array<int, array{url: string, srcset: string, sizes: string, width: int, height: int}>}
      */
     private function productData(Product $product): array
     {
         return [
+            'public_id' => $product->public_id,
             'name' => $product->name,
             'description' => $product->description,
             'label' => $product->label?->value,
@@ -147,6 +149,9 @@ class PublicMenuController
                 ])->values()->all(),
             ];
         });
+
+        $publicMenu['menu']['image_slider_enabled'] = (new EntitlementService($business))
+            ->hasFeature('image_slider');
 
         return Inertia::render('PublicMenu/Show', $publicMenu);
     }
