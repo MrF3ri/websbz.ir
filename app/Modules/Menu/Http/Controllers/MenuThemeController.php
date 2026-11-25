@@ -43,7 +43,7 @@ class MenuThemeController
             'menu' => [
                 'theme' => array_merge(self::DEFAULT_THEME, $menu->theme ?? []),
             ],
-            'templates' => $registry->availableFor($business),
+            'templates' => $registry->availableFor($business, $entitlements),
             'features' => [
                 'custom_colors' => $entitlements->hasFeature('custom_colors'),
                 'font_selection' => $entitlements->hasFeature('font_selection'),
@@ -77,13 +77,15 @@ class MenuThemeController
                 ->lockForUpdate()
                 ->firstOrFail();
 
+            $ensurePrimaryMenu->execute($lockedBusiness);
+
             $menu = Menu::query()
                 ->where('business_id', $lockedBusiness->getKey())
                 ->lockForUpdate()
                 ->firstOrFail();
 
             $entitlements = new EntitlementService($lockedBusiness);
-            $registry->findAvailable($lockedBusiness, $validated['template']);
+            $registry->findAvailable($lockedBusiness, $entitlements, $validated['template']);
 
             $theme = self::DEFAULT_THEME;
             $theme['template'] = $validated['template'];
