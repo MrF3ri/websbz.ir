@@ -5,6 +5,7 @@ namespace App\Modules\Business\Http\Controllers;
 use App\Modules\Business\Actions\UploadBusinessLogoAction;
 use App\Modules\Business\Http\Requests\UploadBusinessLogoRequest;
 use App\Modules\Business\Models\Business;
+use App\Modules\Media\Models\BusinessLogo;
 use App\Modules\Media\Models\Media;
 use App\Modules\PublicMenu\Services\PublicMenuCache;
 use App\Modules\Tenancy\Services\CurrentBusiness;
@@ -46,8 +47,9 @@ class BusinessLogoController
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            $oldMedia = $lockedBusiness->logo()->lockForUpdate()->first();
-            $lockedBusiness->update(['logo_media_id' => null]);
+            $oldLogo = $lockedBusiness->logo()->lockForUpdate()->first();
+            $oldMedia = $oldLogo?->media()->lockForUpdate()->first();
+            $oldLogo?->delete();
         });
 
         if ($oldMedia instanceof Media) {
@@ -67,11 +69,12 @@ class BusinessLogoController
             ->whereHas('menu', fn ($query) => $query->where('status', 'published'))
             ->firstOrFail();
 
-        $media = Media::query()
+        $logo = BusinessLogo::query()
+            ->with('media')
             ->where('business_id', $business->getKey())
-            ->where('public_id', $mediaPublicId)
-            ->whereKey($business->logo_media_id)
+            ->whereHas('media', fn ($query) => $query->where('public_id', $mediaPublicId))
             ->firstOrFail();
+        $media = $logo->media;
 
         $disk = Storage::disk($media->disk);
         abort_unless($disk->exists($media->path), 404);
