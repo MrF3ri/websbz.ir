@@ -107,7 +107,7 @@ class BranchCatalogSettingsTest extends TestCase
         [$user, $business, $menu] = $this->createCatalogTenant('top');
         $category = $this->createCatalogCategory($menu, 'Coffee');
         $product = $this->createCatalogProduct($menu, $category, 'Espresso', basePrice: 100000);
-        $this->ensurePrimaryBranch($business);
+        app(EnsurePrimaryBranchAction::class)->execute($business);
         $branch = app(CreateBranchAction::class)->execute($business, [
             'name' => 'West Branch',
             'slug' => 'west',
