@@ -6,7 +6,7 @@ use App\Modules\Business\Models\Business;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class BusinessLogo extends Model
+/**\n * @property int $id\n * @property int $business_id\n * @property int $media_id\n */\nclass BusinessLogo extends Model
 {
     protected $fillable = [
         'business_id',
