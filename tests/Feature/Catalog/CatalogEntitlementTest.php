@@ -4,6 +4,7 @@ namespace Tests\Feature\Catalog;
 
 use App\Models\User;
 use App\Modules\Menu\Actions\EnsurePrimaryMenuAction;
+use App\Modules\Product\Enums\ProductLabel;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Concerns\InteractsWithCatalog;
 use Tests\TestCase;
@@ -93,6 +94,60 @@ class CatalogEntitlementTest extends TestCase
 
         $this->assertSame(8, $menu->categories()->count());
         $this->assertSame(25, $menu->products()->count());
+    }
+
+    public function test_economic_plan_cannot_assign_product_labels(): void
+    {
+        [$user, , $menu] = $this->createCatalogTenant('economic');
+        $category = $this->createCatalogCategory($menu);
+
+        $this->actingAs($user)
+            ->post(route('catalog.products.store'), [
+                'category_public_id' => $category->public_id,
+                'name' => 'Labeled product',
+                'base_price' => 100000,
+                'label' => ProductLabel::Popular->value,
+                'status' => 'draft',
+            ])
+            ->assertForbidden();
+
+        $this->assertSame(0, $menu->products()->count());
+    }
+
+    public function test_downgraded_business_can_keep_or_remove_existing_label_but_cannot_change_it(): void
+    {
+        [$user, , $menu] = $this->createCatalogTenant('economic');
+        $category = $this->createCatalogCategory($menu);
+        $product = $this->createCatalogProduct($menu, $category, 'Previously labeled product');
+        $product->update(['label' => ProductLabel::New]);
+
+        $payload = [
+            'category_public_id' => $category->public_id,
+            'name' => $product->name,
+            'base_price' => $product->base_price,
+            'status' => $product->status->value,
+            'label' => ProductLabel::New->value,
+        ];
+
+        $this->actingAs($user)
+            ->put(route('catalog.products.update', $product->public_id), $payload)
+            ->assertRedirect();
+
+        $payload['label'] = ProductLabel::Popular->value;
+
+        $this->actingAs($user)
+            ->put(route('catalog.products.update', $product->public_id), $payload)
+            ->assertForbidden();
+
+        $this->assertSame(ProductLabel::New, $product->fresh()->label);
+
+        $payload['label'] = null;
+
+        $this->actingAs($user)
+            ->put(route('catalog.products.update', $product->public_id), $payload)
+            ->assertRedirect();
+
+        $this->assertNull($product->fresh()->label);
     }
 
     public function test_economic_discount_and_availability_toggle_are_forbidden(): void
