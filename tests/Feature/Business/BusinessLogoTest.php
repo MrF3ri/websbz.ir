@@ -148,8 +148,10 @@ class BusinessLogoTest extends TestCase
 
     public function test_business_logo_route_cannot_cross_tenant_boundaries(): void
     {
-        [$userA, $businessA] = $this->createCatalogTenant('professional');
-        [$userB, $businessB] = $this->createCatalogTenant('professional');
+        [, $businessA, $menuA] = $this->createCatalogTenant('professional');
+        [$userB, $businessB, $menuB] = $this->createCatalogTenant('professional');
+        $menuA->update(['status' => MenuStatus::Published]);
+        $menuB->update(['status' => MenuStatus::Published]);
 
         $this->actingAs($userB)->post(route('business.logo.store'), [
             'logo' => UploadedFile::fake()->image('other-tenant.png', 128, 128),
@@ -161,7 +163,7 @@ class BusinessLogoTest extends TestCase
             ->assertNotFound();
 
         $this->get(route('media.business-logo', [$businessB->public_id, $media->public_id]))
-            ->assertNotFound();
+            ->assertOk();
     }
 
     public function test_logo_upload_rejects_mismatched_file_content(): void
