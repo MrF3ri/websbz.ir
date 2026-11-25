@@ -4,6 +4,7 @@ namespace Tests\Feature\PublicMenu;
 
 use App\Enums\BusinessStatus;
 use App\Modules\Menu\Enums\MenuStatus;
+use App\Modules\Product\Enums\ProductLabel;
 use App\Modules\Product\Enums\ProductStatus;
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -142,6 +143,25 @@ class PublicMenuTest extends TestCase
             ->assertInertia(fn (Assert $page) => $page
                 ->where('categories.0.products.0.name', 'Double Espresso')
                 ->where('categories.0.products.0.price', 120000));
+    }
+
+    public function test_public_menu_displays_allow_listed_product_labels(): void
+    {
+        [, $business, $menu] = $this->createCatalogTenant('professional');
+        $category = $this->createCatalogCategory($menu, 'Coffee');
+        $product = $this->createCatalogProduct(
+            $menu,
+            $category,
+            'Chef espresso',
+            status: ProductStatus::Published,
+        );
+        $product->update(['label' => ProductLabel::ChefSpecial]);
+        $menu->update(['status' => MenuStatus::Published]);
+
+        $this->get(route('public.menu.show', [$business->slug, $menu->slug]))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('categories.0.products.0.label', ProductLabel::ChefSpecial->value));
     }
 
     public function test_guest_cannot_view_a_draft_menu_or_suspended_business(): void
