@@ -6,6 +6,7 @@ use App\Modules\Business\Http\Requests\UpdateBusinessSettingsRequest;
 use App\Modules\Business\Models\Business;
 use App\Modules\PublicMenu\Services\PublicMenuCache;
 use App\Modules\Subscription\Services\EntitlementService;
+use App\Modules\Subscription\Services\EnforcementService;
 use App\Modules\Tenancy\Services\CurrentBusiness;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
@@ -35,12 +36,14 @@ class BusinessSettingsController
                 'address',
                 'city',
                 'postal_code',
+                'introduction',
             ]), [
                 'logo_url' => $logo ? route('media.business-logo', [$business->public_id, $logo->media->public_id]) : null,
             ]),
             'features' => [
                 'business_logo' => (new EntitlementService($business))->hasFeature('business_logo'),
                 'can_manage_logo' => Gate::allows('update', $business),
+                'business_introduction' => (new EntitlementService($business))->hasFeature('business_introduction'),
             ],
         ]);
     }
@@ -49,7 +52,15 @@ class BusinessSettingsController
     {
         // Update authorization is owned by the Form Request; do not duplicate the Policy check.
         $business = $this->resolveCurrentBusiness();
-        $business->update($request->validated());
+        $data = $request->validated();
+        $introduction = $data['introduction'] ?? $business->introduction;
+
+        if ($introduction !== null && $introduction !== $business->introduction) {
+            $entitlements = new EntitlementService($business);
+            (new EnforcementService($entitlements))->requireFeature($business, 'business_introduction');
+        }
+
+        $business->update($data);
         $menu = $business->menu()->first();
 
         if ($menu !== null) {
