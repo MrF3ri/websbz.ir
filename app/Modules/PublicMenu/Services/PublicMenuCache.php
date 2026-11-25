@@ -27,6 +27,6 @@ class PublicMenuCache
 
     private function key(Menu $menu): string
     {
-        return 'public-menu:'.$menu->getKey();
+        return 'public-menu:v2:'.$menu->getKey();
     }
 }
