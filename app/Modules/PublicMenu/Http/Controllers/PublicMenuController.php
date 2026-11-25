@@ -19,8 +19,7 @@ class PublicMenuController
         string $businessSlug,
         string $menuSlug,
         PublicMenuCache $publicMenuCache,
-    ): Response
-    {
+    ): Response {
         $business = Business::query()
             ->where('slug', $businessSlug)
             ->where('status', BusinessStatus::Active)
