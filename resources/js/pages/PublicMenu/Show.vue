@@ -23,6 +23,7 @@ defineProps<{
         title: string;
         slug: string;
         locale: string;
+        theme: { template: string; primary_color: string; font: string; mode: string };
     };
     categories: PublicCategory[];
 }>();
@@ -46,13 +47,14 @@ function formatPrice(value: number): string {
         <meta head-key="robots" name="robots" content="index,follow" />
     </Head>
 
-    <main dir="rtl" lang="fa" class="min-h-screen bg-stone-50 px-4 py-8 text-stone-900 dark:bg-stone-950 dark:text-stone-100 sm:py-12">
+    <div :class="menu.theme.mode === 'dark' ? 'dark' : ''">
+    <main dir="rtl" lang="fa" :data-template="menu.theme.template" :style="{ '--menu-accent': menu.theme.primary_color }" :class="['min-h-screen bg-stone-50 px-4 py-8 text-stone-900 dark:bg-stone-950 dark:text-stone-100 sm:py-12', menu.theme.font === 'serif' ? 'font-serif' : 'font-sans']">
         <div class="mx-auto w-full max-w-3xl space-y-8">
-            <header class="rounded-3xl border border-stone-200 bg-white px-6 py-8 text-center shadow-sm dark:border-stone-800 dark:bg-stone-900 sm:px-10">
+            <header class="border border-stone-200 bg-white px-6 py-8 text-center shadow-sm dark:border-stone-800 dark:bg-stone-900 sm:px-10" :class="menu.theme.template === 'minimal' ? 'rounded-xl shadow-none' : menu.theme.template === 'editorial' ? 'rounded-none border-x-0 border-t-0 shadow-none' : 'rounded-3xl'">
                 <p class="text-sm font-medium text-stone-500 dark:text-stone-400">
                     {{ business.name }}
                 </p>
-                <h1 class="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
+                <h1 class="mt-2 text-3xl font-bold tracking-tight sm:text-4xl" style="color: var(--menu-accent)">
                     {{ menu.title }}
                 </h1>
                 <p class="mt-3 text-sm text-stone-500 dark:text-stone-400">
@@ -123,4 +125,5 @@ function formatPrice(value: number): string {
             </footer>
         </div>
     </main>
+    </div>
 </template>
