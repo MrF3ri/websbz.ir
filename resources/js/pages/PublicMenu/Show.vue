@@ -186,12 +186,12 @@ function formatPrice(value: number): string {
                             </div>
                             <div v-else-if="product.images.length" class="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
                                 <img
-                                    v-for="image in product.images"
+                                    v-for="(image, imageIndex) in product.images"
                                     :key="image.url"
                                     :src="image.url"
                                     :srcset="image.srcset"
                                     :sizes="image.sizes"
-                                    :alt="'تصویر ' + product.name"
+                                    :alt="'تصویر ' + product.name + '، شماره ' + (imageIndex + 1)"
                                     :width="image.width"
                                     :height="image.height"
                                     loading="lazy"
