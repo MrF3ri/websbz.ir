@@ -27,6 +27,7 @@ class UpdateBusinessSettingsRequest extends FormRequest
             'address' => ['nullable', 'string', 'max:5000'],
             'city' => ['nullable', 'string', 'max:255'],
             'postal_code' => ['nullable', 'string', 'max:32'],
+            'introduction' => ['sometimes', 'nullable', 'string', 'max:1200'],
         ];
     }
 }
