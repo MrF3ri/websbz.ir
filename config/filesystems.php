@@ -13,7 +13,9 @@ return [
     |
     */
 
-    'default' => env('FILESYSTEM_DISK', 'local'),\n\n    'media_disk' => env('MEDIA_DISK', 'media'),
+    'default' => env('FILESYSTEM_DISK', 'local'),
+
+    'media_disk' => env('MEDIA_DISK', 'media'),
 
     /*
     |--------------------------------------------------------------------------
@@ -38,7 +40,15 @@ return [
             'report' => false,
         ],
 
-        'media' => [\n            'driver' => 'local',\n            'root' => storage_path('app/media'),\n            'visibility' => 'private',\n            'throw' => true,\n            'report' => false,\n        ],\n\n        'public' => [
+        'media' => [
+            'driver' => 'local',
+            'root' => storage_path('app/media'),
+            'visibility' => 'private',
+            'throw' => true,
+            'report' => false,
+        ],
+
+        'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
             'url' => rtrim((string) env('APP_URL', 'http://localhost'), '/').'/storage',
