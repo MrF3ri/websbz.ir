@@ -5,7 +5,6 @@ namespace Tests\Feature\Branch;
 use App\Modules\Branch\Actions\CreateBranchAction;
 use App\Modules\Branch\Actions\EnsurePrimaryBranchAction;
 use App\Modules\Branch\Actions\SetBranchStatusAction;
-use App\Modules\Branch\Models\Branch;
 use App\Modules\Menu\Enums\MenuStatus;
 use App\Modules\Product\Enums\ProductStatus;
 use Illuminate\Foundation\Testing\RefreshDatabase;
