@@ -35,8 +35,8 @@ class BranchCatalogController
                 'public_id' => $category->public_id,
                 'name' => $category->name,
                 'is_active' => $category->is_active,
-                'is_visible' => $category->branchSettings->first()?->is_visible ?? true,
-                'sort_order' => $category->branchSettings->first()?->sort_order ?? $category->sort_order,
+                'is_visible' => $category->branchSettings->first()->is_visible ?? true,
+                'sort_order' => $category->branchSettings->first()->sort_order ?? $category->sort_order,
             ])->values();
 
         $resolver = app(BranchProductResolver::class);
@@ -57,16 +57,16 @@ class BranchCatalogController
                     'base_price' => $product->base_price,
                     'discount_price' => $product->discount_price,
                     'name_override' => $setting?->name_override,
-                    'description_override_enabled' => $setting?->description_override_enabled ?? false,
+                    'description_override_enabled' => $setting->description_override_enabled ?? false,
                     'description_override' => $setting?->description_override,
                     'base_price_override' => $setting?->base_price_override,
-                    'discount_override_mode' => $setting?->discount_override_mode ?? 'inherit',
+                    'discount_override_mode' => $setting->discount_override_mode ?? 'inherit',
                     'discount_price_override' => $setting?->discount_price_override,
-                    'is_visible' => $setting?->is_visible ?? true,
-                    'is_available' => $setting?->is_available ?? true,
-                    'track_inventory' => $setting?->track_inventory ?? false,
+                    'is_visible' => $setting->is_visible ?? true,
+                    'is_available' => $setting->is_available ?? true,
+                    'track_inventory' => $setting->track_inventory ?? false,
                     'stock_quantity' => $setting?->stock_quantity,
-                    'sort_order' => $setting?->sort_order ?? $product->sort_order,
+                    'sort_order' => $setting->sort_order ?? $product->sort_order,
                     'effective' => $resolver->resolve($product, $setting),
                 ];
             })->values();
@@ -92,7 +92,9 @@ class BranchCatalogController
     ): RedirectResponse {
         $business = $this->resolveBusiness($currentBusiness);
         $branch = $this->resolveBranch($business, $branchPublicId);
-        $updateSettings->execute($business, $branch, $request->validated());
+        /** @var array{categories: array<int, array<string, mixed>>, products: array<int, array<string, mixed>>} $data */
+        $data = $request->validated();
+        $updateSettings->execute($business, $branch, $data);
         $menu = $business->menu()->first();
 
         if ($menu instanceof Menu) {
