@@ -38,7 +38,7 @@ class BusinessLogoTest extends TestCase
             ->assertRedirect();
 
         $business = $business->fresh();
-        $media = $business->logo()->firstOrFail();
+        $media = $business->logo()->with('media')->firstOrFail()->media;
 
         $this->assertSame($business->getKey(), $media->business_id);
         $this->assertSame('image/png', $media->mime_type);
