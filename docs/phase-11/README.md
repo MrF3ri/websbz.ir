@@ -16,7 +16,17 @@ Pull request: #71 (Draft)
 - Public-menu cache invalidation after successful theme updates.
 - Existing selected templates are preserved after a plan downgrade, but unavailable templates cannot be newly selected.
 
-## Delivered in increment 11.2 (implementation in progress)\n\n- Add mobile and desktop preview sizing for each available template in the theme editor.\n- Add tenant-owned business-logo metadata linked to the existing private media table with a composite tenant foreign key.\n- Add owner/admin-authorized logo upload and removal, gated by the `business_logo` subscription snapshot.\n- Validate JPEG/PNG/WebP content, MIME/extension agreement, 2 MiB file size, and 2048 × 2048 maximum dimensions.\n- Deliver logos through a public application route only for active businesses with a published menu; source objects remain on private storage.\n- Invalidate public-menu cache after logo changes and clean up replaced media objects.\n- Add ADR 0016 for the private logo storage and tenant isolation contract.\n\n## Remaining Phase 11 work
+## Delivered in increment 11.2 (implementation in progress)
+
+- Add mobile and desktop preview sizing for each available template in the theme editor.
+- Add tenant-owned business-logo metadata linked to the existing private media table with a composite tenant foreign key.
+- Add owner/admin-authorized logo upload and removal, gated by the `business_logo` subscription snapshot.
+- Validate JPEG/PNG/WebP content, MIME/extension agreement, 2 MiB file size, and 2048 × 2048 maximum dimensions.
+- Deliver logos through a public application route only for active businesses with a published menu; source objects remain on private storage.
+- Invalidate public-menu cache after logo changes and clean up replaced media objects.
+- Add ADR 0016 for the private logo storage and tenant isolation contract.
+
+## Remaining Phase 11 work
 
 1. Add preview cards and responsive previews for every template, with visual regression coverage.
 2. Complete the logo workflow using private media storage, tenant ownership checks, replacement cleanup, and entitlement enforcement.
