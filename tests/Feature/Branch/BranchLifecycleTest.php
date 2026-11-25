@@ -192,12 +192,36 @@ class BranchLifecycleTest extends TestCase
 
         $updated = app(UpdateBranchAction::class)->execute($business, $branch, [
             'name' => 'Renamed Branch',
-            'slug' => 'renamed',
+            'slug' => 'original',
         ]);
 
         $this->assertSame('Renamed Branch', $updated->name);
+        $this->assertSame('original', $updated->slug);
         $this->assertSame('+989120000000', $updated->phone);
         $this->assertSame('Europe/Baku', $updated->timezone);
+    }
+
+    public function test_branch_slug_cannot_be_changed_after_creation(): void
+    {
+        [, $business] = $this->createCatalogTenant('top');
+        $this->ensurePrimaryBranch($business);
+        $branch = app(CreateBranchAction::class)->execute($business, [
+            'name' => 'Stable Branch',
+            'slug' => 'stable',
+        ]);
+
+        try {
+            app(UpdateBranchAction::class)->execute($business, $branch, [
+                'name' => 'Renamed Branch',
+                'slug' => 'changed',
+            ]);
+            $this->fail('A branch slug must remain immutable after creation.');
+        } catch (ValidationException $exception) {
+            $this->assertArrayHasKey('slug', $exception->errors());
+        }
+
+        $this->assertSame('stable', $branch->fresh()?->slug);
+        $this->assertSame('Stable Branch', $branch->fresh()?->name);
     }
 
     public function test_branch_from_another_business_cannot_be_updated_through_the_current_tenant(): void
