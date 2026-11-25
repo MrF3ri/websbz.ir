@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
+import { computed } from 'vue';
 
 type PublicProduct = {
     public_id: string;
@@ -10,6 +11,8 @@ type PublicProduct = {
     price: number;
     discount_price: number | null;
 };
+
+type PublicLocale = { code: string; name: string; native_name: string; direction: 'rtl' | 'ltr' };
 
 type PublicCategory = {
     name: string;
@@ -27,18 +30,75 @@ defineProps<{
         title: string;
         slug: string;
         locale: string;
+        direction: 'rtl' | 'ltr';
         theme: { template: string; primary_color: string; font: string; mode: string; density: string; card_style: string; heading_size: string };
         image_slider_enabled: boolean;
         advertising_banner: { title: string | null; message: string | null; cta_label: string | null; cta_url: string | null } | null;
     };
     categories: PublicCategory[];
+    locales: PublicLocale[];
 }>();
 
-const tomanFormatter = new Intl.NumberFormat('fa-IR', {
-    maximumFractionDigits: 0,
-});
+const copyByLocale = {
+    fa: {
+        officialMenu: 'منوی رسمی',
+        emptyMenu: '{{ copy.emptyMenu }}',
+        previous: 'قبلی',
+        next: 'بعدی',
+        digitalMenu: '{{ copy.digitalMenu }}',
+        logoOf: 'لوگوی ',
+        imageOf: 'تصویر ',
+        category: 'دسته‌بندی ',
+        languageSwitcher: 'انتخاب زبان منو',
+        banner: 'بنر تبلیغاتی',
+        currency: 'تومان',
+        description: 'منوی ',
+    },
+    en: {
+        officialMenu: 'Official menu',
+        emptyMenu: 'There are currently no products to display.',
+        previous: 'Previous',
+        next: 'Next',
+        digitalMenu: 'Digital menu',
+        logoOf: 'Logo of ',
+        imageOf: 'Image of ',
+        category: 'Category ',
+        languageSwitcher: 'Menu language selector',
+        banner: 'Advertisement',
+        currency: 'Toman',
+        description: 'Menu for ',
+    },
+    ar: {
+        officialMenu: 'القائمة الرسمية',
+        emptyMenu: 'لا توجد منتجات متاحة للعرض حاليًا.',
+        previous: 'السابق',
+        next: 'التالي',
+        digitalMenu: 'القائمة الرقمية',
+        logoOf: 'شعار ',
+        imageOf: 'صورة ',
+        category: 'الفئة ',
+        languageSwitcher: 'اختيار لغة القائمة',
+        banner: 'إعلان',
+        currency: 'تومان',
+        description: 'قائمة ',
+    },
+} as const;
 
-const productLabelTitles = { new: 'جدید', popular: 'پرفروش', recommended: 'پیشنهاد ویژه', chef_special: 'پیشنهاد سرآشپز' } as const;
+const copy = computed(() => copyByLocale[props.menu.locale as keyof typeof copyByLocale] ?? copyByLocale.fa);
+const numberFormatter = computed(() => new Intl.NumberFormat(props.menu.locale, {
+    maximumFractionDigits: 0,
+}));
+
+const productLabelTitles = computed(() => ({
+    fa: { new: 'جدید', popular: 'پرفروش', recommended: 'پیشنهاد ویژه', chef_special: 'پیشنهاد سرآشپز' },
+    en: { new: 'New', popular: 'Best seller', recommended: 'Recommended', chef_special: "Chef's special" },
+    ar: { new: 'جديد', popular: 'الأكثر مبيعًا', recommended: 'موصى به', chef_special: 'اختيار الشيف' },
+}[props.menu.locale as 'fa' | 'en' | 'ar'] ?? {
+    new: 'جدید',
+    popular: 'پرفروش',
+    recommended: 'پیشنهاد ویژه',
+    chef_special: 'پیشنهاد سرآشپز',
+}));
 
 const densityClasses: Record<string, string> = {
     compact: 'space-y-6',
@@ -106,7 +166,7 @@ function scrollProductImages(publicId: string, direction: -1 | 1): void {
 }
 
 function formatPrice(value: number): string {
-    return tomanFormatter.format(value) + ' تومان';
+    return numberFormatter.value.format(value) + ' ' + copy.value.currency;
 }
 </script>
 
@@ -115,16 +175,16 @@ function formatPrice(value: number): string {
         <meta
             head-key="description"
             name="description"
-            :content="'منوی ' + business.name + ' - ' + menu.title"
+            :content="copy.description + business.name + ' - ' + menu.title"
         />
         <meta head-key="robots" name="robots" content="index,follow" />
     </Head>
 
     <div :class="menu.theme.mode === 'dark' ? 'dark' : ''">
-    <main id="public-menu-main" aria-labelledby="public-menu-title" dir="rtl" lang="fa" :data-template="menu.theme.template" :style="{ '--menu-accent': menu.theme.primary_color }"  :class="['min-h-screen bg-stone-50 px-4 py-8 text-stone-900 dark:bg-stone-950 dark:text-stone-100 sm:py-12', menu.theme.font === 'serif' ? 'font-serif' : menu.theme.font === 'rounded' ? 'font-sans tracking-wide' : 'font-sans']">
+    <main id="public-menu-main" aria-labelledby="public-menu-title" :dir="menu.direction" :lang="menu.locale" :data-template="menu.theme.template" :style="{ '--menu-accent': menu.theme.primary_color }"  :class="['min-h-screen bg-stone-50 px-4 py-8 text-stone-900 dark:bg-stone-950 dark:text-stone-100 sm:py-12', menu.theme.font === 'serif' ? 'font-serif' : menu.theme.font === 'rounded' ? 'font-sans tracking-wide' : 'font-sans']">
         <div class="mx-auto w-full max-w-3xl" :class="densityClasses[menu.theme.density] ?? densityClasses.comfortable">
             <header class="border border-stone-200 bg-white px-6 py-8 text-center shadow-sm dark:border-stone-800 dark:bg-stone-900 sm:px-10"  :class="{ classic: 'rounded-3xl shadow-sm', minimal: 'rounded-xl border-0 shadow-none', editorial: 'rounded-none border-x-0 border-t-0 shadow-none', modern: 'rounded-2xl border-2 border-stone-100 shadow-lg dark:border-stone-700', cafe: 'rounded-[2rem] border-amber-200 dark:border-amber-900', contrast: 'rounded-md border-2 border-stone-900 shadow-md dark:border-white' }[menu.theme.template] ?? 'rounded-3xl'">
-                <img v-if="business.logo_url" :src="business.logo_url" :alt="'لوگوی ' + business.name" class="mx-auto mb-4 size-20 rounded-xl object-contain" width="80" height="80" />
+                <img v-if="business.logo_url" :src="business.logo_url" :alt="copy.logoOf + business.name" class="mx-auto mb-4 size-20 rounded-xl object-contain" width="80" height="80" />
                 <p class="text-sm font-medium text-stone-500 dark:text-stone-400">
                     {{ business.name }}
                 </p>
@@ -133,11 +193,26 @@ function formatPrice(value: number): string {
                     {{ menu.title }}
                 </h1>
                 <p class="mt-3 text-sm text-stone-500 dark:text-stone-400">
-                    منوی رسمی {{ business.name }}
+                    {{ copy.officialMenu }} {{ business.name }}
                 </p>
             </header>
 
-            <section v-if="menu.advertising_banner" aria-label="بنر تبلیغاتی" class="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-5 text-amber-950 shadow-sm dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-100 sm:px-7">
+            <nav v-if="locales.length > 1" :aria-label="copy.languageSwitcher" class="flex flex-wrap justify-center gap-2">
+                <a
+                    v-for="option in locales"
+                    :key="option.code"
+                    :href="`/menu/${business.slug}/${menu.slug}?lang=${option.code}`"
+                    :lang="option.code"
+                    :dir="option.direction"
+                    :aria-current="menu.locale === option.code ? 'page' : undefined"
+                    class="rounded-full border px-4 py-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--menu-accent)]"
+                    :class="menu.locale === option.code ? 'border-[var(--menu-accent)] bg-[var(--menu-accent)] text-white' : 'border-stone-200 bg-white text-stone-600 hover:border-stone-400 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-300'"
+                >
+                    {{ option.native_name }}
+                </a>
+            </nav>
+
+            <section v-if="menu.advertising_banner" :aria-label="copy.banner" class="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-5 text-amber-950 shadow-sm dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-100 sm:px-7">
                 <h2 v-if="menu.advertising_banner.title" class="text-lg font-bold">{{ menu.advertising_banner.title }}</h2>
                 <p v-if="menu.advertising_banner.message" class="mt-2 whitespace-pre-line text-sm leading-7">{{ menu.advertising_banner.message }}</p>
                 <a
@@ -159,7 +234,7 @@ function formatPrice(value: number): string {
                 <section
                     v-for="(category, index) in categories"
                     :key="category.name + '-' + index"
-                    :aria-label="'دسته‌بندی ' + category.name"
+                    :aria-label="copy.category + category.name"
                     :class="categoryDensityClasses[menu.theme.density] ?? categoryDensityClasses.comfortable"
                 >
                     <div class="flex items-center gap-3">
@@ -175,12 +250,12 @@ function formatPrice(value: number): string {
                         >
                             <div v-if="menu.image_slider_enabled && product.images.length > 1" class="mb-4">
                                 <div class="mb-2 flex justify-end gap-2" dir="rtl">
-                                    <button type="button" class="rounded-md border border-stone-200 px-3 py-1 text-xs text-stone-600 transition hover:bg-stone-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--menu-accent)] dark:border-stone-700 dark:text-stone-300 dark:hover:bg-stone-800" :aria-label="'تصاویر قبلی ' + product.name" @click="scrollProductImages(product.public_id, -1)">قبلی</button>
-                                    <button type="button" class="rounded-md border border-stone-200 px-3 py-1 text-xs text-stone-600 transition hover:bg-stone-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--menu-accent)] dark:border-stone-700 dark:text-stone-300 dark:hover:bg-stone-800" :aria-label="'تصاویر بعدی ' + product.name" @click="scrollProductImages(product.public_id, 1)">بعدی</button>
+                                    <button type="button" class="rounded-md border border-stone-200 px-3 py-1 text-xs text-stone-600 transition hover:bg-stone-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--menu-accent)] dark:border-stone-700 dark:text-stone-300 dark:hover:bg-stone-800" :aria-label="copy.previous + ' — ' + product.name" @click="scrollProductImages(product.public_id, -1)">{{ copy.previous }}</button>
+                                    <button type="button" class="rounded-md border border-stone-200 px-3 py-1 text-xs text-stone-600 transition hover:bg-stone-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--menu-accent)] dark:border-stone-700 dark:text-stone-300 dark:hover:bg-stone-800" :aria-label="copy.next + ' — ' + product.name" @click="scrollProductImages(product.public_id, 1)">{{ copy.next }}</button>
                                 </div>
-                                <div :ref="(element) => setImageSliderRef(product.public_id, element)" class="flex snap-x snap-mandatory gap-2 overflow-x-auto scroll-smooth pb-2" dir="ltr" tabindex="0" role="region" aria-roledescription="گالری تصاویر" :aria-label="'گالری تصاویر ' + product.name">
+                                <div :ref="(element) => setImageSliderRef(product.public_id, element)" class="flex snap-x snap-mandatory gap-2 overflow-x-auto scroll-smooth pb-2" dir="ltr" tabindex="0" role="region" aria-roledescription="image gallery" :aria-label="copy.imageOf + product.name">
                                     <div v-for="(image, imageIndex) in product.images" :key="image.url" class="w-[82%] shrink-0 snap-center sm:w-[62%]">
-                                        <img :src="image.url" :srcset="image.srcset" :sizes="image.sizes" :alt="'تصویر ' + product.name + '، شماره ' + (imageIndex + 1)" :width="image.width" :height="image.height" loading="lazy" decoding="async" class="aspect-[4/3] w-full rounded-xl object-cover" />
+                                        <img :src="image.url" :srcset="image.srcset" :sizes="image.sizes" :alt="copy.imageOf + product.name + ' ' + (imageIndex + 1)" :width="image.width" :height="image.height" loading="lazy" decoding="async" class="aspect-[4/3] w-full rounded-xl object-cover" />
                                     </div>
                                 </div>
                             </div>
