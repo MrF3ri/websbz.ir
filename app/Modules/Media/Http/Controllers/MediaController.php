@@ -139,7 +139,7 @@ class MediaController
     public function publicImage(string $mediaPublicId, Request $request): StreamedResponse
     {
         $variantName = $request->query('variant', 'original');
-        abort_unless(in_array($variantName, ['thumbnail', 'medium', 'original'], true), 404);
+        abort_unless(is_string($variantName) && in_array($variantName, ['thumbnail', 'medium', 'original'], true), 404);
 
         $image = ProductImage::query()
             ->with(['media', 'product.menu.business'])
@@ -162,7 +162,13 @@ class MediaController
 
         if ($variantName !== 'original') {
             $variant = $media->variants[$variantName] ?? null;
-            abort_unless(is_array($variant) && isset($variant['path'], $variant['mime_type']), 404);
+            abort_unless(
+                is_array($variant)
+                && isset($variant['path'], $variant['mime_type'])
+                && is_string($variant['path'])
+                && is_string($variant['mime_type']),
+                404,
+            );
             $path = $variant['path'];
             $mimeType = $variant['mime_type'];
         }

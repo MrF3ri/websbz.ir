@@ -62,7 +62,7 @@ class ProductImageConcurrencyTest extends TestCase
         foreach ($resultPaths as $resultPath) {
             $pid = pcntl_fork();
 
-            if ($pid === -1) {
+            if (! is_int($pid) || $pid < 0) {
                 $this->fail('Unable to fork a PostgreSQL upload worker.');
             }
 

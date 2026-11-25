@@ -55,10 +55,20 @@ class ProductImageVariantGenerator
                 $height = max(1, (int) round($sourceHeight * $scale));
                 $target = imagecreatetruecolor($width, $height);
 
+                if ($target === false) {
+                    throw new RuntimeException('Unable to allocate a responsive image buffer.');
+                }
+
                 if ($mimeType !== 'image/jpeg') {
                     imagealphablending($target, false);
                     imagesavealpha($target, true);
                     $transparent = imagecolorallocatealpha($target, 0, 0, 0, 127);
+
+                    if ($transparent === false) {
+                        imagedestroy($target);
+                        throw new RuntimeException('Unable to initialize image transparency.');
+                    }
+
                     imagefilledrectangle($target, 0, 0, $width, $height, $transparent);
                 }
 
@@ -97,7 +107,12 @@ class ProductImageVariantGenerator
         } catch (Throwable $exception) {
             foreach ($generatedPaths as $path) {
                 try {
-                    Storage::disk($disk)->delete($path);
+                    if (! Storage::disk($disk)->delete($path)) {
+                        Log::warning('Failed to remove a partial responsive image variant.', [
+                            'disk' => $disk,
+                            'path' => $path,
+                        ]);
+                    }
                 } catch (Throwable $cleanupException) {
                     Log::warning('Failed to clean up a responsive image variant.', [
                         'disk' => $disk,
