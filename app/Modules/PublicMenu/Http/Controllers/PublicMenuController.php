@@ -102,7 +102,7 @@ class PublicMenuController
     /**
      * @param array<string, mixed> $effective
      */
-    private function productData(Product $product, array $effective, BranchProductSetting|null $setting): array
+    private function productData(Product $product, array $effective, ?BranchProductSetting $setting): array
     {
         return [
             'public_id' => $product->public_id,
@@ -188,7 +188,7 @@ class PublicMenuController
     private function renderMenu(
         string $businessSlug,
         string $menuSlug,
-        string|null $branchSlug,
+        ?string $branchSlug,
         BranchProductResolver $resolver,
         PublicMenuCache $publicMenuCache,
         Request $request,
