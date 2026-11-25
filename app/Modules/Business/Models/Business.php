@@ -29,6 +29,7 @@ use Illuminate\Support\Str;
  * @property string|null $address
  * @property string|null $city
  * @property string|null $postal_code
+ * @property string|null $introduction
  *
  * @method static Builder<static> query()
  */
@@ -51,6 +52,7 @@ class Business extends Model
         'address',
         'city',
         'postal_code',
+        'introduction',
     ];
 
     /**

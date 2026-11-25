@@ -151,9 +151,12 @@ class PublicMenuController
             ];
         });
 
-        if (is_array($publicMenu) && is_array($publicMenu['menu'] ?? null)) {
-            $publicMenu['menu']['image_slider_enabled'] = (new EntitlementService($business))
-                ->hasFeature('image_slider');
+        if (is_array($publicMenu) && is_array($publicMenu['menu'] ?? null) && is_array($publicMenu['business'] ?? null)) {
+            $entitlements = new EntitlementService($business);
+            $publicMenu['menu']['image_slider_enabled'] = $entitlements->hasFeature('image_slider');
+            $publicMenu['business']['introduction'] = $entitlements->hasFeature('business_introduction')
+                ? $business->introduction
+                : null;
         } else {
             throw new LogicException('The cached public menu payload is invalid.');
         }

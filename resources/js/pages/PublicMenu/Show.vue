@@ -21,6 +21,7 @@ defineProps<{
         name: string;
         slug: string;
         logo_url: string | null;
+        introduction: string | null;
     };
     menu: {
         title: string;
@@ -80,6 +81,7 @@ function formatPrice(value: number): string {
                 <p class="text-sm font-medium text-stone-500 dark:text-stone-400">
                     {{ business.name }}
                 </p>
+                <p v-if="business.introduction" class="mx-auto mt-3 max-w-2xl text-sm leading-7 text-stone-600 dark:text-stone-300">{{ business.introduction }}</p>
                 <h1 class="mt-2 text-3xl font-bold tracking-tight sm:text-4xl" style="color: var(--menu-accent)">
                     {{ menu.title }}
                 </h1>
