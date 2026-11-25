@@ -35,16 +35,7 @@ Pull request: #74 (Draft)
 - Add SQLite/PostgreSQL tests for entitlement enforcement, downgrade behavior, and public rendering.
 - Record the allow-list and downgrade behavior in ADR 0017.
 
-## Delivered in increment 11.4 (implementation in progress)
-
-- Add a subscription-snapshot-driven image slider to public product cards when more than one image exists.
-- Keep the responsive image grid for Economic plans and products with one image.
-- Add keyboard focus, previous/next controls, scroll-snap behavior, and accessible labels.
-- Resolve the `image_slider` entitlement outside the cached public-menu payload so subscription changes take effect immediately.
-- Add coverage for entitlement changes while the public-menu catalog cache remains warm.
-- Record the behavior in ADR 0018.
-
-## Delivered in increment 11.4 (implementation in progress)
+## Increment 11.4 — subscription-gated image slider
 
 - Add a subscription-snapshot-driven image slider to public product cards when more than one image exists.
 - Keep the responsive image grid for Economic plans and products with one image.
@@ -85,10 +76,6 @@ Pull request: #74 (Draft)
 - Pint: 236 files passed; PHPStan reported no errors.
 - Production image build, Compose validation, and Nginx validation: passed.
 
-### Increment 11.4 — PR #74
-
-- GitHub Actions verification is pending for the current branch head.
-
 ### Increment 11.3 — merged PR #73
 
 - SQLite: 233 passed, 7 skipped (500 assertions).
@@ -98,3 +85,7 @@ Pull request: #74 (Draft)
 - Frontend unit tests: 7 passed; Vue/TypeScript checks passed.
 - Pint: 238 files passed; PHPStan reported no errors.
 - Production image build, Compose validation, and Nginx validation: passed.
+
+### Increment 11.4 — PR #74
+
+- GitHub Actions verification is pending for the current branch head.
