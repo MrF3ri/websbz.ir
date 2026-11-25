@@ -4,7 +4,8 @@ namespace App\Modules\Business\Http\Controllers;
 
 use App\Modules\Business\Http\Requests\UpdateBusinessSettingsRequest;
 use App\Modules\Business\Models\Business;
-use App\Modules\PublicMenu\Services\PublicMenuCache;\nuse App\Modules\Subscription\Services\EntitlementService;
+use App\Modules\PublicMenu\Services\PublicMenuCache;
+use App\Modules\Subscription\Services\EntitlementService;
 use App\Modules\Tenancy\Services\CurrentBusiness;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
@@ -24,15 +25,22 @@ class BusinessSettingsController
 
         Gate::authorize('view', $business);
 
+        $logo = $business->logo()->first();
+
         return Inertia::render('Business/Settings', [
-            'business' => $business->only([
+            'business' => array_merge($business->only([
                 'name',
                 'phone',
                 'email',
                 'address',
                 'city',
                 'postal_code',
+            ]), [
+                'logo_url' => $logo ? route('media.business-logo', [$business->public_id, $logo->public_id]) : null,
             ]),
+            'features' => [
+                'business_logo' => (new EntitlementService($business))->hasFeature('business_logo'),
+            ],
         ]);
     }
 
