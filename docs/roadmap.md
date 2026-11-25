@@ -69,15 +69,15 @@ This snapshot records the operational state reported and verified during the own
 
 ## Current product phase
 
-- **Phase 12 — Localization and Translation Management:** in progress. PRs #83–#87 delivered the locale registry/schema, Top-only translation management, public-menu locale rendering, translation completeness, and tenant/cache regression coverage. Increment 12.6 extracts translation persistence into an action and adds PostgreSQL concurrency coverage for simultaneous locale writes. The approved translation schema covers menu, category, product name, and product description; banner and business-introduction fields remain outside the approved translation scope. Only Top supports `fa`, `en`, and `ar`; Economic and Professional remain single-language. See `docs/phase-12/README.md`.
-- **Phase 9 — Branch Management:** implementation is merged through PRs #89–#94: branch-aware public menu projection, branch-specific QR targets, immutable branch slugs, branch catalog settings, cache invalidation audit, and PostgreSQL quota/settings concurrency tests. Only owner-controlled physical acceptance remains: create a second branch, customize it, scan its downloaded QR with a phone, and verify the primary branch is unchanged. No production deployment is included. See `docs/phase-9/README.md`.
+- **Phase 9 — Branch Management:** technical implementation is merged through PRs #88–#94: branch-aware public menu projection, branch-specific QR targets, immutable branch slugs, branch catalog settings, cache invalidation audit, and PostgreSQL quota/settings concurrency tests. Owner-controlled physical QR acceptance remains: create a second branch, customize it, scan its downloaded QR with a phone, and verify the primary branch is unchanged. No production deployment is included. See `docs/phase-9/README.md`.
+- **Phase 10 — Media and Product Image Management:** implementation is complete and merged through PRs #69 and #70. This includes secure product-image management, responsive variants, ordered galleries, storage deletion reliability, PostgreSQL quota concurrency coverage, and a passing real Backblaze B2 non-production integration test. Owner-side local image/gallery acceptance and review of bucket lifecycle policy remain; see `docs/phase-10/README.md` and `docs/phase-10/S3-VERIFICATION.md`.
 - **Phase 11 — Menu Customization and Visual Templates:** complete and merged through PR #82. See `docs/phase-11/README.md` for increment-level implementation and CI history.
+- **Phase 12 — Localization and Translation Management:** feature implementation is complete and merged through PRs #83–#87 and #95. The supported Top-plan locales are `fa`, `en`, and `ar`; Economic and Professional remain single-language. The approved translation schema covers menu, category, product name, and product description. Banner and business-introduction fields remain outside the approved translation scope. Only the repository-wide Release Gate remains, after all product phases are complete. See `docs/phase-12/README.md`.
 
 ## Deferred product phases
 
 These are intentionally separate from the current localization increment:
 
-- **Phase 10:** Media and product image management.
 - **Phase 15:** Top-plan advanced features (video, reviews/ratings, likes, Instagram API, Excel export, backup/restore, notifications/customer communication, initial setup service).
 - **Phase 16:** Custom domains and HTTPS per tenant.
 - **Phase 17:** Social links, contact, and location integrations.
