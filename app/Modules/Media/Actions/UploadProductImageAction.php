@@ -143,7 +143,14 @@ class UploadProductImageAction
         } catch (Throwable $exception) {
             foreach (array_reverse($storedPaths) as $storedPath) {
                 try {
-                    Storage::disk($disk)->delete($storedPath);
+                    $cleanupDisk = Storage::disk($disk);
+
+                    if ($cleanupDisk->exists($storedPath) && ! $cleanupDisk->delete($storedPath)) {
+                        Log::warning('Failed to remove a stored product image after a database error.', [
+                            'disk' => $disk,
+                            'path' => $storedPath,
+                        ]);
+                    }
                 } catch (Throwable $cleanupException) {
                     Log::warning('Failed to clean up a product image upload after an error.', [
                         'disk' => $disk,
