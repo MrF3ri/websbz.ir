@@ -5,6 +5,7 @@ namespace Tests\Feature\Business;
 use App\Enums\BusinessRole;
 use App\Modules\Menu\Enums\MenuStatus;
 use Illuminate\Database\QueryException;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\UploadedFile;
@@ -235,6 +236,65 @@ class BusinessLogoTest extends TestCase
         $this->get($url)
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page->where('business.logo_url', null));
+    }
+
+
+    public function test_replacement_storage_failure_keeps_old_media_metadata_for_retry(): void
+    {
+        [$user, $business] = $this->createCatalogTenant('professional');
+
+        $this->actingAs($user)->post(route('business.logo.store'), [
+            'logo' => UploadedFile::fake()->image('first.png', 128, 128),
+        ])->assertRedirect();
+
+        $oldMedia = $business->fresh()->logo()->with('media')->firstOrFail()->media;
+        $newPath = 'businesses/'.$business->public_id.'/logo/replacement.png';
+
+        $disk = \\Mockery::mock(FilesystemAdapter::class);
+        $disk->shouldReceive('putFileAs')
+            ->once()
+            ->with(
+                'businesses/'.$business->public_id.'/logo',
+                \\Mockery::type(UploadedFile::class),
+                \\Mockery::type('string'),
+            )
+            ->andReturn($newPath);
+        $disk->shouldReceive('exists')->once()->with($oldMedia->path)->andReturn(true);
+        $disk->shouldReceive('delete')->once()->with($oldMedia->path)->andReturn(false);
+        Storage::shouldReceive('disk')->twice()->with('media')->andReturn($disk);
+
+        $this->actingAs($user)->post(route('business.logo.store'), [
+            'logo' => UploadedFile::fake()->image('replacement.png', 256, 256),
+        ])->assertRedirect();
+
+        $newMedia = $business->fresh()->logo()->with('media')->firstOrFail()->media;
+
+        $this->assertNotSame($oldMedia->getKey(), $newMedia->getKey());
+        $this->assertDatabaseHas('media', ['id' => $oldMedia->getKey(), 'path' => $oldMedia->path]);
+        $this->assertDatabaseHas('media', ['id' => $newMedia->getKey(), 'path' => $newPath]);
+    }
+
+    public function test_logo_removal_storage_failure_retains_media_metadata_for_retry(): void
+    {
+        [$user, $business] = $this->createCatalogTenant('professional');
+
+        $this->actingAs($user)->post(route('business.logo.store'), [
+            'logo' => UploadedFile::fake()->image('brand.png', 128, 128),
+        ])->assertRedirect();
+
+        $media = $business->fresh()->logo()->with('media')->firstOrFail()->media;
+
+        $disk = \\Mockery::mock(FilesystemAdapter::class);
+        $disk->shouldReceive('exists')->once()->with($media->path)->andReturn(true);
+        $disk->shouldReceive('delete')->once()->with($media->path)->andReturn(false);
+        Storage::shouldReceive('disk')->once()->with('media')->andReturn($disk);
+
+        $this->actingAs($user)
+            ->delete(route('business.logo.destroy'))
+            ->assertRedirect();
+
+        $this->assertFalse($business->fresh()->logo()->exists());
+        $this->assertDatabaseHas('media', ['id' => $media->getKey(), 'path' => $media->path]);
     }
 
 }
