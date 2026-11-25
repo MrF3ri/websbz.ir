@@ -2,6 +2,7 @@
 
 namespace App\Modules\Product\Http\Requests;
 
+use App\Modules\Product\Enums\ProductLabel;
 use App\Modules\Product\Enums\ProductStatus;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -28,6 +29,7 @@ class SaveProductRequest extends FormRequest
             'category_public_id' => ['required', 'string', 'size:26'],
             'name' => ['required', 'string', 'max:180'],
             'description' => ['nullable', 'string', 'max:5000'],
+            'label' => ['nullable', Rule::enum(ProductLabel::class)],
             'base_price' => ['required', 'integer', 'min:0'],
             'discount_price' => ['nullable', 'integer', 'min:0', 'lt:base_price'],
             'is_available' => ['sometimes', 'boolean'],
