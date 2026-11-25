@@ -208,6 +208,30 @@ class MenuThemeTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_public_menu_falls_back_for_unknown_custom_design_tokens(): void
+    {
+        [, $business, $menu] = $this->createCatalogTenant('professional');
+        $menu->update([
+            'status' => MenuStatus::Published,
+            'theme' => [
+                'template' => 'classic',
+                'primary_color' => '#365B4A',
+                'font' => 'system',
+                'mode' => 'light',
+                'density' => 'untrusted',
+                'card_style' => 'arbitrary-css',
+                'heading_size' => '<script>',
+            ],
+        ]);
+
+        $this->get(route('public.menu.show', [$business->slug, $menu->slug]))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('menu.theme.density', 'comfortable')
+                ->where('menu.theme.card_style', 'standard')
+                ->where('menu.theme.heading_size', 'normal'));
+    }
+
     public function test_public_menu_receives_the_saved_allow_list_theme(): void
     {
         [$user, $business, $menu] = $this->createCatalogTenant('professional');
