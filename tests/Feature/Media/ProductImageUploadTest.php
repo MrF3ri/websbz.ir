@@ -209,5 +209,4 @@ class ProductImageUploadTest extends TestCase
             $product->images()->with('media')->orderBy('sort_order')->get()->pluck('media.public_id')->all(),
         );
     }
-
 }
