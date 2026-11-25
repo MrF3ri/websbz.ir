@@ -97,14 +97,14 @@ class ProductController
             $lockedMenu->products()->whereKey($product->getKey())->firstOrFail()->delete();
 
             foreach ($mediaItems as $media) {
-                if (!$media->productImages()->exists()) {
+                if (! $media->productImages()->exists()) {
                     $media->delete();
                 }
             }
         });
 
         foreach ($mediaItems as $media) {
-            if (!$media->fresh()) {
+            if (! $media->fresh()) {
                 Storage::disk($media->disk)->delete($media->path);
             }
         }
