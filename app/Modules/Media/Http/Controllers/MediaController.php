@@ -4,8 +4,8 @@ namespace App\Modules\Media\Http\Controllers;
 
 use App\Modules\Business\Models\Business;
 use App\Modules\Media\Actions\UploadProductImageAction;
-use App\Modules\Media\Http\Requests\UploadProductImageRequest;
 use App\Modules\Media\Http\Requests\ReorderProductImagesRequest;
+use App\Modules\Media\Http\Requests\UploadProductImageRequest;
 use App\Modules\Media\Models\ProductImage;
 use App\Modules\Menu\Actions\EnsurePrimaryMenuAction;
 use App\Modules\Menu\Enums\MenuStatus;
@@ -67,12 +67,12 @@ class MediaController
         DB::transaction(function () use ($image, $media): void {
             $image->delete();
 
-            if (! $media->productImages()->exists()) {
+            if (!$media->productImages()->exists()) {
                 $media->delete();
             }
         });
 
-        if (! $media->fresh()) {
+        if (!$media->fresh()) {
             Storage::disk($media->disk)->delete($media->path);
         }
         $publicMenuCache->forget($menu);
