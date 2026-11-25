@@ -62,7 +62,7 @@ class MenuThemeTest extends TestCase
 
         $this->actingAs($user)
             ->put(route('catalog.menu.theme.update'), [
-                'template' => 'editorial',
+                'template' => 'modern',
                 'primary_color' => '#365B4A',
                 'font' => 'system',
                 'mode' => 'light',
