@@ -3,6 +3,7 @@ import { Head, useForm } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Button } from '@/components/ui/button';
 import { computed, ref } from 'vue';
+import { getMenuTemplatePreview } from './menuTemplatePreview';
 
 type Template = { name: string; description: string; layout: string };
 
@@ -57,14 +58,7 @@ function resetCustomDesign(): void {
 
 const previewMode = ref<'mobile' | 'desktop'>('mobile');
 
-const previewClasses: Record<string, string> = {
-    classic: 'rounded-xl border border-stone-200 bg-white shadow-sm',
-    minimal: 'rounded-lg border-0 bg-white shadow-none',
-    editorial: 'rounded-none border-y border-stone-300 bg-white',
-    modern: 'rounded-2xl border-2 border-stone-200 bg-white shadow-lg',
-    cafe: 'rounded-[1.5rem] border border-amber-200 bg-amber-50',
-    contrast: 'rounded-md border-2 border-stone-900 bg-white shadow-md',
-};
+
 
 function save(): void {
     form.put('/catalog/menu/theme', { preserveScroll: true });
@@ -99,14 +93,22 @@ function save(): void {
                         class="cursor-pointer rounded-lg border p-4 transition-colors"
                         :class="form.template === key ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'"
                     >
-                        <span class="mx-auto mb-3 block overflow-hidden rounded-lg border border-border bg-background p-2 transition-[width]" :class="previewMode === 'mobile' ? 'w-full max-w-40' : 'w-full max-w-full'">
+                        <span
+                            class="mx-auto mb-3 block overflow-hidden p-3 transition-[width]"
+                            :class="[getMenuTemplatePreview(key, previewMode).viewport, getMenuTemplatePreview(key, previewMode).frame]"
+                        >
                             <span class="mb-2 flex items-center justify-between gap-2">
-                                <span class="size-5 rounded-full bg-primary/20" />
-                                <span class="h-2 w-14 rounded bg-muted-foreground/30" />
+                                <span class="size-5 rounded-full bg-stone-200" />
+                                <span class="h-2 w-14 rounded bg-stone-400/60" />
                             </span>
                             <span class="mb-2 block h-2 w-2/3 rounded" :style="{ backgroundColor: form.primary_color }" />
                             <span class="grid grid-cols-2 gap-2">
-                                <span v-for="sample in 2" :key="sample" class="space-y-1 rounded-md p-2" :class="previewClasses[key] ?? previewClasses.classic">
+                                <span
+                                    v-for="sample in 2"
+                                    :key="sample"
+                                    class="space-y-1 p-2"
+                                    :class="getMenuTemplatePreview(key, previewMode).product"
+                                >
                                     <span class="block h-8 rounded bg-stone-200" />
                                     <span class="block h-1.5 w-3/4 rounded bg-stone-400/60" />
                                     <span class="block h-1.5 w-1/2 rounded" :style="{ backgroundColor: form.primary_color }" />
