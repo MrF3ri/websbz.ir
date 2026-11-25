@@ -54,6 +54,12 @@ function changeLocale(locale: string): void {
     }
 }
 
+function changeLocaleFromEvent(event: Event): void {
+    if (event.target instanceof HTMLSelectElement) {
+        changeLocale(event.target.value);
+    }
+}
+
 function save(): void {
     form.put(`/catalog/menu/translations/${props.locale.code}`, {
         preserveScroll: true,
@@ -79,7 +85,7 @@ function save(): void {
                         id="translation-locale"
                         class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                         :value="locale.code"
-                        @change="changeLocale(($event.target as HTMLSelectElement).value)"
+                        @change="changeLocaleFromEvent"
                     >
                         <option v-for="option in locales" :key="option.code" :value="option.code">
                             {{ option.native_name }} ({{ option.code }})
