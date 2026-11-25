@@ -78,10 +78,10 @@ function formatPrice(value: number): string {
         <div class="mx-auto w-full max-w-3xl space-y-8">
             <header class="border border-stone-200 bg-white px-6 py-8 text-center shadow-sm dark:border-stone-800 dark:bg-stone-900 sm:px-10"  :class="{ classic: 'rounded-3xl shadow-sm', minimal: 'rounded-xl border-0 shadow-none', editorial: 'rounded-none border-x-0 border-t-0 shadow-none', modern: 'rounded-2xl border-2 border-stone-100 shadow-lg dark:border-stone-700', cafe: 'rounded-[2rem] border-amber-200 dark:border-amber-900', contrast: 'rounded-md border-2 border-stone-900 shadow-md dark:border-white' }[menu.theme.template] ?? 'rounded-3xl'">
                 <img v-if="business.logo_url" :src="business.logo_url" :alt="'لوگوی ' + business.name" class="mx-auto mb-4 size-20 rounded-xl object-contain" width="80" height="80" />
-                <p v-if="business.introduction" class="mx-auto mt-3 max-w-2xl text-sm leading-7 text-stone-600 dark:text-stone-300">{{ business.introduction }}</p>
                 <p class="text-sm font-medium text-stone-500 dark:text-stone-400">
                     {{ business.name }}
                 </p>
+                <p v-if="business.introduction" class="mx-auto mt-3 max-w-2xl text-sm leading-7 text-stone-600 dark:text-stone-300">{{ business.introduction }}</p>
                 <h1 class="mt-2 text-3xl font-bold tracking-tight sm:text-4xl" style="color: var(--menu-accent)">
                     {{ menu.title }}
                 </h1>
