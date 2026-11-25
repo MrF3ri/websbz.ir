@@ -3,6 +3,9 @@
 namespace App\Modules\PublicMenu\Http\Controllers;
 
 use App\Enums\BusinessStatus;
+use App\Modules\Branch\Models\Branch;
+use App\Modules\Branch\Models\BranchProductSetting;
+use App\Modules\Branch\Services\BranchProductResolver;
 use App\Modules\Business\Models\Business;
 use App\Modules\Category\Models\Category;
 use App\Modules\Localization\Services\LocaleRegistry;
@@ -96,15 +99,15 @@ class PublicMenuController
     /**
      * @return array{public_id: string, name: string, description: string|null, label: string|null, price: int, discount_price: int|null, images: array<int, array{url: string, srcset: string, sizes: string, width: int, height: int}>, translations: array<string, array{name: string, description: string|null}>}
      */
-    private function productData(Product $product): array
+    private function productData(Product $product, array $effective): array
     {
         return [
             'public_id' => $product->public_id,
-            'name' => $product->name,
-            'description' => $product->description,
+            'name' => $effective['name'],
+            'description' => $effective['description'],
             'label' => $product->label?->value,
-            'price' => $product->base_price,
-            'discount_price' => $product->discount_price,
+            'price' => $effective['base_price'],
+            'discount_price' => $effective['discount_price'],
             'images' => $product->images->map(fn (ProductImage $image): array => $this->imageData($image))->values()->all(),
             'translations' => $product->translations->keyBy('locale')->map(fn ($translation): array => [
                 'name' => $translation->name,
@@ -157,6 +160,7 @@ class PublicMenuController
     public function show(
         string $businessSlug,
         string $menuSlug,
+        ?string $branchSlug,
         PublicMenuCache $publicMenuCache,
         Request $request,
         LocaleRegistry $localeRegistry,
@@ -171,8 +175,20 @@ class PublicMenuController
             ->where('status', MenuStatus::Published)
             ->firstOrFail();
 
-        $publicMenu = $publicMenuCache->remember($menu, function () use ($menu, $business): array {
+        $branchQuery = Branch::query()
+            ->where('business_id', $business->getKey())
+            ->where('status', 'active');
+
+        $branch = $branchSlug !== null
+            ? $branchQuery->where('slug', $branchSlug)->firstOrFail()
+            : $branchQuery->where('is_primary', true)->firstOrFail();
+
+        $publicMenu = $publicMenuCache->remember($menu, function () use ($menu, $business, $branch): array {
             $logo = $business->logo()->with('media')->first();
+            $categorySettings = $branch->categorySettings()->get()->keyBy('category_id');
+            $productSettings = $branch->productSettings()->get()->keyBy('product_id');
+            $resolver = new BranchProductResolver();
+
             $categories = $menu->categories()
                 ->where('is_active', true)
                 ->whereHas('products', function ($query) use ($menu): void {
@@ -185,19 +201,80 @@ class PublicMenuController
                     $query
                         ->where('products.menu_id', $menu->getKey())
                         ->where('status', ProductStatus::Published)
-                        ->where('is_available', true)
-                        ->orderBy('sort_order')
-                        ->orderBy('id');
+                        ->where('is_available', true);
                 }, 'translations', 'products.images.media', 'products.translations'])
-                ->orderBy('sort_order')
-                ->orderBy('id')
-                ->get();
+                ->get()
+                ->map(function (Category $category) use ($categorySettings, $productSettings, $resolver): ?array {
+                    $categorySetting = $categorySettings->get($category->getKey());
+
+                    if ($categorySetting !== null && ! $categorySetting->is_visible) {
+                        return null;
+                    }
+
+                    $products = $category->products
+                        ->map(function (Product $product) use ($productSettings, $resolver): ?array {
+                            $effective = $resolver->resolve(
+                                $product,
+                                $productSettings->get($product->getKey()),
+                            );
+
+                            if (! $effective['is_visible'] || ! $effective['is_available']) {
+                                return null;
+                            }
+
+                            return [
+                                ...$this->productData($product, $effective),
+                                '_sort_order' => $effective['sort_order'],
+                            ];
+                        })
+                        ->filter()
+                        ->sortBy('_sort_order')
+                        ->values()
+                        ->map(function (array $product): array {
+                            unset($product['_sort_order']);
+
+                            return $product;
+                        })
+                        ->all();
+
+                    if ($products === []) {
+                        return null;
+                    }
+
+                    return [
+                        'name' => $category->name,
+                        'sort_order' => $categorySetting?->sort_order ?? $category->sort_order,
+                        'translations' => $category->translations->keyBy('locale')->map(fn ($translation): array => [
+                            'name' => $translation->name,
+                        ])->all(),
+                        'products' => $products,
+                    ];
+                })
+                ->filter()
+                ->sortBy('sort_order')
+                ->values()
+                ->map(function (array $category): array {
+                    unset($category['sort_order']);
+
+                    return $category;
+                })
+                ->all();
 
             return [
                 'business' => [
                     'name' => $business->name,
                     'slug' => $business->slug,
                     'logo_url' => $logo ? route('media.business-logo', [$business->public_id, $logo->media->public_id]) : null,
+                ],
+                'branch' => [
+                    'name' => $branch->name,
+                    'slug' => $branch->slug,
+                    'phone' => $branch->phone,
+                    'address' => $branch->address,
+                    'latitude' => $branch->latitude,
+                    'longitude' => $branch->longitude,
+                    'timezone' => $branch->timezone,
+                    'opening_hours' => $branch->opening_hours,
                 ],
                 'menu' => [
                     'title' => $menu->title,
@@ -208,15 +285,9 @@ class PublicMenuController
                     ])->all(),
                     'theme' => $this->themeData($menu),
                 ],
-                'categories' => $categories->map(fn (Category $category): array => [
-                    'name' => $category->name,
-                    'translations' => $category->translations->keyBy('locale')->map(fn ($translation): array => [
-                        'name' => $translation->name,
-                    ])->all(),
-                    'products' => $category->products->map(fn (Product $product): array => $this->productData($product))->values()->all(),
-                ])->values()->all(),
+                'categories' => $categories,
             ];
-        });
+        }, $branch);
 
         if (is_array($publicMenu) && is_array($publicMenu['menu'] ?? null) && is_array($publicMenu['business'] ?? null)) {
             $availableLocales = $localeRegistry->availableFor($business);
@@ -231,7 +302,7 @@ class PublicMenuController
             $publicMenu['menu']['source_locale'] = $menu->default_locale;
             $publicMenu['menu']['locale'] = $locale;
             $publicMenu['menu']['direction'] = $localeRegistry->direction($locale);
-            $publicMenu['menu']['public_url'] = route('public.menu.show', [$business->slug, $menu->slug]);
+            $publicMenu['menu']['public_url'] = route('public.menu.show', [$business->slug, $menu->slug, $branch->slug]);
             $publicMenu['menu']['available_locales'] = collect($availableLocales)
                 ->map(fn (array $details, string $code): array => ['code' => $code, ...$details])
                 ->values()
