@@ -7,6 +7,7 @@ use App\Modules\Menu\Services\MenuThemeRegistry;
 use App\Modules\Product\Enums\ProductStatus;
 use App\Modules\Subscription\Services\EntitlementService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\Concerns\InteractsWithCatalog;
 use Tests\TestCase;
@@ -285,4 +286,38 @@ class MenuThemeTest extends TestCase
                 ->where('menu.theme.heading_size', 'large')
                 ->missing('menu.theme.unsafe_html'));
     }
+
+    public function test_theme_update_invalidates_a_warm_public_menu_cache(): void
+    {
+        config(['cache.default' => 'array']);
+        Cache::store('array')->flush();
+
+        [$user, $business, $menu] = $this->createCatalogTenant('professional');
+        $menu->update(['status' => MenuStatus::Published]);
+        $url = route('public.menu.show', [$business->slug, $menu->slug]);
+
+        $this->get($url)
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('menu.theme.template', 'classic')
+                ->where('menu.theme.primary_color', '#365B4A'));
+
+        $this->actingAs($user)
+            ->put(route('catalog.menu.theme.update'), [
+                'template' => 'modern',
+                'primary_color' => '#AABBCC',
+                'font' => 'serif',
+                'mode' => 'dark',
+            ])
+            ->assertRedirect();
+
+        $this->get($url)
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('menu.theme.template', 'modern')
+                ->where('menu.theme.primary_color', '#AABBCC')
+                ->where('menu.theme.font', 'serif')
+                ->where('menu.theme.mode', 'dark'));
+    }
+
 }
