@@ -71,8 +71,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('/business/settings', [BusinessSettingsController::class, 'update'])->name('business.settings.update');
         Route::post('/business/logo', [BusinessLogoController::class, 'store'])->name('business.logo.store');
         Route::delete('/business/logo', [BusinessLogoController::class, 'destroy'])->name('business.logo.destroy');
-        Route::post('/business/logo', [BusinessLogoController::class, 'store'])->name('business.logo.store');
-        Route::delete('/business/logo', [BusinessLogoController::class, 'destroy'])->name('business.logo.destroy');
 
         Route::get('/business/branches', [BranchController::class, 'index'])->name('business.branches.index');
         Route::get('/business/branches/manage', [BranchController::class, 'manage'])->name('business.branches.manage');
