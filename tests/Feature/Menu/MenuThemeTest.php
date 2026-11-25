@@ -35,6 +35,95 @@ class MenuThemeTest extends TestCase
         $this->assertCount(6, $registry->availableFor($top, new EntitlementService($top)));
     }
 
+    public function test_top_plan_can_save_allow_listed_custom_design_tokens(): void
+    {
+        [$user, , $menu] = $this->createCatalogTenant('top');
+
+        $this->actingAs($user)
+            ->put(route('catalog.menu.theme.update'), [
+                'template' => 'classic',
+                'primary_color' => '#365B4A',
+                'font' => 'system',
+                'mode' => 'light',
+                'density' => 'compact',
+                'card_style' => 'elevated',
+                'heading_size' => 'display',
+            ])
+            ->assertRedirect();
+
+        $this->assertSame('compact', $menu->fresh()->theme['density']);
+        $this->assertSame('elevated', $menu->fresh()->theme['card_style']);
+        $this->assertSame('display', $menu->fresh()->theme['heading_size']);
+    }
+
+    public function test_professional_plan_cannot_change_top_only_custom_design_tokens(): void
+    {
+        [$user, , $menu] = $this->createCatalogTenant('professional');
+
+        $this->actingAs($user)
+            ->put(route('catalog.menu.theme.update'), [
+                'template' => 'classic',
+                'primary_color' => '#365B4A',
+                'font' => 'system',
+                'mode' => 'light',
+                'density' => 'compact',
+                'card_style' => 'standard',
+                'heading_size' => 'normal',
+            ])
+            ->assertForbidden();
+
+        $this->assertNull($menu->fresh()->theme);
+    }
+
+    public function test_downgraded_top_can_preserve_or_reset_custom_design_but_cannot_change_to_another_custom_value(): void
+    {
+        [$user, $business, $menu] = $this->createCatalogTenant('top');
+        $custom = [
+            'template' => 'classic',
+            'primary_color' => '#365B4A',
+            'font' => 'system',
+            'mode' => 'light',
+            'density' => 'compact',
+            'card_style' => 'elevated',
+            'heading_size' => 'display',
+        ];
+
+        $this->actingAs($user)
+            ->put(route('catalog.menu.theme.update'), $custom)
+            ->assertRedirect();
+
+        $subscription = $business->subscriptions()->latest('id')->firstOrFail();
+        $snapshot = $subscription->features_snapshot;
+        $snapshot['custom_design'] = false;
+        $subscription->update(['features_snapshot' => $snapshot]);
+
+        $this->actingAs($user)
+            ->put(route('catalog.menu.theme.update'), $custom)
+            ->assertRedirect();
+
+        $changed = $custom;
+        $changed['density'] = 'spacious';
+
+        $this->actingAs($user)
+            ->put(route('catalog.menu.theme.update'), $changed)
+            ->assertForbidden();
+
+        $this->assertSame('compact', $menu->fresh()->theme['density']);
+
+        $reset = $custom;
+        $reset['density'] = 'comfortable';
+        $reset['card_style'] = 'standard';
+        $reset['heading_size'] = 'normal';
+
+        $this->actingAs($user)
+            ->put(route('catalog.menu.theme.update'), $reset)
+            ->assertRedirect();
+
+        $this->assertSame('comfortable', $menu->fresh()->theme['density']);
+        $this->assertSame('standard', $menu->fresh()->theme['card_style']);
+        $this->assertSame('normal', $menu->fresh()->theme['heading_size']);
+    }
+
     public function test_business_owner_can_save_a_theme_with_plan_entitled_settings(): void
     {
         [$user, , $menu] = $this->createCatalogTenant('professional');
@@ -136,6 +225,9 @@ class MenuThemeTest extends TestCase
                 'primary_color' => '#123456',
                 'font' => 'rounded',
                 'mode' => 'dark',
+                'density' => 'spacious',
+                'card_style' => 'flat',
+                'heading_size' => 'large',
                 'unsafe_html' => '<script>alert(1)</script>',
             ],
         ]);
@@ -149,6 +241,9 @@ class MenuThemeTest extends TestCase
                 ->where('menu.theme.primary_color', '#123456')
                 ->where('menu.theme.font', 'rounded')
                 ->where('menu.theme.mode', 'dark')
+                ->where('menu.theme.density', 'spacious')
+                ->where('menu.theme.card_style', 'flat')
+                ->where('menu.theme.heading_size', 'large')
                 ->missing('menu.theme.unsafe_html'));
     }
 }
