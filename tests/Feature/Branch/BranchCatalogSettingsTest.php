@@ -90,7 +90,7 @@ class BranchCatalogSettingsTest extends TestCase
             'product_id' => $product->getKey(),
             'name_override' => 'North espresso',
             'description_override_enabled' => true,
-            'description_override' => '',
+            'description_override' => null,
             'base_price_override' => 145000,
             'discount_override_mode' => 'clear',
             'discount_price_override' => null,
