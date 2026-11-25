@@ -1,9 +1,9 @@
 # Phase 11 — Public Menu Customization
 
 Status: In progress  
-Current increment: 11.2 — Responsive previews and private business logos  
-Implementation branch: `feat/phase-11-logo-and-previews`  
-Pull request: #72
+Current increment: 11.3 — Plan-gated product labels  
+Implementation branch: `feat/phase-11-product-labels`  
+Pull request: #73 (Draft)
 
 ## Delivered in increment 11.1
 
@@ -26,10 +26,10 @@ Pull request: #72
 - Invalidate public-menu cache after logo changes and clean up replaced media objects.
 - Add ADR 0016 for the private logo storage and tenant isolation contract.
 
-## Remaining Phase 11 work
+## Delivered in increment 11.3 (implementation in progress)\n\n- Add a server-owned product-label registry (`new`, `popular`, `recommended`, `chef_special`).\n- Gate new and changed labels through the `product_labels` subscription snapshot on the server.\n- Preserve existing labels across downgrade when product details are edited; allow label removal without the feature.\n- Display labels in the catalog editor and public menu using fixed text and styles.\n- Add SQLite/PostgreSQL tests for entitlement enforcement, downgrade behavior, and public rendering.\n- Record the allow-list and downgrade behavior in ADR 0017.\n\n## Remaining Phase 11 work
 
 1. Add visual regression coverage for all template previews and test mobile/desktop breakpoints.
-2. Add plan-gated public-menu features: product labels, image slider, advertising banner, and business introduction.
+2. Add plan-gated public-menu components: image slider, advertising banner, and business introduction.
 3. Add Top-plan controlled custom-design settings without arbitrary user HTML, CSS, or JavaScript.
 4. Verify accessibility, cache invalidation, tenant isolation, storage-failure recovery, and SQLite/PostgreSQL parity for all new features.
 
@@ -49,7 +49,7 @@ Pull request: #72
 - Backblaze B2 S3 integration: passed in both database jobs.
 - Production image, Compose, and Nginx validation: passed.
 
-### Increment 11.2 — PR #72
+### Increment 11.2 — merged PR #72
 
 - SQLite: 230 passed, 7 skipped (483 assertions).
 - PostgreSQL: 237 passed (566 assertions).
