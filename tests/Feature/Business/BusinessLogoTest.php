@@ -69,7 +69,7 @@ class BusinessLogoTest extends TestCase
             ])
             ->assertForbidden();
 
-        $this->assertNull($business->fresh()->logo_media_id);
+        $this->assertFalse($business->fresh()->logo()->exists());
         $this->assertDatabaseCount('media', 0);
         Storage::disk('media')->assertDirectoryEmpty('businesses');
     }
@@ -84,7 +84,7 @@ class BusinessLogoTest extends TestCase
             ])
             ->assertForbidden();
 
-        $this->assertNull($business->fresh()->logo_media_id);
+        $this->assertFalse($business->fresh()->logo()->exists());
         $this->assertDatabaseCount('media', 0);
     }
 
@@ -96,14 +96,15 @@ class BusinessLogoTest extends TestCase
             'logo' => UploadedFile::fake()->image('first.png', 128, 128),
         ])->assertRedirect();
 
-        $oldMedia = $business->fresh()->logo()->firstOrFail();
+        $oldLogo = $business->fresh()->logo()->with('media')->firstOrFail();
+        $oldMedia = $oldLogo->media;
         $oldPath = $oldMedia->path;
 
         $this->actingAs($user)->post(route('business.logo.store'), [
             'logo' => UploadedFile::fake()->image('second.png', 256, 256),
         ])->assertRedirect();
 
-        $newMedia = $business->fresh()->logo()->firstOrFail();
+        $newMedia = $business->fresh()->logo()->with('media')->firstOrFail()->media;
 
         $this->assertNotSame($oldMedia->getKey(), $newMedia->getKey());
         $this->assertDatabaseMissing('media', ['id' => $oldMedia->getKey()]);
@@ -119,7 +120,8 @@ class BusinessLogoTest extends TestCase
             'logo' => UploadedFile::fake()->image('brand.png', 128, 128),
         ])->assertRedirect();
 
-        $media = $business->fresh()->logo()->firstOrFail();
+        $logo = $business->fresh()->logo()->with('media')->firstOrFail();
+        $media = $logo->media;
 
         $this->actingAs($user)
             ->delete(route('business.logo.destroy'))
@@ -138,9 +140,27 @@ class BusinessLogoTest extends TestCase
             'logo' => UploadedFile::fake()->image('brand.png', 128, 128),
         ])->assertRedirect();
 
-        $media = $business->fresh()->logo()->firstOrFail();
+        $media = $business->fresh()->logo()->with('media')->firstOrFail()->media;
 
         $this->get(route('media.business-logo', [$business->public_id, $media->public_id]))
+            ->assertNotFound();
+    }
+
+    public function test_business_logo_route_cannot_cross_tenant_boundaries(): void
+    {
+        [$userA, $businessA] = $this->createCatalogTenant('professional');
+        [$userB, $businessB] = $this->createCatalogTenant('professional');
+
+        $this->actingAs($userB)->post(route('business.logo.store'), [
+            'logo' => UploadedFile::fake()->image('other-tenant.png', 128, 128),
+        ])->assertRedirect();
+
+        $media = $businessB->fresh()->logo()->with('media')->firstOrFail()->media;
+
+        $this->get(route('media.business-logo', [$businessA->public_id, $media->public_id]))
+            ->assertNotFound();
+
+        $this->get(route('media.business-logo', [$businessB->public_id, $media->public_id]))
             ->assertNotFound();
     }
 
