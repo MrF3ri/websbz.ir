@@ -295,7 +295,7 @@ class PublicMenuTest extends TestCase
 
         [, $business, $menu] = $this->createCatalogTenant('top');
         $category = $this->createCatalogCategory($menu, 'Coffee');
-        $product = $this->createCatalogProduct($menu, $category, 'Espresso', status: ProductStatus::Published);
+        $this->createCatalogProduct($menu, $category, 'Espresso', status: ProductStatus::Published);
         $menu->translations()->create(['locale' => 'en', 'title' => 'Coffee menu']);
         $menu->update(['status' => MenuStatus::Published]);
 
