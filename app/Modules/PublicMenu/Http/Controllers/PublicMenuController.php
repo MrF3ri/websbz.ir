@@ -12,6 +12,7 @@ use App\Modules\Product\Enums\ProductStatus;
 use App\Modules\Product\Models\Product;
 use App\Modules\PublicMenu\Services\PublicMenuCache;
 use App\Modules\Subscription\Services\EntitlementService;
+use LogicException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -149,6 +150,10 @@ class PublicMenuController
                 ])->values()->all(),
             ];
         });
+
+        if (! is_array($publicMenu) || ! is_array($publicMenu['menu'] ?? null)) {
+            throw new LogicException('The cached public menu payload is invalid.');
+        }
 
         $publicMenu['menu']['image_slider_enabled'] = (new EntitlementService($business))
             ->hasFeature('image_slider');
