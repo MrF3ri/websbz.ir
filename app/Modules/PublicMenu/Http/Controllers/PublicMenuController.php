@@ -108,8 +108,8 @@ class PublicMenuController
             'public_id' => $product->public_id,
             'name' => $effective['name'],
             'description' => $effective['description'],
-            'branch_name_override' => $setting?->name_override !== null,
-            'branch_description_override' => $setting?->description_override_enabled ?? false,
+            'branch_name_override' => $setting !== null && $setting->name_override !== null,
+            'branch_description_override' => $setting !== null && $setting->description_override_enabled,
             'label' => $product->label?->value,
             'price' => $effective['base_price'],
             'discount_price' => $effective['discount_price'],
@@ -272,7 +272,7 @@ class PublicMenuController
 
                     return [
                         'name' => $category->name,
-                        'sort_order' => $categorySetting?->sort_order ?? $category->sort_order,
+                        'sort_order' => $categorySetting !== null ? $categorySetting->sort_order : $category->sort_order,
                         'translations' => $category->translations->keyBy('locale')->map(fn ($translation): array => [
                             'name' => $translation->name,
                         ])->all(),
