@@ -28,7 +28,8 @@ defineProps<{
         slug: string;
         locale: string;
         theme: { template: string; primary_color: string; font: string; mode: string };
-        image_slider_enabled: boolean;\n        advertising_banner: { title: string | null; message: string | null; cta_label: string | null; cta_url: string | null } | null;
+        image_slider_enabled: boolean;
+        advertising_banner: { title: string | null; message: string | null; cta_label: string | null; cta_url: string | null } | null;
     };
     categories: PublicCategory[];
 }>();
