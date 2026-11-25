@@ -285,6 +285,4 @@ class MenuThemeTest extends TestCase
                 ->where('menu.theme.heading_size', 'large')
                 ->missing('menu.theme.unsafe_html'));
     }
-
-
 }
