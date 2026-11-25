@@ -22,7 +22,7 @@ The GitHub Actions jobs and owner-side local suite must pass. PostgreSQL is requ
 
 ## Remaining work
 
-- Responsive-variant, gallery, storage-failure, and PostgreSQL multi-process concurrency tests have been added. Their CI runs must pass on the final PR head.
+- Responsive-variant, gallery, storage-failure, and PostgreSQL multi-process concurrency tests pass in CI on PR head d37c5b4d. Owner-side local acceptance remains a separate project sign-off.
 - The S3 adapter is now included in composer.json and composer.lock. Run the opt-in S3 integration test against a real non-production bucket and apply the lifecycle policy in S3-VERIFICATION.md. This requires owner-provisioned credentials and endpoint configuration; it cannot be certified using a fake disk.
 - Run the full Release Gate separately; Phase 10 completion alone does not make the product production-ready.
 
