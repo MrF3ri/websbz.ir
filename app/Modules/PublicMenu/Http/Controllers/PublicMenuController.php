@@ -99,14 +99,14 @@ class PublicMenuController
     /**
      * @return array{public_id: string, name: string, description: string|null, label: string|null, price: int, discount_price: int|null, images: array<int, array{url: string, srcset: string, sizes: string, width: int, height: int}>, translations: array<string, array{name: string, description: string|null}>}
      */
-    private function productData(Product $product, array $effective): array
+    private function productData(Product $product, array $effective, ?BranchProductSetting $setting): array
     {
         return [
             'public_id' => $product->public_id,
             'name' => $effective['name'],
             'description' => $effective['description'],
-            'branch_name_override' => $effective['name'] !== $product->name,
-            'branch_description_override' => $effective['description'] !== $product->description,
+            'branch_name_override' => $setting?->name_override !== null,
+            'branch_description_override' => $setting?->description_override_enabled ?? false,
             'label' => $product->label?->value,
             'price' => $effective['base_price'],
             'discount_price' => $effective['discount_price'],
@@ -215,17 +215,15 @@ class PublicMenuController
 
                     $products = $category->products
                         ->map(function (Product $product) use ($productSettings, $resolver): ?array {
-                            $effective = $resolver->resolve(
-                                $product,
-                                $productSettings->get($product->getKey()),
-                            );
+                            $setting = $productSettings->get($product->getKey());
+                            $effective = $resolver->resolve($product, $setting);
 
                             if (! $effective['is_visible'] || ! $effective['is_available']) {
                                 return null;
                             }
 
                             return [
-                                ...$this->productData($product, $effective),
+                                ...$this->productData($product, $effective, $setting),
                                 '_sort_order' => $effective['sort_order'],
                             ];
                         })
