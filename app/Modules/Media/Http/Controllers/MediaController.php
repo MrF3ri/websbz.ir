@@ -67,12 +67,12 @@ class MediaController
         DB::transaction(function () use ($image, $media): void {
             $image->delete();
 
-            if (!$media->productImages()->exists()) {
+            if (! $media->productImages()->exists()) {
                 $media->delete();
             }
         });
 
-        if (!$media->fresh()) {
+        if (! $media->fresh()) {
             Storage::disk($media->disk)->delete($media->path);
         }
         $publicMenuCache->forget($menu);
