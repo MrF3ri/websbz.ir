@@ -59,12 +59,17 @@ class CreateProductAction
                 $enforcement->requireFeature($lockedBusiness, 'product_availability_toggle');
             }
 
+            if (($data['label'] ?? null) !== null) {
+                $enforcement->requireFeature($lockedBusiness, 'product_labels');
+            }
+
             $sortOrder = (int) ($lockedCategory->products()->max('sort_order') ?? -1) + 1;
 
             $product = $lockedCategory->products()->create([
                 'menu_id' => $lockedMenu->getKey(),
                 'name' => $data['name'],
                 'description' => $data['description'] ?? null,
+                'label' => $data['label'] ?? null,
                 'base_price' => $data['base_price'],
                 'discount_price' => $data['discount_price'] ?? null,
                 'is_available' => $data['is_available'] ?? true,
