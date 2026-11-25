@@ -165,28 +165,31 @@ class PublicMenuController
     public function showPrimary(
         string $businessSlug,
         string $menuSlug,
+        BranchProductResolver $branchProductResolver,
         PublicMenuCache $publicMenuCache,
         Request $request,
         LocaleRegistry $localeRegistry,
     ): Response {
-        return $this->renderMenu($businessSlug, $menuSlug, null, $publicMenuCache, $request, $localeRegistry);
+        return $this->renderMenu($businessSlug, $menuSlug, null, $branchProductResolver, $publicMenuCache, $request, $localeRegistry);
     }
 
     public function showBranch(
         string $businessSlug,
         string $menuSlug,
         string $branchSlug,
+        BranchProductResolver $branchProductResolver,
         PublicMenuCache $publicMenuCache,
         Request $request,
         LocaleRegistry $localeRegistry,
     ): Response {
-        return $this->renderMenu($businessSlug, $menuSlug, $branchSlug, $publicMenuCache, $request, $localeRegistry);
+        return $this->renderMenu($businessSlug, $menuSlug, $branchSlug, $branchProductResolver, $publicMenuCache, $request, $localeRegistry);
     }
 
     private function renderMenu(
         string $businessSlug,
         string $menuSlug,
         ?string $branchSlug,
+        BranchProductResolver $resolver,
         PublicMenuCache $publicMenuCache,
         Request $request,
         LocaleRegistry $localeRegistry,
@@ -213,8 +216,6 @@ class PublicMenuController
             $logo = $business->logo()->with('media')->first();
             $categorySettings = $branch->categorySettings()->get()->keyBy('category_id');
             $productSettings = $branch->productSettings()->get()->keyBy('product_id');
-            $resolver = new BranchProductResolver();
-
             $categories = $menu->categories()
                 ->where('is_active', true)
                 ->whereHas('products', function ($query) use ($menu): void {
