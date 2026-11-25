@@ -48,9 +48,9 @@ function formatPrice(value: number): string {
     </Head>
 
     <div :class="menu.theme.mode === 'dark' ? 'dark' : ''">
-    <main dir="rtl" lang="fa" :data-template="menu.theme.template" :style="{ '--menu-accent': menu.theme.primary_color }" :class="['min-h-screen bg-stone-50 px-4 py-8 text-stone-900 dark:bg-stone-950 dark:text-stone-100 sm:py-12', menu.theme.font === 'serif' ? 'font-serif' : 'font-sans']">
+    <main dir="rtl" lang="fa" :data-template="menu.theme.template" :style="{ '--menu-accent': menu.theme.primary_color }"  :class="['min-h-screen bg-stone-50 px-4 py-8 text-stone-900 dark:bg-stone-950 dark:text-stone-100 sm:py-12', menu.theme.font === 'serif' ? 'font-serif' : menu.theme.font === 'rounded' ? 'font-sans tracking-wide' : 'font-sans']">
         <div class="mx-auto w-full max-w-3xl space-y-8">
-            <header class="border border-stone-200 bg-white px-6 py-8 text-center shadow-sm dark:border-stone-800 dark:bg-stone-900 sm:px-10" :class="menu.theme.template === 'minimal' ? 'rounded-xl shadow-none' : menu.theme.template === 'editorial' ? 'rounded-none border-x-0 border-t-0 shadow-none' : 'rounded-3xl'">
+            <header class="border border-stone-200 bg-white px-6 py-8 text-center shadow-sm dark:border-stone-800 dark:bg-stone-900 sm:px-10"  :class="{ classic: 'rounded-3xl shadow-sm', minimal: 'rounded-xl border-0 shadow-none', editorial: 'rounded-none border-x-0 border-t-0 shadow-none', modern: 'rounded-2xl border-2 border-stone-100 shadow-lg dark:border-stone-700', cafe: 'rounded-[2rem] border-amber-200 dark:border-amber-900', contrast: 'rounded-md border-2 border-stone-900 shadow-md dark:border-white' }[menu.theme.template] ?? 'rounded-3xl'">
                 <p class="text-sm font-medium text-stone-500 dark:text-stone-400">
                     {{ business.name }}
                 </p>
@@ -73,11 +73,11 @@ function formatPrice(value: number): string {
                     class="space-y-3"
                 >
                     <div class="flex items-center gap-3">
-                        <h2 class="text-xl font-bold">{{ category.name }}</h2>
+                        <h2 class="text-xl font-bold" style="color: var(--menu-accent)">{{ category.name }}</h2>
                         <div class="h-px flex-1 bg-stone-200 dark:bg-stone-800" />
                     </div>
 
-                    <div class="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm dark:border-stone-800 dark:bg-stone-900">
+                    <div class="overflow-hidden bg-white dark:bg-stone-900" :class="{ classic: 'rounded-2xl border border-stone-200 shadow-sm dark:border-stone-800', minimal: 'rounded-lg border-0 shadow-none', editorial: 'rounded-none border-y border-stone-300 dark:border-stone-700', modern: 'rounded-3xl border border-stone-200 shadow-lg dark:border-stone-700', cafe: 'rounded-2xl border border-amber-200 dark:border-amber-900', contrast: 'rounded-md border-2 border-stone-900 shadow-md dark:border-white' }[menu.theme.template] ?? 'rounded-2xl border border-stone-200 shadow-sm dark:border-stone-800'">
                         <article
                             v-for="(product, productIndex) in category.products"
                             :key="product.name + '-' + productIndex"
