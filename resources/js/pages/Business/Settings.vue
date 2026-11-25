@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, router, useForm } from '@inertiajs/vue3';
 import { Building2, CheckCircle2, MapPin, Save } from '@lucide/vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,10 +13,12 @@ interface Business {
     address: string | null;
     city: string | null;
     postal_code: string | null;
+    logo_url: string | null;
 }
 
 const props = defineProps<{
     business: Business;
+    features: { business_logo: boolean; can_manage_logo: boolean };
 }>();
 
 defineOptions({
@@ -38,6 +40,20 @@ const form = useForm({
     city: props.business.city ?? '',
     postal_code: props.business.postal_code ?? '',
 });
+
+const logoForm = useForm<{ logo: File | null }>({ logo: null });
+
+function submitLogo() {
+    logoForm.post('/business/logo', {
+        forceFormData: true,
+        preserveScroll: true,
+        onSuccess: () => logoForm.reset(),
+    });
+}
+
+function removeLogo() {
+    router.delete('/business/logo', { preserveScroll: true });
+}
 
 function submit() {
     form.put('/business/settings', {
@@ -69,6 +85,33 @@ function submit() {
                     این اطلاعات می‌توانند در بخش‌های مختلف پلتفرم نمایش داده شوند.
                 </p>
             </header>
+
+            <section class="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+                <div class="border-b border-border px-5 py-4 sm:px-6">
+                    <h2 class="font-semibold text-foreground">لوگوی کسب‌وکار</h2>
+                    <p class="mt-1 text-xs text-muted-foreground">فایل لوگو به‌صورت خصوصی ذخیره می‌شود و فقط از مسیر امن منوی منتشرشده نمایش داده می‌شود.</p>
+                </div>
+                <div class="flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:p-6">
+                    <div class="flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border bg-muted">
+                        <img v-if="business.logo_url" :src="business.logo_url" :alt="'لوگوی ' + business.name" class="size-full object-contain" width="96" height="96" />
+                        <Building2 v-else class="size-9 text-muted-foreground" aria-hidden="true" />
+                    </div>
+                    <div class="min-w-0 flex-1 space-y-3">
+                        <form @submit.prevent="submitLogo" class="space-y-3">
+                            <Label for="business-logo">انتخاب تصویر لوگو (JPG، PNG یا WebP، حداکثر ۲ مگابایت)</Label>
+                            <Input id="business-logo" type="file" accept="image/jpeg,image/png,image/webp" class="h-auto min-h-11 py-2"  :disabled="!features.business_logo || !features.can_manage_logo || logoForm.processing" @input="logoForm.logo = ($event.target as HTMLInputElement).files?.[0] ?? null" />
+                            <p v-if="logoForm.errors.logo" class="text-sm text-destructive" role="alert">{{ logoForm.errors.logo }}</p>
+                            <p v-if="!features.business_logo" class="text-xs text-muted-foreground">بارگذاری لوگو در طرح فعلی فعال نیست. لوگوی قبلی در صورت وجود نمایش داده می‌شود.</p>
+                            <div class="flex flex-wrap gap-2">
+                                <Button type="submit"  :disabled="!features.business_logo || !features.can_manage_logo || !logoForm.logo || logoForm.processing">
+                                    {{ logoForm.processing ? 'در حال بارگذاری...' : 'بارگذاری لوگو' }}
+                                </Button>
+                                <Button v-if="business.logo_url && features.can_manage_logo" type="button" variant="outline" :disabled="logoForm.processing" @click="removeLogo">حذف لوگو</Button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
 
             <div
                 v-if="form.recentlySuccessful"

@@ -5,6 +5,7 @@ namespace App\Modules\Business\Models;
 use App\Enums\BusinessStatus;
 use App\Models\User;
 use App\Modules\Branch\Models\Branch;
+use App\Modules\Media\Models\BusinessLogo;
 use App\Modules\Menu\Models\Menu;
 use App\Modules\Subscription\Models\Subscription;
 use Database\Factories\BusinessFactory;
@@ -104,6 +105,12 @@ class Business extends Model
             ->using(BusinessMember::class)
             ->withPivot(['id', 'role'])
             ->withTimestamps();
+    }
+
+    /** @return HasOne<BusinessLogo, $this> */
+    public function logo(): HasOne
+    {
+        return $this->hasOne(BusinessLogo::class);
     }
 
     /**

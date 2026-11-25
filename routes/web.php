@@ -1,6 +1,7 @@
 <?php
 
 use App\Modules\Branch\Http\Controllers\BranchController;
+use App\Modules\Business\Http\Controllers\BusinessLogoController;
 use App\Modules\Business\Http\Controllers\BusinessOnboardingController;
 use App\Modules\Business\Http\Controllers\BusinessSettingsController;
 use App\Modules\Catalog\Http\Controllers\CatalogController;
@@ -25,6 +26,7 @@ use Illuminate\Support\Facades\Route;
 Route::inertia('/', 'Welcome')->name('home');
 
 Route::get('/media/{mediaPublicId}', [MediaController::class, 'publicImage'])->name('media.public');
+Route::get('/media/business-logo/{businessPublicId}/{mediaPublicId}', [BusinessLogoController::class, 'public'])->name('media.business-logo');
 
 Route::get('/menu/{businessSlug}/{menuSlug}', [PublicMenuController::class, 'show'])
     ->name('public.menu.show');
@@ -67,6 +69,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::get('/business/settings', [BusinessSettingsController::class, 'edit'])->name('business.settings.edit');
         Route::put('/business/settings', [BusinessSettingsController::class, 'update'])->name('business.settings.update');
+        Route::post('/business/logo', [BusinessLogoController::class, 'store'])->middleware('throttle:5,1')->name('business.logo.store');
+        Route::delete('/business/logo', [BusinessLogoController::class, 'destroy'])->name('business.logo.destroy');
 
         Route::get('/business/branches', [BranchController::class, 'index'])->name('business.branches.index');
         Route::get('/business/branches/manage', [BranchController::class, 'manage'])->name('business.branches.manage');
