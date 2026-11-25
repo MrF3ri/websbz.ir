@@ -7,6 +7,7 @@ use App\Modules\Branch\Actions\EnsurePrimaryBranchAction;
 use App\Modules\Branch\Actions\SetBranchStatusAction;
 use App\Modules\Menu\Enums\MenuStatus;
 use App\Modules\Product\Enums\ProductStatus;
+use App\Modules\PublicMenu\Services\PublicMenuCache;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Inertia\Testing\AssertableInertia as Assert;
