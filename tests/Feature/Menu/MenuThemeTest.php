@@ -80,9 +80,9 @@ class MenuThemeTest extends TestCase
         [$user, $business, $menu] = $this->createCatalogTenant('top');
         $custom = [
             'template' => 'classic',
-            'primary_color' => '#365B4A',
-            'font' => 'system',
-            'mode' => 'light',
+            'primary_color' => '#AABBCC',
+            'font' => 'serif',
+            'mode' => 'dark',
             'density' => 'compact',
             'card_style' => 'elevated',
             'heading_size' => 'display',
@@ -95,6 +95,9 @@ class MenuThemeTest extends TestCase
         $subscription = $business->subscriptions()->latest('id')->firstOrFail();
         $snapshot = $subscription->features_snapshot;
         $snapshot['custom_design'] = false;
+        $snapshot['custom_colors'] = false;
+        $snapshot['font_selection'] = false;
+        $snapshot['dark_mode'] = false;
         $subscription->update(['features_snapshot' => $snapshot]);
 
         $this->actingAs($user)
@@ -109,8 +112,14 @@ class MenuThemeTest extends TestCase
             ->assertForbidden();
 
         $this->assertSame('compact', $menu->fresh()->theme['density']);
+        $this->assertSame('#AABBCC', $menu->fresh()->theme['primary_color']);
+        $this->assertSame('serif', $menu->fresh()->theme['font']);
+        $this->assertSame('dark', $menu->fresh()->theme['mode']);
 
         $reset = $custom;
+        $reset['primary_color'] = '#365B4A';
+        $reset['font'] = 'system';
+        $reset['mode'] = 'light';
         $reset['density'] = 'comfortable';
         $reset['card_style'] = 'standard';
         $reset['heading_size'] = 'normal';
@@ -122,6 +131,9 @@ class MenuThemeTest extends TestCase
         $this->assertSame('comfortable', $menu->fresh()->theme['density']);
         $this->assertSame('standard', $menu->fresh()->theme['card_style']);
         $this->assertSame('normal', $menu->fresh()->theme['heading_size']);
+        $this->assertSame('#365B4A', $menu->fresh()->theme['primary_color']);
+        $this->assertSame('system', $menu->fresh()->theme['font']);
+        $this->assertSame('light', $menu->fresh()->theme['mode']);
     }
 
     public function test_business_owner_can_save_a_theme_with_plan_entitled_settings(): void
