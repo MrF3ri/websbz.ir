@@ -28,10 +28,10 @@ describe('getTranslationCompletion', () => {
                 { name: 'Tea', description: '', sourceDescription: null },
             ],
         })).toEqual({
-            completed: 2,
+            completed: 3,
             total: 4,
-            missing: 2,
-            percent: 50,
+            missing: 1,
+            percent: 75,
         });
     });
 
@@ -41,10 +41,10 @@ describe('getTranslationCompletion', () => {
             categories: [{ name: 'Coffee' }, { name: '' }],
             products: [{ name: 'Espresso', description: 'Strong coffee', sourceDescription: 'قهوه غلیظ' }],
         })).toEqual({
-            completed: 3,
+            completed: 4,
             total: 5,
-            missing: 2,
-            percent: 60,
+            missing: 1,
+            percent: 80,
         });
     });
 
