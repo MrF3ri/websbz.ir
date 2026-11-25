@@ -220,6 +220,43 @@ class BranchLifecycleTest extends TestCase
         );
     }
 
+    public function test_branch_opening_hours_are_saved_and_can_be_cleared(): void
+    {
+        [, $business] = $this->createCatalogTenant('top');
+        $this->ensurePrimaryBranch($business);
+
+        $schedule = [
+            'sat' => [
+                ['open' => '09:00', 'close' => '13:00'],
+                ['open' => '17:00', 'close' => '22:00'],
+            ],
+            'sun' => [],
+            'mon' => [
+                ['open' => '10:00', 'close' => '20:00'],
+            ],
+            'tue' => [],
+            'wed' => [],
+            'thu' => [],
+            'fri' => [],
+        ];
+
+        $branch = app(CreateBranchAction::class)->execute($business, [
+            'name' => 'Hours Branch',
+            'slug' => 'hours',
+            'opening_hours' => $schedule,
+        ]);
+
+        $this->assertSame($schedule, $branch->fresh()->opening_hours);
+
+        $updated = app(UpdateBranchAction::class)->execute($business, $branch, [
+            'name' => 'Hours Branch',
+            'slug' => 'hours',
+            'opening_hours' => null,
+        ]);
+
+        $this->assertNull($updated->opening_hours);
+    }
+
     private function ensurePrimaryBranch(Business $business): Branch
     {
         return app(EnsurePrimaryBranchAction::class)->execute($business);
