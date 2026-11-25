@@ -7,6 +7,8 @@ use App\Modules\Branch\Actions\SetBranchStatusAction;
 use App\Modules\Branch\Actions\UpdateBranchAction;
 use App\Modules\Branch\Http\Requests\SaveBranchRequest;
 use App\Modules\Branch\Models\Branch;
+use App\Modules\Menu\Models\Menu;
+use App\Modules\PublicMenu\Services\PublicMenuCache;
 use App\Modules\Business\Models\Business;
 use App\Modules\Tenancy\Services\CurrentBusiness;
 use Illuminate\Http\JsonResponse;
@@ -86,10 +88,16 @@ class BranchController
         string $branchPublicId,
         CurrentBusiness $currentBusiness,
         UpdateBranchAction $updateBranch,
+        PublicMenuCache $publicMenuCache,
     ): RedirectResponse {
         $business = $this->resolveBusiness($currentBusiness);
         $branch = $this->resolveBranch($business, $branchPublicId);
-        $updateBranch->execute($business, $branch, $request->validated());
+        $updatedBranch = $updateBranch->execute($business, $branch, $request->validated());
+        $menu = $business->menu()->first();
+
+        if ($menu instanceof Menu) {
+            $publicMenuCache->forget($menu, $updatedBranch);
+        }
 
         return to_route('business.branches.manage')->with('success', 'اطلاعات شعبه ذخیره شد.');
     }
