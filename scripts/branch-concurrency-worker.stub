@@ -1,0 +1,150 @@
+<?php
+
+use App\Modules\Branch\Actions\CreateBranchAction;
+use App\Modules\Branch\Actions\UpdateBranchCatalogSettingsAction;
+use App\Modules\Branch\Models\Branch;
+use App\Modules\Business\Models\Business;
+use App\Modules\Menu\Models\Menu;
+use App\Modules\Product\Models\Product;
+use Illuminate\Support\Facades\DB;
+
+require dirname(__DIR__).'/vendor/autoload.php';
+
+/** @var \Illuminate\Foundation\Application $app */
+$app = require dirname(__DIR__).'/bootstrap/app.php';
+$app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+
+if (! app()->environment('testing')) {
+    fwrite(STDERR, "This worker is only available in the testing environment.\n");
+    exit(2);
+}
+
+[
+    $operation,
+    $businessId,
+    $branchId,
+    $productId,
+    $name,
+    $slug,
+    $signalDirectory,
+    $workerId,
+    $holdAfterLock,
+    $failAfterLock,
+] = array_pad(array_slice($argv, 1), 10, null);
+
+$businessId = (int) $businessId;
+$branchId = (int) $branchId;
+$productId = (int) $productId;
+$holdAfterLock = $holdAfterLock === '1';
+$failAfterLock = $failAfterLock === '1';
+
+if (! in_array($operation, ['create-branch', 'update-settings'], true) || ! is_dir((string) $signalDirectory)) {
+    fwrite(STDERR, "Invalid worker arguments.\n");
+    exit(2);
+}
+
+DB::connection()->selectOne(
+    "select set_config('application_name', ?, false)",
+    ['branch-worker-'.$workerId],
+);
+
+file_put_contents($signalDirectory.'/'.$workerId.'.started', 'started');
+
+$businessLockObserved = false;
+
+DB::listen(function (\Illuminate\Database\Events\QueryExecuted $query) use (
+    &$businessLockObserved,
+    $signalDirectory,
+    $workerId,
+    $holdAfterLock,
+    $failAfterLock,
+): void {
+    $sql = strtolower($query->sql);
+
+    if (
+        $businessLockObserved
+        || ! str_contains($sql, 'for update')
+        || ! preg_match('/\bfrom\s+["`]?businesses["`]?/', $sql)
+    ) {
+        return;
+    }
+
+    $businessLockObserved = true;
+    file_put_contents($signalDirectory.'/'.$workerId.'.locked', 'locked');
+
+    if ($holdAfterLock) {
+        $gate = fopen($signalDirectory.'/gate', 'c+');
+
+        if ($gate === false) {
+            throw new \RuntimeException('Unable to open the branch concurrency gate.');
+        }
+
+        try {
+            if (! flock($gate, LOCK_EX)) {
+                throw new \RuntimeException('Unable to wait on the branch concurrency gate.');
+            }
+
+            flock($gate, LOCK_UN);
+        } finally {
+            fclose($gate);
+        }
+    }
+
+    if ($failAfterLock) {
+        throw new \RuntimeException('Intentional failure after acquiring the business lock.');
+    }
+});
+
+$result = ['status' => 'error', 'message' => 'Worker did not execute.'];
+
+try {
+    $business = Business::query()->findOrFail($businessId);
+
+    if ($operation === 'create-branch') {
+        app(CreateBranchAction::class)->execute($business, [
+            'name' => (string) $name,
+            'slug' => (string) $slug,
+        ]);
+    } else {
+        $branch = $business->branches()->whereKey($branchId)->firstOrFail();
+        $menu = Menu::query()
+            ->where('business_id', $businessId)
+            ->firstOrFail();
+        $product = $menu->products()->whereKey($productId)->firstOrFail();
+
+        app(UpdateBranchCatalogSettingsAction::class)->execute($business, $branch, [
+            'categories' => [],
+            'products' => [[
+                'public_id' => $product->public_id,
+                'name_override' => (string) $name,
+                'description_override_enabled' => false,
+                'description_override' => null,
+                'base_price_override' => null,
+                'discount_override_mode' => 'inherit',
+                'discount_price_override' => null,
+                'is_visible' => true,
+                'is_available' => true,
+                'track_inventory' => false,
+                'stock_quantity' => null,
+                'sort_order' => 0,
+            ]],
+        ]);
+    }
+
+    $result = ['status' => 'success'];
+} catch (\Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException $exception) {
+    $result = ['status' => 'forbidden', 'message' => $exception->getMessage()];
+} catch (\Throwable $exception) {
+    $result = [
+        'status' => 'error',
+        'exception' => $exception::class,
+        'message' => $exception->getMessage(),
+    ];
+}
+
+file_put_contents(
+    $signalDirectory.'/'.$workerId.'.result',
+    json_encode($result, JSON_THROW_ON_ERROR),
+);
+
+exit($result['status'] === 'error' ? 1 : 0);
