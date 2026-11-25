@@ -154,6 +154,9 @@ class MenuThemeTest extends TestCase
             'primary_color' => '#AABBCC',
             'font' => 'serif',
             'mode' => 'dark',
+            'density' => 'comfortable',
+            'card_style' => 'standard',
+            'heading_size' => 'normal',
         ], $menu->fresh()->theme);
     }
 
