@@ -67,14 +67,17 @@ This snapshot records the operational state reported and verified during the own
 - Establish immutable image publishing, reviewed migrations, deployment, and rollback verification.
 - Complete the operational runbook, monitoring/alerting, and final launch acceptance.
 
+## Current product phase
+
+- **Phase 12 — Localization and Translation Management:** in progress on `feat/phase-12-localization`. Only Top supports the three public-menu locales `fa`, `en`, and `ar`; Economic and Professional remain single-language.
+- **Phase 11 — Menu Customization and Visual Templates:** complete and merged through PR #82. See `docs/phase-11/README.md` for increment-level implementation and CI history.
+
 ## Deferred product phases
 
-These are intentionally not blockers for the first usable MVP unless the business launch requires them:
+These are intentionally separate from the current localization increment:
 
 - **Phase 9:** Branch management and mixed product settings.
 - **Phase 10:** Media and product image management.
-- **Phase 11:** Menu customization and visual templates; template-count entitlements start here.
-- **Phase 12:** Localization and translation management.
 - **Phase 15:** Top-plan advanced features (video, reviews/ratings, likes, Instagram API, Excel export, backup/restore, notifications/customer communication, initial setup service).
 - **Phase 16:** Custom domains and HTTPS per tenant.
 - **Phase 17:** Social links, contact, and location integrations.
