@@ -1,7 +1,7 @@
 # ADR 0015: Menu Theme Registry and Snapshot-Based Template Entitlements
 
 - Status: Accepted for Phase 11 implementation
-- Date: 2026-11-26
+- Date: 2026-11-25
 - Related: ADR 0003, ADR 0006, ADR 0011, ADR 0014
 
 ## Context
