@@ -16,7 +16,8 @@ Business logos are public-facing brand assets, but their source objects must rem
 - Upload authorization is checked against the current tenant's BusinessPolicy and the current subscription snapshot. UI visibility is not authorization.
 - Accept only JPEG, PNG, and WebP images, maximum 2 MiB and 2048 × 2048 pixels; verify actual MIME type and extension before storage.
 - Serve a logo only through an application route that verifies the business is active, its menu is published, and the requested media belongs to that business's current logo record.
-- Replace or remove the logo by updating the relation transactionally, then clean up the old private object and metadata. Storage cleanup failures are logged and metadata is retained when possible.
+- Replacement stores the new object and updates the current-logo relation transactionally; after commit, it cleans up the replaced object and metadata. If cleanup fails, the old media metadata is retained for a later retry.
+- Removal deletes the private object and its media metadata inside the same database transaction before deleting the logo relation. If storage deletion fails, the transaction rolls back and preserves the logo association and metadata so the owner can retry safely. If the object is already absent, metadata cleanup may proceed idempotently.
 - Invalidate the public-menu cache after upload or removal. Public URLs include the media public ID so replacement changes the URL.
 
 ## Consequences
