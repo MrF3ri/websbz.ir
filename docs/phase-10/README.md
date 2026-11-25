@@ -1,6 +1,8 @@
 # Phase 10 — Media and product image management
 
-## Implemented on the Phase 10 branch
+Status: Implementation complete and merged through PRs #69 and #70. Owner-side acceptance and repository-wide Release Gate remain.
+
+## Implemented on main
 
 - Media metadata with ULID public identifiers, tenant ownership, detected MIME, file size, and pixel dimensions.
 - Product-image relation with database composite foreign keys tying media, product, menu, and business ownership together.
@@ -16,15 +18,18 @@
 - Generated thumbnail and medium variants (where smaller than the original) plus original-image delivery through a responsive srcset.
 - Public-menu multi-image gallery rendering for all images attached to a published product.
 
-## Required verification
+## Verification
 
-The GitHub Actions jobs and owner-side local suite must pass. PostgreSQL is required to validate the row-lock quota behavior and composite foreign keys. SQLite-only success is insufficient.
+- PR #69 delivered secure product image management and passed its configured SQLite/PostgreSQL/production-image checks.
+- PR #70 delivered responsive variants, ordered multi-image galleries, storage deletion reliability, and PostgreSQL multi-process quota coverage.
+- On PR #70 head `92e9007e1042da83729b6c3f278d36038f70bd83`, SQLite, PostgreSQL, frontend unit/type checks, Pint, PHPStan, dependency audits, and production image/Compose validation passed.
+- The real Backblaze B2 non-production S3 integration test executed and passed on PR #70, covering upload, responsive variants, authorized delivery, and deletion. No production bucket or credentials were used.
 
 ## Remaining work
 
-- Responsive-variant, gallery, storage-failure, and PostgreSQL multi-process concurrency tests pass in CI on PR head d37c5b4d. Owner-side local acceptance remains a separate project sign-off.
-- The S3 adapter is now included in composer.json and composer.lock. Run the opt-in S3 integration test against a real non-production bucket and apply the lifecycle policy in S3-VERIFICATION.md. This requires owner-provisioned credentials and endpoint configuration; it cannot be certified using a fake disk.
-- Run the full Release Gate separately; Phase 10 completion alone does not make the product production-ready.
+- Owner-side local acceptance of image upload, gallery rendering, and deletion remains a separate project sign-off.
+- Review/apply the documented S3 lifecycle policy to owner-managed buckets; do not expire current objects that may still be referenced by media records.
+- Run the full repository Release Gate separately; Phase 10 completion alone does not make the product production-ready.
 
 ## Security notes
 
