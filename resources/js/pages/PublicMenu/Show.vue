@@ -159,7 +159,7 @@ function formatPrice(value: number): string {
                         <div class="h-px flex-1 bg-stone-200 dark:bg-stone-800" />
                     </div>
 
-                    <div class="overflow-hidden bg-white dark:bg-stone-900" :class="{ classic: 'rounded-2xl border border-stone-200 shadow-sm dark:border-stone-800', minimal: 'rounded-lg border-0 shadow-none', editorial: 'rounded-none border-y border-stone-300 dark:border-stone-700', modern: 'rounded-3xl border border-stone-200 shadow-lg dark:border-stone-700', cafe: 'rounded-2xl border border-amber-200 dark:border-amber-900', contrast: 'rounded-md border-2 border-stone-900 shadow-md dark:border-white' }[menu.theme.template] ?? 'rounded-2xl border border-stone-200 shadow-sm dark:border-stone-800'">
+                    <div class="overflow-hidden bg-white dark:bg-stone-900" :class="[productBorderClasses[menu.theme.template] ?? productBorderClasses.classic, cardStyleClasses[menu.theme.card_style] ?? cardStyleClasses.standard]">
                         <article
                             v-for="(product, productIndex) in category.products"
                             :key="product.public_id"
