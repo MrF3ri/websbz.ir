@@ -15,10 +15,7 @@ use Inertia\Response;
 
 class PublicMenuController
 {
-    public function __construct(
-        private readonly PublicMenuCache $publicMenuCache,
-    ) {
-    }
+    public function __construct(private readonly PublicMenuCache $publicMenuCache) {}
 
     public function show(string $businessSlug, string $menuSlug): Response
     {
