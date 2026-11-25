@@ -62,16 +62,16 @@ class PublicMenuController
         $mode = $theme['mode'] ?? 'light';
 
         return [
-            'template' => is_string($template) && in_array($template, ['classic', 'minimal', 'editorial', 'modern', 'cafe', 'contrast'], true)
+            'template' => in_array($template, ['classic', 'minimal', 'editorial', 'modern', 'cafe', 'contrast'], true)
                 ? $template
                 : 'classic',
-            'primary_color' => is_string($color) && preg_match('/^#[0-9A-Fa-f]{6}$/', $color) === 1
+            'primary_color' => preg_match('/^#[0-9A-Fa-f]{6}$/', $color) === 1
                 ? strtoupper($color)
                 : '#365B4A',
-            'font' => is_string($font) && in_array($font, ['system', 'serif', 'rounded'], true)
+            'font' => in_array($font, ['system', 'serif', 'rounded'], true)
                 ? $font
                 : 'system',
-            'mode' => is_string($mode) && in_array($mode, ['light', 'dark'], true)
+            'mode' => in_array($mode, ['light', 'dark'], true)
                 ? $mode
                 : 'light',
         ];
