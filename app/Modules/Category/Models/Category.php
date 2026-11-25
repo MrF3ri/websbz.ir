@@ -48,7 +48,7 @@ class Category extends Model
         return $this->hasMany(Product::class);
     }
 
-    /** @return HasMany<CategoryTranslation, $this> */
+    /** @return HasMany<BranchCategorySetting, $this> */\n    public function branchSettings(): HasMany\n    {\n        return $this->hasMany(BranchCategorySetting::class);\n    }\n\n    /** @return HasMany<CategoryTranslation, $this> */
     public function translations(): HasMany
     {
         return $this->hasMany(CategoryTranslation::class);
