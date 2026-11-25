@@ -1,6 +1,6 @@
 # Roadmap and delivery status
 
-Last reviewed: 2026-11-17
+Last reviewed: 2026-11-25
 
 This roadmap preserves the phase numbering in `docs/master-spec.md` and its ERRATA. Historical audit statements describe the repository at the time of that audit; the current status below reflects the changes merged afterward.
 
@@ -69,7 +69,7 @@ This snapshot records the operational state reported and verified during the own
 
 ## Current product phase
 
-- **Phase 12 — Localization and Translation Management:** in progress on `feat/phase-12-localization`. Only Top supports the three public-menu locales `fa`, `en`, and `ar`; Economic and Professional remain single-language.
+- **Phase 12 — Localization and Translation Management:** in progress. PR #83 merged the locale registry and normalized translation schema; PR #84 merged Top-only tenant-scoped translation management. Increment 12.3 is implementing public-menu locale resolution, translated rendering, direction metadata, and source-field fallback. Only Top supports `fa`, `en`, and `ar`; Economic and Professional remain single-language. See `docs/phase-12/README.md`.
 - **Phase 11 — Menu Customization and Visual Templates:** complete and merged through PR #82. See `docs/phase-11/README.md` for increment-level implementation and CI history.
 
 ## Deferred product phases
