@@ -93,7 +93,14 @@ class ProductImageConcurrencyTest extends TestCase
             $waitedPid = pcntl_waitpid($pid, $status);
             $this->assertSame($pid, $waitedPid);
             $this->assertTrue(pcntl_wifexited($status));
-            $this->assertSame(0, pcntl_wexitstatus($status));
+            $exitCode = pcntl_wexitstatus($status);
+
+            if ($exitCode !== 0) {
+                $workerOutput = file_get_contents($resultPaths[$index]);
+                $this->fail('PostgreSQL upload worker failed: '.(is_string($workerOutput) ? $workerOutput : 'no worker output'));
+            }
+
+            $this->assertSame(0, $exitCode);
         }
 
         DB::purge();
