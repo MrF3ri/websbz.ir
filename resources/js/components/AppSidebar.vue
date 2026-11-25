@@ -15,7 +15,8 @@ import type { NavItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
     { title: 'داشبورد', href: dashboard(), icon: LayoutGrid },
-    { title: 'مدیریت منو', href: catalogIndex(), icon: ClipboardList },\n    { title: 'قالب و ظاهر منو', href: '/catalog/menu/theme', icon: Palette },
+    { title: 'مدیریت منو', href: catalogIndex(), icon: ClipboardList },
+    { title: 'قالب و ظاهر منو', href: '/catalog/menu/theme', icon: Palette },
     { title: 'مدیریت شعب', href: '/business/branches/manage', icon: Store },
     { title: 'اشتراک و پرداخت', href: '/billing', icon: CreditCard },
     { title: 'تنظیمات کسب‌وکار', href: '/business/settings', icon: Building2 },
