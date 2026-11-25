@@ -4,10 +4,10 @@ namespace App\Modules\Product\Http\Controllers;
 
 use App\Modules\Business\Models\Business;
 use App\Modules\Category\Models\Category;
-use App\Modules\Menu\Actions\EnsurePrimaryMenuAction;
-use App\Modules\Menu\Models\Menu;
 use App\Modules\Media\Models\Media;
 use App\Modules\Media\Models\ProductImage;
+use App\Modules\Menu\Actions\EnsurePrimaryMenuAction;
+use App\Modules\Menu\Models\Menu;
 use App\Modules\Product\Actions\CreateProductAction;
 use App\Modules\Product\Http\Requests\ReorderProductsRequest;
 use App\Modules\Product\Http\Requests\SaveProductRequest;
@@ -97,14 +97,14 @@ class ProductController
             $lockedMenu->products()->whereKey($product->getKey())->firstOrFail()->delete();
 
             foreach ($mediaItems as $media) {
-                if (! $media->productImages()->exists()) {
+                if (!$media->productImages()->exists()) {
                     $media->delete();
                 }
             }
         });
 
         foreach ($mediaItems as $media) {
-            if (! $media->fresh()) {
+            if (!$media->fresh()) {
                 Storage::disk($media->disk)->delete($media->path);
             }
         }
