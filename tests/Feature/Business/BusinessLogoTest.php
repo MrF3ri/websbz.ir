@@ -127,7 +127,7 @@ class BusinessLogoTest extends TestCase
             ->delete(route('business.logo.destroy'))
             ->assertRedirect();
 
-        $this->assertNull($business->fresh()->logo_media_id);
+        $this->assertFalse($business->fresh()->logo()->exists());
         $this->assertDatabaseMissing('media', ['id' => $media->getKey()]);
         Storage::disk('media')->assertMissing($media->path);
     }
@@ -175,7 +175,7 @@ class BusinessLogoTest extends TestCase
             ->post(route('business.logo.store'), ['logo' => $invalid])
             ->assertSessionHasErrors('logo');
 
-        $this->assertNull($business->fresh()->logo_media_id);
+        $this->assertFalse($business->fresh()->logo()->exists());
         $this->assertDatabaseCount('media', 0);
         Storage::disk('media')->assertDirectoryEmpty('businesses');
     }
