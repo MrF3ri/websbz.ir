@@ -157,6 +157,14 @@ Implementation branch: `feat/phase-11-accessibility-tenant-audit`
 - PHPStan reported no errors; all CI quality checks passed.
 - Production image build, Compose validation, and Nginx validation: passed.
 
+### Increment 11.7 — merged PR #77
+
+- SQLite: 248 passed, 7 skipped.
+- PostgreSQL: 255 passed.
+- MenuThemeTest and Backblaze B2 S3 integration passed in both database jobs.
+- Frontend unit tests, Vue/TypeScript checks, and PHPStan passed.
+- Production image build, Compose validation, and Nginx validation passed.
+
 ### Increment 11.8 — merged PR #78
 
 - SQLite: 248 passed, 7 skipped.
