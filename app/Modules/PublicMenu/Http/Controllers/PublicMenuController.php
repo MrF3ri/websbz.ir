@@ -100,7 +100,7 @@ class PublicMenuController
      * @return array{public_id: string, name: string, description: string|null, branch_name_override: bool, branch_description_override: bool, label: string|null, price: int, discount_price: int|null, images: array<int, array{url: string, srcset: string, sizes: string, width: int, height: int}>, translations: array<string, array{name: string, description: string|null}>}
      */
     /**
-     * @param array{name: string, description: string|null, base_price: int, discount_price: int|null, is_visible: bool, is_available: bool, sort_order: int} $effective
+     * @param array<string, mixed> $effective
      */
     private function productData(Product $product, array $effective, BranchProductSetting|null $setting): array
     {
