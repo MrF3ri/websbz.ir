@@ -3,6 +3,7 @@ import { Head } from '@inertiajs/vue3';
 
 type PublicProduct = {
     name: string;
+    images: { url: string; width: number; height: number }[];
     description: string | null;
     price: number;
     discount_price: number | null;
@@ -81,6 +82,15 @@ function formatPrice(value: number): string {
                             class="flex items-start justify-between gap-4 px-5 py-4"
                             :class="{ 'border-t border-stone-100 dark:border-stone-800': productIndex > 0 }"
                         >
+                            <img
+                                v-if="product.images[0]"
+                                :src="product.images[0].url"
+                                :alt="`تصویر ${product.name}`"
+                                :width="product.images[0].width"
+                                :height="product.images[0].height"
+                                loading="lazy"
+                                class="size-20 shrink-0 rounded-xl object-cover sm:size-24"
+                            />
                             <div class="min-w-0 flex-1">
                                 <h3 class="font-semibold">{{ product.name }}</h3>
                                 <p v-if="product.description" class="mt-1 whitespace-pre-line text-sm leading-6 text-stone-500 dark:text-stone-400">
