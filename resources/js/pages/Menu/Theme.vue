@@ -156,7 +156,7 @@ function save(): void {
                 <div class="grid gap-4 sm:grid-cols-2">
                     <div class="space-y-2">
                         <label for="banner-title" class="text-sm font-medium">عنوان بنر</label>
-                        <input id="banner-title" v-model="bannerForm.title" maxlength="100" class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm" :readonly="!features.advertising_banner && hasBannerContent" :disabled="!features.advertising_banner && !hasBannerContent" />
+                        <input id="banner-title" v-model="bannerForm.title" maxlength="100" class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"  :readonly="!features.advertising_banner && hasBannerContent" :disabled="!features.advertising_banner && !hasBannerContent" />
                         <p v-if="bannerForm.errors.title" class="text-xs text-destructive" role="alert">{{ bannerForm.errors.title }}</p>
                     </div>
                     <div class="space-y-2">
@@ -166,7 +166,7 @@ function save(): void {
                     </div>
                     <div class="space-y-2 sm:col-span-2">
                         <label for="banner-message" class="text-sm font-medium">متن پیام</label>
-                        <textarea id="banner-message" v-model="bannerForm.message" rows="3" maxlength="300" class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm leading-6" :readonly="!features.advertising_banner && hasBannerContent" :disabled="!features.advertising_banner && !hasBannerContent" />
+                        <textarea id="banner-message" v-model="bannerForm.message" rows="3" maxlength="300" class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm leading-6" :readonly="!features.advertising_banner && hasBannerContent" :disabled="!features.advertising_banner && !hasBannerContent"></textarea>
                         <p v-if="bannerForm.errors.message" class="text-xs text-destructive" role="alert">{{ bannerForm.errors.message }}</p>
                     </div>
                     <div class="space-y-2 sm:col-span-2">
@@ -177,7 +177,7 @@ function save(): void {
                 </div>
                 <p v-if="!features.advertising_banner" class="text-xs text-muted-foreground">بنر تبلیغاتی در طرح فعلی فعال نیست. بنر قبلی حفظ می‌شود و می‌توانید آن را حذف کنید.</p>
                 <div class="flex flex-wrap items-center gap-2">
-                    <Button type="button" :disabled="bannerForm.processing || (!features.advertising_banner && !hasBannerContent)" @click="saveBanner">
+                    <Button type="button"  :disabled="bannerForm.processing" @click="saveBanner">
                         {{ bannerForm.processing ? 'در حال ذخیره...' : 'ذخیره بنر' }}
                     </Button>
                     <Button v-if="!features.advertising_banner && hasBannerContent" type="button" variant="outline" :disabled="bannerForm.processing" @click="clearBanner">حذف بنر قبلی</Button>
