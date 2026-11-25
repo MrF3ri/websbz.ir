@@ -25,7 +25,7 @@ class BranchController
         $business = $this->resolveBusiness($currentBusiness);
         Gate::authorize('view', $business);
 
-        $menu = $business->menu()->first();
+        $menu = Menu::query()->where('business_id', $business->getKey())->first();
         $menuIsPublished = $menu !== null && $menu->status === MenuStatus::Published;
 
         $branches = $business->branches()
