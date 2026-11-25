@@ -1,7 +1,7 @@
 <?php
 
 use App\Modules\Branch\Http\Controllers\BranchController;
-use App\Modules\Business\Http\Controllers\BusinessOnboardingController;
+use App\Modules\Business\Http\Controllers\BusinessOnboardingController;\nuse App\Modules\Business\Http\Controllers\BusinessLogoController;
 use App\Modules\Business\Http\Controllers\BusinessSettingsController;
 use App\Modules\Catalog\Http\Controllers\CatalogController;
 use App\Modules\Category\Http\Controllers\CategoryController;
@@ -24,7 +24,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'Welcome')->name('home');
 
-Route::get('/media/{mediaPublicId}', [MediaController::class, 'publicImage'])->name('media.public');\nRoute::get('/media/business-logo/{businessPublicId}/{mediaPublicId}', [BusinessLogoController::class, 'public'])->name('media.business-logo');
+Route::get('/media/{mediaPublicId}', [MediaController::class, 'publicImage'])->name('media.public');\nRoute::get('/media/business-logo/{businessPublicId}/{mediaPublicId}', [BusinessLogoController::class, 'public'])->name('media.business-logo');\nRoute::get('/media/business-logo/{businessPublicId}/{mediaPublicId}', [BusinessLogoController::class, 'public'])->name('media.business-logo');
 
 Route::get('/menu/{businessSlug}/{menuSlug}', [PublicMenuController::class, 'show'])
     ->name('public.menu.show');
@@ -66,7 +66,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->name('billing.payments.receipt');
 
         Route::get('/business/settings', [BusinessSettingsController::class, 'edit'])->name('business.settings.edit');
-        Route::put('/business/settings', [BusinessSettingsController::class, 'update'])->name('business.settings.update');\n        Route::post('/business/logo', [BusinessLogoController::class, 'store'])->name('business.logo.store');\n        Route::delete('/business/logo', [BusinessLogoController::class, 'destroy'])->name('business.logo.destroy');
+        Route::put('/business/settings', [BusinessSettingsController::class, 'update'])->name('business.settings.update');\n        Route::post('/business/logo', [BusinessLogoController::class, 'store'])->name('business.logo.store');\n        Route::delete('/business/logo', [BusinessLogoController::class, 'destroy'])->name('business.logo.destroy');\n        Route::post('/business/logo', [BusinessLogoController::class, 'store'])->name('business.logo.store');\n        Route::delete('/business/logo', [BusinessLogoController::class, 'destroy'])->name('business.logo.destroy');
 
         Route::get('/business/branches', [BranchController::class, 'index'])->name('business.branches.index');
         Route::get('/business/branches/manage', [BranchController::class, 'manage'])->name('business.branches.manage');
