@@ -1,8 +1,8 @@
 # Phase 9 — Branch Management
 
 Status: In progress  
-Current increment: 9.6 — PostgreSQL branch concurrency coverage  
-Implementation branch: `test/phase-9-branch-postgres-concurrency`  
+Current increment: 9.7 — Owner-driven end-to-end acceptance  
+Implementation branch: `fix/phase-9-branch-acceptance-polish`  
 Approved model: Hybrid shared catalog with branch-level overrides (ADR 0014)
 
 ## Delivered foundation
@@ -49,13 +49,27 @@ Approved model: Hybrid shared catalog with branch-level overrides (ADR 0014)
 - Branch creation starts with a new branch identifier and therefore has no prior cache key to invalidate. Activation/deactivation is checked before cache access and status is not part of the cached public projection.
 - Add regression tests proving canonical invalidation clears the primary and branch projections, branch-scoped invalidation preserves the primary projection, and a canonical product update refreshes both public routes.
 
-## Increment 9.6 — PostgreSQL branch concurrency coverage (in review)
+## Increment 9.6 — PostgreSQL branch concurrency coverage (delivered)
 
 - Add a PostgreSQL-only multi-process worker for branch creation and branch catalog settings writes.
 - Prove two simultaneous branch creations serialize on the Business row lock and cannot exceed the Top plan's two-branch limit.
 - Prove concurrent writes to separate branch-product settings preserve both updates and do not mutate canonical Product records.
 - Prove a failed transaction after acquiring the Business lock releases it so a waiting branch-creation worker can proceed.
 - Use PostgreSQL lock-wait observation rather than timing-only assertions; SQLite skips these tests because it does not provide the required row-lock semantics.
+
+## Increment 9.7 — Owner-driven end-to-end acceptance (pending owner action)
+
+The following acceptance must be performed against a running environment with a real phone camera. CI cannot replace the physical QR scan and owner verification.
+
+1. Sign in to a Top-plan business with its canonical menu published and its primary branch active.
+2. Create one secondary branch with a stable slug (for example, `north`).
+3. Open the branch catalog settings page and change a category visibility/order plus a product name, base price, and availability for the secondary branch. Save the changes.
+4. Open Branch Management, download the secondary branch QR as SVG, and scan it with a phone camera.
+5. Confirm the scanned URL opens the secondary branch menu and displays the branch-specific values.
+6. Open the legacy primary menu URL and confirm the canonical product/category values are unchanged.
+7. Rename the secondary branch's display name and confirm the already-printed QR still resolves, because the slug is immutable.
+8. Temporarily deactivate the secondary branch and confirm its public URL returns 404; reactivate it and confirm the same URL works again.
+9. Record owner sign-off with the branch slug, tested URL, and pass/fail result.
 
 ## Remaining Phase 9 work
 
