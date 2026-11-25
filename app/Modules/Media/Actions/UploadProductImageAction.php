@@ -38,7 +38,6 @@ class UploadProductImageAction
 
         if (
             ! is_array($dimensions)
-            || ! isset($dimensions[0], $dimensions[1])
             || $dimensions[0] < 1
             || $dimensions[1] < 1
             || $dimensions[0] > 6000
