@@ -4,9 +4,11 @@ namespace App\Modules\Product\Models;
 
 use App\Modules\Category\Models\Category;
 use App\Modules\Menu\Models\Menu;
+use App\Modules\Media\Models\ProductImage;
 use App\Modules\Product\Enums\ProductStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
 /**
@@ -61,6 +63,12 @@ class Product extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    /** @return HasMany<ProductImage, $this> */
+    public function images(): HasMany
+    {
+        return $this->hasMany(ProductImage::class)->orderBy('sort_order')->orderBy('id');
     }
 
     /** @return array<string, string> */
