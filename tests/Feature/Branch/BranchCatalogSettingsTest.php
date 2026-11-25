@@ -4,6 +4,7 @@ namespace Tests\Feature\Branch;
 
 use App\Modules\Branch\Actions\CreateBranchAction;
 use App\Modules\Branch\Actions\EnsurePrimaryBranchAction;
+use App\Modules\Branch\Actions\EnsurePrimaryBranchAction;
 use App\Modules\Menu\Enums\MenuStatus;
 use App\Modules\Product\Enums\ProductStatus;
 use App\Modules\PublicMenu\Services\PublicMenuCache;
@@ -39,7 +40,7 @@ class BranchCatalogSettingsTest extends TestCase
             100000,
             ProductStatus::Published,
         );
-        $this->ensurePrimaryBranch($business);
+        app(EnsurePrimaryBranchAction::class)->execute($business);
         $branch = app(CreateBranchAction::class)->execute($business, [
             'name' => 'North Branch',
             'slug' => 'north',
@@ -151,7 +152,7 @@ class BranchCatalogSettingsTest extends TestCase
         [, $businessB, $menuB] = $this->createCatalogTenant('top');
         $foreignCategory = $this->createCatalogCategory($menuB, 'Foreign');
         $foreignProduct = $this->createCatalogProduct($menuB, $foreignCategory, 'Foreign item');
-        $this->ensurePrimaryBranch($businessA);
+        app(EnsurePrimaryBranchAction::class)->execute($businessA);
         $branch = $businessA->primaryBranch()->firstOrFail();
         $user->forceFill(['email_verified_at' => now()])->save();
 
