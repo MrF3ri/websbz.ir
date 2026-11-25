@@ -3,6 +3,7 @@
 namespace App\Modules\Product\Models;
 
 use App\Modules\Category\Models\Category;
+use App\Modules\Branch\Models\BranchProductSetting;
 use App\Modules\Media\Models\ProductImage;
 use App\Modules\Menu\Models\Menu;
 use App\Modules\Product\Enums\ProductLabel;
@@ -74,7 +75,13 @@ class Product extends Model
         return $this->hasMany(ProductImage::class)->orderBy('sort_order')->orderBy('id');
     }
 
-    /** @return HasMany<BranchProductSetting, $this> */\n    public function branchSettings(): HasMany\n    {\n        return $this->hasMany(BranchProductSetting::class);\n    }\n\n    /** @return HasMany<ProductTranslation, $this> */
+    /** @return HasMany<BranchProductSetting, $this> */
+    public function branchSettings(): HasMany
+    {
+        return $this->hasMany(BranchProductSetting::class);
+    }
+
+    /** @return HasMany<ProductTranslation, $this> */
     public function translations(): HasMany
     {
         return $this->hasMany(ProductTranslation::class);
