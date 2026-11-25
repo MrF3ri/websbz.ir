@@ -8,10 +8,12 @@ use App\Modules\Category\Models\Category;
 use App\Modules\Media\Models\ProductImage;
 use App\Modules\Menu\Enums\MenuStatus;
 use App\Modules\Menu\Models\Menu;
+use App\Modules\Localization\Services\LocaleRegistry;
 use App\Modules\Product\Enums\ProductStatus;
 use App\Modules\Product\Models\Product;
 use App\Modules\PublicMenu\Services\PublicMenuCache;
 use App\Modules\Subscription\Services\EntitlementService;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use LogicException;
@@ -104,6 +106,10 @@ class PublicMenuController
             'price' => $product->base_price,
             'discount_price' => $product->discount_price,
             'images' => $product->images->map(fn (ProductImage $image): array => $this->imageData($image))->values()->all(),
+            'translations' => $product->translations->keyBy('locale')->map(fn ($translation): array => [
+                'name' => $translation->name,
+                'description' => $translation->description,
+            ])->all(),
         ];
     }
 
@@ -152,6 +158,8 @@ class PublicMenuController
         string $businessSlug,
         string $menuSlug,
         PublicMenuCache $publicMenuCache,
+        Request $request,
+        LocaleRegistry $localeRegistry,
     ): Response {
         $business = Business::query()
             ->where('slug', $businessSlug)
@@ -180,7 +188,7 @@ class PublicMenuController
                         ->where('is_available', true)
                         ->orderBy('sort_order')
                         ->orderBy('id');
-                }, 'products.images.media'])
+                }, 'translations', 'products.images.media', 'products.translations'])
                 ->orderBy('sort_order')
                 ->orderBy('id')
                 ->get();
@@ -195,16 +203,59 @@ class PublicMenuController
                     'title' => $menu->title,
                     'slug' => $menu->slug,
                     'locale' => $menu->default_locale,
+                    'translations' => $menu->translations->keyBy('locale')->map(fn ($translation): array => [
+                        'title' => $translation->title,
+                    ])->all(),
                     'theme' => $this->themeData($menu),
                 ],
                 'categories' => $categories->map(fn (Category $category): array => [
                     'name' => $category->name,
+                    'translations' => $category->translations->keyBy('locale')->map(fn ($translation): array => [
+                        'name' => $translation->name,
+                    ])->all(),
                     'products' => $category->products->map(fn (Product $product): array => $this->productData($product))->values()->all(),
                 ])->values()->all(),
             ];
         });
 
         if (is_array($publicMenu) && is_array($publicMenu['menu'] ?? null) && is_array($publicMenu['business'] ?? null)) {
+            $availableLocales = $localeRegistry->availableFor($business);
+            $requestedLocale = $request->query('lang');
+            $locale = is_string($requestedLocale) && $localeRegistry->allows($business, $requestedLocale)
+                ? $requestedLocale
+                : $menu->default_locale;
+
+            $menuTranslation = $publicMenu['menu']['translations'][$locale] ?? null;
+            $publicMenu['menu']['title'] = $menuTranslation['title'] ?? $publicMenu['menu']['title'];
+            unset($publicMenu['menu']['translations']);
+            $publicMenu['menu']['source_locale'] = $menu->default_locale;
+            $publicMenu['menu']['locale'] = $locale;
+            $publicMenu['menu']['direction'] = $localeRegistry->direction($locale);
+            $publicMenu['menu']['public_url'] = route('public.menu.show', [$business->slug, $menu->slug]);
+            $publicMenu['menu']['available_locales'] = collect($availableLocales)
+                ->map(fn (array $details, string $code): array => ['code' => $code, ...$details])
+                ->values()
+                ->all();
+
+            $publicMenu['categories'] = array_map(function (array $category) use ($locale): array {
+                $categoryTranslation = $category['translations'][$locale] ?? null;
+                $category['name'] = $categoryTranslation['name'] ?? $category['name'];
+                unset($category['translations']);
+
+                $category['products'] = array_map(function (array $product) use ($locale): array {
+                    $translation = $product['translations'][$locale] ?? null;
+                    if (is_array($translation)) {
+                        $product['name'] = $translation['name'] ?? $product['name'];
+                        $product['description'] = $translation['description'] ?? $product['description'];
+                    }
+                    unset($product['translations']);
+
+                    return $product;
+                }, $category['products']);
+
+                return $category;
+            }, $publicMenu['categories']);
+
             $entitlements = new EntitlementService($business);
             $publicMenu['menu']['image_slider_enabled'] = $entitlements->hasFeature('image_slider');
             $publicMenu['menu']['advertising_banner'] = $entitlements->hasFeature('advertising_banner')
