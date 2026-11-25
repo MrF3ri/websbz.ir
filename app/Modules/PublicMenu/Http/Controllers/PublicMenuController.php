@@ -251,10 +251,10 @@ class PublicMenuController
                                 return null;
                             }
 
-                            return [
-                                ...$this->productData($product, $effective, $setting),
-                                '_sort_order' => $effective['sort_order'],
-                            ];
+                            return array_merge(
+                                $this->productData($product, $effective, $setting),
+                                ['_sort_order' => $effective['sort_order']],
+                            );
                         })
                         ->filter()
                         ->sortBy('_sort_order')
