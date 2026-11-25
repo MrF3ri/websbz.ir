@@ -201,7 +201,7 @@ class ManualPaymentSubmissionTest extends TestCase
         $payload = [
             'plan_id' => $plan->getKey(),
             'bank_tracking_number' => 'BANK-TRACK-DUPLICATE',
-            'receipt' => UploadedFile::fake()->image('receipt.png'),
+            'receipt' => UploadedFile::fake()->create('receipt.pdf', 50, 'application/pdf'),
         ];
 
         $this->actingAs($user)
