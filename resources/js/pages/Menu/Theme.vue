@@ -58,8 +58,6 @@ function resetCustomDesign(): void {
 
 const previewMode = ref<'mobile' | 'desktop'>('mobile');
 
-
-
 function save(): void {
     form.put('/catalog/menu/theme', { preserveScroll: true });
 }
@@ -77,7 +75,7 @@ function save(): void {
             <section class="rounded-xl border border-border bg-card p-5">
                 <div class="flex flex-wrap items-center justify-between gap-3">
                     <div>
-                        <h2 class="font-semibold">انتخاب قالب</h2>
+                        <h2 id="template-selection-title" class="font-semibold">انتخاب قالب</h2>
                         <p class="mt-1 text-sm text-muted-foreground">پیش‌نمایش‌های زیر در چیدمان واکنش‌گرا نمایش داده می‌شوند.</p>
                     </div>
                     <div role="group" aria-label="اندازه پیش‌نمایش" class="flex items-center gap-1 rounded-lg border border-border p-1">
@@ -86,7 +84,7 @@ function save(): void {
                     </div>
                 </div>
                 <p class="mt-1 text-sm text-muted-foreground">قالب‌های قابل انتخاب بر اساس اشتراک فعال نمایش داده می‌شوند.</p>
-                <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                <div role="radiogroup" aria-labelledby="template-selection-title" class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     <label
                         v-for="(template, key) in templates"
                         :key="key"

@@ -1,8 +1,8 @@
 # Phase 11 — Public Menu Customization
 
 Status: In progress  
-Current increment: 11.8 — Template preview visual regression coverage  
-Implementation branch: `feat/phase-11-template-preview-tests`
+Current increment: 11.10 — Accessibility and tenant-isolation audit  
+Implementation branch: `feat/phase-11-accessibility-tenant-audit`
 
 ## Delivered in increment 11.1
 
@@ -73,17 +73,32 @@ Implementation branch: `feat/phase-11-template-preview-tests`
 - Add tests for Top access, Professional denial, downgrade preservation/reset, and public renderer fallbacks.
 - Record the behavior in ADR 0021.
 
-## Delivered in increment 11.8 (implementation in progress)
+## Delivered in increment 11.8 — merged PR #78
 
-- Extract the six template preview styles into a typed, allow-listed presentation module.
-- Make each template preview visually distinct at the frame, heading, and product-card levels.
-- Keep mobile and desktop preview widths explicit and testable.
-- Add frontend regression tests for complete template coverage, distinct frames, responsive widths, and unknown-template fallback.
-- Add accessible pressed state and grouping semantics to the mobile/desktop preview controls.
+- Extract the six allow-listed template preview styles into a typed frontend module.
+- Give each template a distinct frame, header, and product-card treatment.
+- Keep mobile and desktop preview widths explicit and deterministic.
+- Add Vitest coverage for all six template IDs, distinct visual treatments, responsive widths, and unknown-template fallback.
+- Improve preview control accessibility with group semantics, pressed states, and decorative preview hiding.
+
+## Delivered in increment 11.9 — merged PR #79
+
+- Add cache-invalidation regression tests for theme updates and business-logo upload/removal against a warm public-menu cache.
+- Make logo removal transactional with object deletion: a storage failure rolls back the transaction and preserves the logo association and media metadata for retry.
+- Verify failed logo replacement cleanup retains the old media metadata for retry.
+- Document the storage cleanup contract in ADR 0016.
+
+## Delivered in increment 11.10 (implementation in progress)
+
+- Add explicit accessible labels for the public menu landmark, template radio group, and advertising banner.
+- Improve product image alternative text with image ordering and expose the slider as a named image gallery region.
+- Announce the empty-menu state to assistive technology.
+- Add a nested-route tenant-isolation regression test proving a business cannot resolve another business's menu.
 
 ## Remaining Phase 11 work
 
-1. Verify accessibility, cache invalidation, tenant isolation, storage-failure recovery, and SQLite/PostgreSQL parity for all new features.
+1. Complete accessibility and tenant-isolation review for the public-menu customization flows.
+2. Verify all new behavior across SQLite and PostgreSQL and retain the existing Release Gate requirements.
 
 ## Operational constraints
 
@@ -154,11 +169,28 @@ Implementation branch: `feat/phase-11-template-preview-tests`
 
 - SQLite: 248 passed, 7 skipped.
 - PostgreSQL: 255 passed.
-- `MenuThemeTest` and Backblaze B2 S3 integration passed in both database jobs.
-- Frontend unit tests: 2 files passed; Vue/TypeScript checks passed.
-- PHPStan reported no errors.
+- MenuThemeTest and Backblaze B2 S3 integration passed in both database jobs.
+- Frontend unit tests, Vue/TypeScript checks, and PHPStan passed.
 - Production image build, Compose validation, and Nginx validation passed.
 
-### Increment 11.8 — current branch
+### Increment 11.8 — merged PR #78
 
-- Template preview presentation module and frontend regression tests are in progress; CI verification is pending.
+- SQLite: 248 passed, 7 skipped.
+- PostgreSQL: 255 passed.
+- Three template preview frontend regression tests passed; all frontend unit test files passed.
+- Vue/TypeScript checks and PHPStan passed.
+- Production image build, Compose validation, and Nginx validation passed.
+
+### Increment 11.9 — merged PR #79
+
+- SQLite: 252 passed, 7 skipped.
+- PostgreSQL: 259 passed.
+- BusinessLogoTest storage-failure and cache-invalidation coverage passed.
+- MenuThemeCacheTest passed on both database engines.
+- Backblaze B2 S3 integration passed.
+- Frontend unit tests, Vue/TypeScript checks, Pint, and PHPStan passed.
+- Production image build, Compose validation, and Nginx validation passed.
+
+### Increment 11.10 — current branch
+
+- Accessibility improvements and nested tenant-route isolation coverage are in progress; CI verification is pending.
