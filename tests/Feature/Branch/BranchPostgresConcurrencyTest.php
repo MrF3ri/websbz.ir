@@ -62,7 +62,6 @@ class BranchPostgresConcurrencyTest extends TestCase
         [$first, $second] = $this->runContendedPair(
             'update-settings',
             $business,
-            $menu,
             $branch,
             'North espresso A',
             'North espresso B',
@@ -96,7 +95,6 @@ class BranchPostgresConcurrencyTest extends TestCase
         [$first, $second] = $this->runContendedPair(
             'create-branch',
             $business,
-            $menu,
             null,
             'Rolled Back Branch',
             'Branch After Rollback',
@@ -155,7 +153,6 @@ class BranchPostgresConcurrencyTest extends TestCase
             $second = $this->startWorker(
                 $operation,
                 $business,
-                $menu,
                 $branch,
                 $secondProduct,
                 $secondName,
