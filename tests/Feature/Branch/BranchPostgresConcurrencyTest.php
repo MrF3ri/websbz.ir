@@ -6,7 +6,6 @@ use App\Modules\Branch\Actions\CreateBranchAction;
 use App\Modules\Branch\Actions\EnsurePrimaryBranchAction;
 use App\Modules\Branch\Models\Branch;
 use App\Modules\Business\Models\Business;
-use App\Modules\Menu\Models\Menu;
 use App\Modules\Product\Models\Product;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Support\Facades\DB;
@@ -30,13 +29,12 @@ class BranchPostgresConcurrencyTest extends TestCase
 
     public function test_concurrent_branch_creation_cannot_exceed_the_plan_quota(): void
     {
-        [, $business, $menu] = $this->createCatalogTenant('top');
+        [, $business] = $this->createCatalogTenant('top');
         app(EnsurePrimaryBranchAction::class)->execute($business);
 
         [$first, $second] = $this->runContendedPair(
             'create-branch',
             $business,
-            $menu,
             null,
             'Concurrent Branch A',
             'Concurrent Branch B',
@@ -124,7 +122,6 @@ class BranchPostgresConcurrencyTest extends TestCase
     private function runContendedPair(
         string $operation,
         Business $business,
-        Menu $menu,
         ?Branch $branch,
         string $firstName,
         string $secondName,
@@ -143,7 +140,6 @@ class BranchPostgresConcurrencyTest extends TestCase
             $first = $this->startWorker(
                 $operation,
                 $business,
-                $menu,
                 $branch,
                 $firstProduct,
                 $firstName,
@@ -189,7 +185,6 @@ class BranchPostgresConcurrencyTest extends TestCase
     private function startWorker(
         string $operation,
         Business $business,
-        Menu $menu,
         ?Branch $branch,
         ?Product $product,
         string $name,
