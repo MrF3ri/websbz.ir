@@ -1,8 +1,8 @@
 # Phase 11 — Public Menu Customization
 
 Status: In progress  
-Current increment: 11.11 — Tenant-session integration coverage  
-Implementation branch: `feat/phase-11-tenant-integration-tests`
+Current increment: 11.12 — Cross-feature write tenant-isolation audit  
+Implementation branch: `feat/phase-11-write-tenant-isolation`
 
 ## Delivered in increment 11.1
 
@@ -95,10 +95,15 @@ Implementation branch: `feat/phase-11-tenant-integration-tests`
 - Announce the empty-menu state to assistive technology.
 - Add a nested-route tenant-isolation regression test proving a business cannot resolve another business's menu.
 
-## Delivered in increment 11.11 (implementation in progress)
+## Delivered in increment 11.11 — merged PR #81
 
 - Add controller-level integration tests proving a forged foreign active-business session cannot redirect menu theme or advertising-banner updates to another tenant.
 - Verify the tenant middleware restores the authenticated user's own active business before the settings controllers execute.
+
+## Delivered in increment 11.12 (implementation in progress)
+
+- Extend forged-session isolation tests to product updates, business settings/introduction, and private business-logo uploads.
+- Verify writes are scoped to the authenticated user's resolved business and cannot mutate another tenant's records.
 
 ## Remaining Phase 11 work
 
@@ -204,8 +209,15 @@ Implementation branch: `feat/phase-11-tenant-integration-tests`
 - Frontend unit tests: 3 files passed; Vue/TypeScript checks and PHPStan passed.
 - Production image build, Compose validation, and Nginx validation passed.
 
-### Increment 11.11 — current branch
+### Increment 11.11 — merged PR #81
 
-- Tenant-session integration coverage for theme and banner settings is in progress; CI verification is pending.
+- SQLite: 255 passed, 7 skipped.
+- PostgreSQL: 262 passed.
+- MenuTenantIntegrationTest passed on both database engines.
+- Frontend unit tests, Vue/TypeScript checks, PHPStan, and Production image validation passed.
+
+### Increment 11.12 — current branch
+
+- Product, business-settings, and logo write-isolation tests are in progress; CI verification is pending.
 
 - Accessibility improvements and nested tenant-route isolation coverage are in progress; CI verification is pending.
