@@ -66,6 +66,12 @@ class Menu extends Model
         return $this->hasMany(Product::class);
     }
 
+    /** @return HasMany<MenuTranslation, $this> */
+    public function translations(): HasMany
+    {
+        return $this->hasMany(MenuTranslation::class);
+    }
+
     /** @return array<string, string> */
     protected function casts(): array
     {
