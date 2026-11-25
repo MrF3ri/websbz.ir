@@ -117,7 +117,10 @@ const numberFormatter = new Intl.NumberFormat('fa-IR');
 const entitlements = computed(() => page.props.entitlements);
 const canDiscount = computed(() => entitlements.value?.features.product_discount === true);
 const canToggleAvailability = computed(() => entitlements.value?.features.product_availability_toggle === true);
-const imageLimit = computed(() => entitlements.value?.features.max_product_images ?? 0);
+const imageLimit = computed(() => {
+    const limit = entitlements.value?.features.max_product_images;
+    return typeof limit === 'number' ? limit : 0;
+});
 const canUploadImages = computed(() => imageLimit.value === -1 || imageLimit.value > 0);
 
 const qrSvg = computed(() => (
