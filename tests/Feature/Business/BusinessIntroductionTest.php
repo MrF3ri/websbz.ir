@@ -114,7 +114,7 @@ class BusinessIntroductionTest extends TestCase
 
         $this->get($url)
             ->assertOk()
-            ->assertInertia(fn ($page) => $page
+            ->assertInertia(fn (Assert $page) => $page
                 ->where('business.introduction', null));
 
         $this->assertSame($introduction, $business->fresh()->introduction);
