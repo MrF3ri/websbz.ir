@@ -223,6 +223,101 @@ class PublicMenuTest extends TestCase
                 ->has('categories.0.products.0.images', 2));
     }
 
+    public function test_top_public_menu_renders_translations_and_exposes_only_entitled_locales(): void
+    {
+        [, $business, $menu] = $this->createCatalogTenant('top');
+        $category = $this->createCatalogCategory($menu, 'قهوه');
+        $product = $this->createCatalogProduct(
+            $menu,
+            $category,
+            'اسپرسو',
+            status: ProductStatus::Published,
+        );
+        $menu->translations()->create(['locale' => 'en', 'title' => 'Coffee menu']);
+        $category->translations()->create(['locale' => 'en', 'name' => 'Coffee']);
+        $product->translations()->create([
+            'locale' => 'en',
+            'name' => 'Espresso',
+            'description' => 'A concentrated coffee drink.',
+        ]);
+        $menu->update(['status' => MenuStatus::Published]);
+
+        $this->get(route('public.menu.show', [$business->slug, $menu->slug]).'?lang=en')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('menu.title', 'Coffee menu')
+                ->where('menu.locale', 'en')
+                ->where('menu.direction', 'ltr')
+                ->where('menu.source_locale', 'fa')
+                ->where('menu.available_locales.0.code', 'fa')
+                ->where('menu.available_locales.1.code', 'en')
+                ->where('menu.available_locales.2.code', 'ar')
+                ->where('categories.0.name', 'Coffee')
+                ->where('categories.0.products.0.name', 'Espresso')
+                ->where('categories.0.products.0.description', 'A concentrated coffee drink.')
+                ->missing('categories.0.translations')
+                ->missing('categories.0.products.0.translations'));
+    }
+
+    public function test_public_menu_falls_back_per_field_and_ignores_unavailable_or_unsupported_locale(): void
+    {
+        [, $business, $menu] = $this->createCatalogTenant('professional');
+        $category = $this->createCatalogCategory($menu, 'قهوه');
+        $product = $this->createCatalogProduct(
+            $menu,
+            $category,
+            'اسپرسو',
+            status: ProductStatus::Published,
+        );
+        $menu->update(['status' => MenuStatus::Published]);
+
+        $this->get(route('public.menu.show', [$business->slug, $menu->slug]).'?lang=en')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('menu.title', $menu->title)
+                ->where('menu.locale', 'fa')
+                ->where('menu.direction', 'rtl')
+                ->has('menu.available_locales', 1)
+                ->where('categories.0.name', 'قهوه')
+                ->where('categories.0.products.0.name', 'اسپرسو'));
+
+        $this->get(route('public.menu.show', [$business->slug, $menu->slug]).'?lang=xx')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('menu.locale', 'fa')
+                ->where('menu.title', $menu->title));
+    }
+
+    public function test_public_menu_locale_entitlement_is_rechecked_after_cache_warmup(): void
+    {
+        config(['cache.default' => 'array']);
+        Cache::store('array')->flush();
+
+        [, $business, $menu] = $this->createCatalogTenant('top');
+        $category = $this->createCatalogCategory($menu, 'Coffee');
+        $product = $this->createCatalogProduct($menu, $category, 'Espresso', status: ProductStatus::Published);
+        $menu->translations()->create(['locale' => 'en', 'title' => 'Coffee menu']);
+        $menu->update(['status' => MenuStatus::Published]);
+
+        $url = route('public.menu.show', [$business->slug, $menu->slug]).'?lang=en';
+
+        $this->get($url)
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->where('menu.title', 'Coffee menu')->where('menu.locale', 'en'));
+
+        $subscription = $business->subscriptions()->latest('id')->firstOrFail();
+        $snapshot = $subscription->features_snapshot;
+        $snapshot['max_languages'] = 1;
+        $subscription->update(['features_snapshot' => $snapshot]);
+
+        $this->get($url)
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('menu.title', $menu->title)
+                ->where('menu.locale', 'fa')
+                ->has('menu.available_locales', 1));
+    }
+
     public function test_guest_cannot_view_a_draft_menu_or_suspended_business(): void
     {
         [, $business, $menu] = $this->createCatalogTenant();
