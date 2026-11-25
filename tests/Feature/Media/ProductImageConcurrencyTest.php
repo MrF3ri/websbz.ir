@@ -76,7 +76,7 @@ class ProductImageConcurrencyTest extends TestCase
                     app(UploadProductImageAction::class)->execute($business, $freshProduct, $file);
                     file_put_contents($resultPath, 'uploaded');
                     exit(0);
-                } catch (ValidationException) {
+                } catch (ValidationException|AccessDeniedHttpException) {
                     file_put_contents($resultPath, 'rejected');
                     exit(0);
                 } catch (\Throwable $exception) {
