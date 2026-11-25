@@ -23,11 +23,11 @@ class SaveBranchCatalogRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'categories' => ['required', 'array'],
+            'categories' => ['present', 'array'],
             'categories.*.public_id' => ['required', 'string', 'distinct'],
             'categories.*.is_visible' => ['required', 'boolean'],
             'categories.*.sort_order' => ['required', 'integer', 'min:0', 'max:100000'],
-            'products' => ['required', 'array'],
+            'products' => ['present', 'array'],
             'products.*.public_id' => ['required', 'string', 'distinct'],
             'products.*.name_override' => ['nullable', 'string', 'max:160'],
             'products.*.description_override_enabled' => ['required', 'boolean'],
