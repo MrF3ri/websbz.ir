@@ -43,7 +43,7 @@ class MenuThemeController
         $entitlements = new EntitlementService($business);
 
         $templates = $registry->availableFor($business, $entitlements);
-        $theme = array_merge(self::DEFAULT_THEME, $menu->theme ?? []);
+        $theme = array_merge(self::DEFAULT_THEME, array_intersect_key($menu->theme ?? [], self::DEFAULT_THEME));
         $theme['density'] = in_array($theme['density'], ['compact', 'comfortable', 'spacious'], true) ? $theme['density'] : self::DEFAULT_THEME['density'];
         $theme['card_style'] = in_array($theme['card_style'], ['standard', 'flat', 'elevated'], true) ? $theme['card_style'] : self::DEFAULT_THEME['card_style'];
         $theme['heading_size'] = in_array($theme['heading_size'], ['normal', 'large', 'display'], true) ? $theme['heading_size'] : self::DEFAULT_THEME['heading_size'];
