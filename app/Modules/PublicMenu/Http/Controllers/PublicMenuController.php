@@ -105,6 +105,8 @@ class PublicMenuController
             'public_id' => $product->public_id,
             'name' => $effective['name'],
             'description' => $effective['description'],
+            'branch_name_override' => $effective['name'] !== $product->name,
+            'branch_description_override' => $effective['description'] !== $product->description,
             'label' => $product->label?->value,
             'price' => $effective['base_price'],
             'discount_price' => $effective['discount_price'],
@@ -160,7 +162,7 @@ class PublicMenuController
     public function show(
         string $businessSlug,
         string $menuSlug,
-        ?string $branchSlug,
+        ?string $branchSlug = null,
         PublicMenuCache $publicMenuCache,
         Request $request,
         LocaleRegistry $localeRegistry,
@@ -316,10 +318,14 @@ class PublicMenuController
                 $category['products'] = array_map(function (array $product) use ($locale): array {
                     $translation = $product['translations'][$locale] ?? null;
                     if (is_array($translation)) {
-                        $product['name'] = $translation['name'] ?? $product['name'];
-                        $product['description'] = $translation['description'] ?? $product['description'];
+                        if (! $product['branch_name_override']) {
+                            $product['name'] = $translation['name'] ?? $product['name'];
+                        }
+                        if (! $product['branch_description_override']) {
+                            $product['description'] = $translation['description'] ?? $product['description'];
+                        }
                     }
-                    unset($product['translations']);
+                    unset($product['translations'], $product['branch_name_override'], $product['branch_description_override']);
 
                     return $product;
                 }, $category['products']);
