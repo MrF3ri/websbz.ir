@@ -26,7 +26,7 @@ class BranchController
         Gate::authorize('view', $business);
 
         $menu = $business->menu()->first();
-        $menuIsPublished = $menu?->status === MenuStatus::Published;
+        $menuIsPublished = $menu !== null && $menu->status === MenuStatus::Published;
 
         $branches = $business->branches()
             ->orderByDesc('is_primary')
