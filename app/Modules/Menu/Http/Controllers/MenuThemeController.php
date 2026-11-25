@@ -24,6 +24,9 @@ class MenuThemeController
         'primary_color' => '#365B4A',
         'font' => 'system',
         'mode' => 'light',
+        'density' => 'comfortable',
+        'card_style' => 'standard',
+        'heading_size' => 'normal',
     ];
 
     public function edit(
@@ -40,7 +43,13 @@ class MenuThemeController
         $entitlements = new EntitlementService($business);
 
         $templates = $registry->availableFor($business, $entitlements);
-        $theme = array_merge(self::DEFAULT_THEME, $menu->theme ?? []);
+        $theme = array_merge(self::DEFAULT_THEME, array_intersect_key($menu->theme ?? [], self::DEFAULT_THEME));
+        if (! in_array($theme['template'], ['classic', 'minimal', 'editorial', 'modern', 'cafe', 'contrast'], true)) {
+            $theme['template'] = self::DEFAULT_THEME['template'];
+        }
+        $theme['density'] = in_array($theme['density'], ['compact', 'comfortable', 'spacious'], true) ? $theme['density'] : self::DEFAULT_THEME['density'];
+        $theme['card_style'] = in_array($theme['card_style'], ['standard', 'flat', 'elevated'], true) ? $theme['card_style'] : self::DEFAULT_THEME['card_style'];
+        $theme['heading_size'] = in_array($theme['heading_size'], ['normal', 'large', 'display'], true) ? $theme['heading_size'] : self::DEFAULT_THEME['heading_size'];
 
         if (! isset($templates[$theme['template']])) {
             $templates[$theme['template']] = [
@@ -60,6 +69,7 @@ class MenuThemeController
                 'custom_colors' => $entitlements->hasFeature('custom_colors'),
                 'font_selection' => $entitlements->hasFeature('font_selection'),
                 'dark_mode' => $entitlements->hasFeature('dark_mode'),
+                'custom_design' => $entitlements->hasFeature('custom_design'),
                 'advertising_banner' => $entitlements->hasFeature('advertising_banner'),
             ],
         ]);
@@ -79,6 +89,9 @@ class MenuThemeController
             'primary_color' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'font' => ['required', 'in:system,serif,rounded'],
             'mode' => ['required', 'in:light,dark'],
+            'density' => ['sometimes', 'in:compact,comfortable,spacious'],
+            'card_style' => ['sometimes', 'in:standard,flat,elevated'],
+            'heading_size' => ['sometimes', 'in:normal,large,display'],
         ]);
 
         $business = $currentBusiness->get();
@@ -105,22 +118,38 @@ class MenuThemeController
                 abort_unless(isset($availableTemplates[$validated['template']]), 403);
             }
 
-            $theme = self::DEFAULT_THEME;
+            $theme = array_merge(self::DEFAULT_THEME, array_intersect_key($menu->theme ?? [], self::DEFAULT_THEME));
             $theme['template'] = $validated['template'];
 
-            if ($validated['primary_color'] !== self::DEFAULT_THEME['primary_color']) {
+            $primaryColor = strtoupper($validated['primary_color']);
+            $currentPrimaryColor = strtoupper($theme['primary_color']);
+
+            if ($primaryColor !== $currentPrimaryColor && $primaryColor !== self::DEFAULT_THEME['primary_color']) {
                 abort_unless($entitlements->hasFeature('custom_colors'), 403);
-                $theme['primary_color'] = strtoupper($validated['primary_color']);
             }
 
-            if ($validated['font'] !== self::DEFAULT_THEME['font']) {
+            $theme['primary_color'] = $primaryColor;
+
+            if ($validated['font'] !== $theme['font'] && $validated['font'] !== self::DEFAULT_THEME['font']) {
                 abort_unless($entitlements->hasFeature('font_selection'), 403);
-                $theme['font'] = $validated['font'];
             }
 
-            if ($validated['mode'] !== self::DEFAULT_THEME['mode']) {
+            $theme['font'] = $validated['font'];
+
+            if ($validated['mode'] !== $theme['mode'] && $validated['mode'] !== self::DEFAULT_THEME['mode']) {
                 abort_unless($entitlements->hasFeature('dark_mode'), 403);
-                $theme['mode'] = $validated['mode'];
+            }
+
+            $theme['mode'] = $validated['mode'];
+
+            foreach (['density', 'card_style', 'heading_size'] as $field) {
+                $value = $validated[$field] ?? $theme[$field];
+
+                if ($value !== $theme[$field] && $value !== self::DEFAULT_THEME[$field]) {
+                    abort_unless($entitlements->hasFeature('custom_design'), 403);
+                }
+
+                $theme[$field] = $value;
             }
 
             $menu->update(['theme' => $theme]);
