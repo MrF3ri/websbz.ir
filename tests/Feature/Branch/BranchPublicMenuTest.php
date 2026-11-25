@@ -118,6 +118,7 @@ class BranchPublicMenuTest extends TestCase
                 ->where('categories.0.products.0.name', 'Visible'));
 
         $branch->categorySettings()->where('category_id', $category->getKey())->update(['is_visible' => false]);
+        app(PublicMenuCache::class)->forget($menu, $branch);
 
         $this->get(route('public.menu.branch.show', [$business->slug, $menu->slug, $branch->slug]))
             ->assertOk()
