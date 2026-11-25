@@ -73,8 +73,15 @@ const productBorderClasses: Record<string, string> = {
     cafe: 'border border-amber-200 dark:border-amber-900',
     contrast: 'border-2 border-stone-900 dark:border-white',
 };
+const templateDefaultCardClasses: Record<string, string> = {
+    classic: 'rounded-2xl shadow-sm',
+    minimal: 'rounded-lg shadow-none',
+    editorial: 'rounded-none shadow-none',
+    modern: 'rounded-3xl shadow-lg',
+    cafe: 'rounded-2xl shadow-sm',
+    contrast: 'rounded-md shadow-md',
+};
 const cardStyleClasses: Record<string, string> = {
-    standard: 'rounded-2xl shadow-sm',
     flat: 'rounded-none shadow-none',
     elevated: 'rounded-3xl shadow-lg',
 };
@@ -159,7 +166,7 @@ function formatPrice(value: number): string {
                         <div class="h-px flex-1 bg-stone-200 dark:bg-stone-800" />
                     </div>
 
-                    <div class="overflow-hidden bg-white dark:bg-stone-900" :class="[productBorderClasses[menu.theme.template] ?? productBorderClasses.classic, cardStyleClasses[menu.theme.card_style] ?? cardStyleClasses.standard]">
+                    <div class="overflow-hidden bg-white dark:bg-stone-900" :class="[productBorderClasses[menu.theme.template] ?? productBorderClasses.classic, (menu.theme.card_style === 'standard' ? templateDefaultCardClasses[menu.theme.template] : cardStyleClasses[menu.theme.card_style]) ?? templateDefaultCardClasses[menu.theme.template] ?? templateDefaultCardClasses.classic]">
                         <article
                             v-for="(product, productIndex) in category.products"
                             :key="product.public_id"
