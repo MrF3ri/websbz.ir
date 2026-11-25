@@ -3,7 +3,7 @@
 Status: In progress  
 Current increment: 11.2 — Responsive previews and private business logos  
 Implementation branch: `feat/phase-11-logo-and-previews`  
-Pull request: #72 (Draft)
+Pull request: #72
 
 ## Delivered in increment 11.1
 
@@ -16,7 +16,7 @@ Pull request: #72 (Draft)
 - Public-menu cache invalidation after successful theme updates.
 - Existing selected templates are preserved after a plan downgrade, but unavailable templates cannot be newly selected.
 
-## Delivered in increment 11.2 (implementation in progress)
+## Delivered in increment 11.2
 
 - Add mobile and desktop preview sizing for each available template in the theme editor.
 - Add tenant-owned business-logo metadata linked to the existing private media table with a composite tenant foreign key.
@@ -51,4 +51,9 @@ Pull request: #72 (Draft)
 
 ### Increment 11.2 — PR #72
 
-- GitHub Actions verification is pending for the current branch head.
+- SQLite: 230 passed, 7 skipped (483 assertions).
+- PostgreSQL: 237 passed (566 assertions).
+- BusinessLogoTest and Backblaze B2 S3 integration: passed.
+- Frontend unit tests: 7 passed; Vue/TypeScript checks passed.
+- Pint: 236 files passed; PHPStan reported no errors.
+- Production image build, Compose validation, and Nginx validation: passed.
