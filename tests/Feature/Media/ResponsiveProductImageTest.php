@@ -52,7 +52,7 @@ class ResponsiveProductImageTest extends TestCase
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->where('categories.0.products.0.images.0.width', 1200)
-                ->where('categories.0.products.0.images.0.srcset', fn (string $srcset): bool => str_contains($srcset, 'variant=thumbnail') && str_contains($srcset, 'variant=medium')));
+                ->where('categories.0.products.0.images.0.srcset', fn ($srcset): bool => is_string($srcset) && str_contains($srcset, 'variant=thumbnail') && str_contains($srcset, 'variant=medium')));
 
         $this->get(route('media.public', ['mediaPublicId' => $media->public_id, 'variant' => 'thumbnail']))
             ->assertOk()

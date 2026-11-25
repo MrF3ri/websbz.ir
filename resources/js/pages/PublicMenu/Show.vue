@@ -14,7 +14,7 @@ type PublicCategory = {
     products: PublicProduct[];
 };
 
-const props = defineProps<{
+defineProps<{
     business: {
         name: string;
         slug: string;
@@ -32,16 +32,16 @@ const tomanFormatter = new Intl.NumberFormat('fa-IR', {
 });
 
 function formatPrice(value: number): string {
-    return \`${tomanFormatter.format(value)} تومان\`;
+    return tomanFormatter.format(value) + ' تومان';
 }
 </script>
 
 <template>
-    <Head :title="\`${business.name} | ${menu.title}\`">
+    <Head :title="business.name + ' | ' + menu.title">
         <meta
             head-key="description"
             name="description"
-            :content="\`منوی ${business.name} - ${menu.title}\`"
+            :content="'منوی ' + business.name + ' - ' + menu.title"
         />
         <meta head-key="robots" name="robots" content="index,follow" />
     </Head>
@@ -67,7 +67,7 @@ function formatPrice(value: number): string {
             <div v-else class="space-y-8">
                 <section
                     v-for="(category, index) in categories"
-                    :key="\`${category.name}-${index}\`"
+                    :key="category.name + '-' + index"
                     class="space-y-3"
                 >
                     <div class="flex items-center gap-3">
@@ -78,7 +78,7 @@ function formatPrice(value: number): string {
                     <div class="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm dark:border-stone-800 dark:bg-stone-900">
                         <article
                             v-for="(product, productIndex) in category.products"
-                            :key="\`${product.name}-${productIndex}\`"
+                            :key="product.name + '-' + productIndex"
                             class="px-5 py-4"
                             :class="{ 'border-t border-stone-100 dark:border-stone-800': productIndex > 0 }"
                         >
@@ -89,7 +89,7 @@ function formatPrice(value: number): string {
                                     :src="image.url"
                                     :srcset="image.srcset"
                                     :sizes="image.sizes"
-                                    :alt="\`تصویر ${product.name}\`"
+                                    :alt="'تصویر ' + product.name"
                                     :width="image.width"
                                     :height="image.height"
                                     loading="lazy"

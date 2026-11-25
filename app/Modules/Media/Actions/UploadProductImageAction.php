@@ -105,13 +105,15 @@ class UploadProductImageAction
                     $lockedProduct->public_id,
                 );
                 $filename = $publicId.'.'.$extension;
-                $path = Storage::disk($disk)->putFileAs($directory, $file, $filename);
+                $path = $directory.'/'.$filename;
+                $storedPaths[] = $path;
+                $storedPath = Storage::disk($disk)->putFileAs($directory, $file, $filename);
 
-                if (! is_string($path) || $path === '') {
+                if (! is_string($storedPath) || $storedPath === '') {
                     throw new RuntimeException('Unable to store product image.');
                 }
 
-                $storedPaths[] = $path;
+                $path = $storedPath;
                 $variants = $this->variantGenerator->generate($file, $mimeType, $directory, $publicId, $disk);
 
                 foreach ($variants as $variant) {

@@ -3,6 +3,7 @@
 namespace App\Modules\Media\Services;
 
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 use Throwable;
@@ -41,10 +42,15 @@ class ProductImageVariantGenerator
         }
 
         $variants = [];
+        $generatedPaths = [];
 
         try {
             foreach (['thumbnail' => 320, 'medium' => 960] as $name => $maxEdge) {
-                $scale = min(1, $maxEdge / max($sourceWidth, $sourceHeight));
+                if (max($sourceWidth, $sourceHeight) <= $maxEdge) {
+                    continue;
+                }
+
+                $scale = $maxEdge / max($sourceWidth, $sourceHeight);
                 $width = max(1, (int) round($sourceWidth * $scale));
                 $height = max(1, (int) round($sourceHeight * $scale));
                 $target = imagecreatetruecolor($width, $height);
@@ -56,9 +62,12 @@ class ProductImageVariantGenerator
                     imagefilledrectangle($target, 0, 0, $width, $height, $transparent);
                 }
 
-                imagecopyresampled($target, $source, 0, 0, 0, 0, $width, $height, $sourceWidth, $sourceHeight);
-                ob_start();
+                if (! imagecopyresampled($target, $source, 0, 0, 0, 0, $width, $height, $sourceWidth, $sourceHeight)) {
+                    imagedestroy($target);
+                    throw new RuntimeException('Unable to resize product image.');
+                }
 
+                ob_start();
                 $encoded = match ($mimeType) {
                     'image/jpeg' => imagejpeg($target, null, 82),
                     'image/png' => imagepng($target, null, 6),
@@ -72,6 +81,7 @@ class ProductImageVariantGenerator
                 }
 
                 $path = $directory.'/'.$baseName.'-'.$name.'.'.$extension;
+                $generatedPaths[] = $path;
 
                 if (! Storage::disk($disk)->put($path, $contents)) {
                     throw new RuntimeException('Unable to store responsive image variant.');
@@ -85,8 +95,16 @@ class ProductImageVariantGenerator
                 ];
             }
         } catch (Throwable $exception) {
-            foreach ($variants as $variant) {
-                Storage::disk($disk)->delete($variant['path']);
+            foreach ($generatedPaths as $path) {
+                try {
+                    Storage::disk($disk)->delete($path);
+                } catch (Throwable $cleanupException) {
+                    Log::warning('Failed to clean up a responsive image variant.', [
+                        'disk' => $disk,
+                        'path' => $path,
+                        'exception' => $cleanupException::class,
+                    ]);
+                }
             }
 
             throw $exception;
