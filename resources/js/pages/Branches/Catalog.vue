@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { ArrowRight, Save, Store } from '@lucide/vue';
 import { Button } from '@/components/ui/button';
@@ -38,6 +39,7 @@ const form = useForm({
         sort_order: item.sort_order,
     })),
 });
+const catalogError = computed(() => (form.errors as Record<string, string>).catalog ?? form.errors.products);
 function submit(): void {
     form.transform((data) => ({
         categories: data.categories,
@@ -67,7 +69,7 @@ function submit(): void {
                 <Button v-if="canManage" :disabled="form.processing" class="gap-2" @click="submit"><Spinner v-if="form.processing" /><Save v-else class="size-4" /> ذخیره تنظیمات</Button>
             </header>
 
-            <div v-if="form.errors.catalog || form.errors.products" role="alert" class="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">{{ form.errors.catalog || form.errors.products }}</div>
+            <div v-if="catalogError" role="alert" class="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">{{ catalogError }}</div>
             <section class="space-y-3 rounded-xl border border-border bg-card p-5">
                 <div><h2 class="font-semibold">دسته‌بندی‌ها</h2><p class="mt-1 text-xs text-muted-foreground">نمایش و ترتیب دسته‌بندی‌ها در این شعبه</p></div>
                 <div v-for="(category, index) in categories" :key="category.public_id" class="grid gap-3 border-t border-border pt-3 sm:grid-cols-[1fr_120px_140px] sm:items-center">
