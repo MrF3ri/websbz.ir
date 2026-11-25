@@ -68,7 +68,7 @@ class BranchPublicMenuTest extends TestCase
                 ->where('categories.0.products.0.price', 120000)
                 ->where('categories.0.products.0.discount_price', 100000));
 
-        $this->get(route('public.menu.show', [$business->slug, $menu->slug, $secondary->slug]))
+        $this->get(route('public.menu.branch.show', [$business->slug, $menu->slug, $secondary->slug]))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->where('branch.slug', 'north')
@@ -85,7 +85,7 @@ class BranchPublicMenuTest extends TestCase
     {
         [, $business, $menu] = $this->createCatalogTenant('top');
         $category = $this->createCatalogCategory($menu, 'Coffee');
-        $visible = $this->createCatalogProduct($menu, $category, 'Visible', status: ProductStatus::Published);
+        $this->createCatalogProduct($menu, $category, 'Visible', status: ProductStatus::Published);
         $hidden = $this->createCatalogProduct($menu, $category, 'Hidden', status: ProductStatus::Published);
         $outOfStock = $this->createCatalogProduct($menu, $category, 'Out of stock', status: ProductStatus::Published);
         $menu->update(['status' => MenuStatus::Published]);
@@ -102,7 +102,7 @@ class BranchPublicMenuTest extends TestCase
             'stock_quantity' => 0,
         ]);
 
-        $this->get(route('public.menu.show', [$business->slug, $menu->slug, $branch->slug]))
+        $this->get(route('public.menu.branch.show', [$business->slug, $menu->slug, $branch->slug]))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->has('categories.0.products', 1)
@@ -110,7 +110,7 @@ class BranchPublicMenuTest extends TestCase
 
         $branch->categorySettings()->where('category_id', $category->getKey())->update(['is_visible' => false]);
 
-        $this->get(route('public.menu.show', [$business->slug, $menu->slug, $branch->slug]))
+        $this->get(route('public.menu.branch.show', [$business->slug, $menu->slug, $branch->slug]))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page->has('categories', 0));
     }
@@ -132,10 +132,10 @@ class BranchPublicMenuTest extends TestCase
         ]);
         app(SetBranchStatusAction::class)->execute($businessA, $inactiveBranch, false);
 
-        $this->get(route('public.menu.show', [$businessA->slug, $menuA->slug, $foreignBranch->slug]))
+        $this->get(route('public.menu.branch.show', [$businessA->slug, $menuA->slug, $foreignBranch->slug]))
             ->assertNotFound();
 
-        $this->get(route('public.menu.show', [$businessA->slug, $menuA->slug, $inactiveBranch->slug]))
+        $this->get(route('public.menu.branch.show', [$businessA->slug, $menuA->slug, $inactiveBranch->slug]))
             ->assertNotFound();
     }
 
@@ -161,7 +161,7 @@ class BranchPublicMenuTest extends TestCase
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page->where('categories.0.products.0.name', 'Canonical'));
 
-        $this->get(route('public.menu.show', [$business->slug, $menu->slug, $branch->slug]))
+        $this->get(route('public.menu.branch.show', [$business->slug, $menu->slug, $branch->slug]))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page->where('categories.0.products.0.name', 'Canonical'));
 
@@ -171,7 +171,7 @@ class BranchPublicMenuTest extends TestCase
 
         app(\App\Modules\PublicMenu\Services\PublicMenuCache::class)->forget($menu, $branch);
 
-        $this->get(route('public.menu.show', [$business->slug, $menu->slug, $branch->slug]))
+        $this->get(route('public.menu.branch.show', [$business->slug, $menu->slug, $branch->slug]))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page->where('categories.0.products.0.name', 'South-only'));
 
