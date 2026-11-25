@@ -69,7 +69,7 @@ This snapshot records the operational state reported and verified during the own
 
 ## Current product phase
 
-- **Phase 12 — Localization and Translation Management:** in progress. PR #83 merged the locale registry and normalized translation schema; PR #84 merged Top-only tenant-scoped translation management; PR #85 merged public-menu locale resolution, translated rendering, direction metadata, and source-field fallback. Increment 12.4 is adding translation completeness accounting and validation coverage. Only Top supports `fa`, `en`, and `ar`; Economic and Professional remain single-language. See `docs/phase-12/README.md`.
+- **Phase 12 — Localization and Translation Management:** in progress. PR #83 merged the locale registry and normalized translation schema; PR #84 merged Top-only tenant-scoped translation management; PR #85 merged public-menu locale resolution, translated rendering, direction metadata, and source-field fallback. Increment 12.4 merged translation completeness accounting and required-field validation; increment 12.5 is adding tenant-isolation and warm-cache invalidation regression coverage. Only Top supports `fa`, `en`, and `ar`; Economic and Professional remain single-language. See `docs/phase-12/README.md`.
 - **Phase 11 — Menu Customization and Visual Templates:** complete and merged through PR #82. See `docs/phase-11/README.md` for increment-level implementation and CI history.
 
 ## Deferred product phases
