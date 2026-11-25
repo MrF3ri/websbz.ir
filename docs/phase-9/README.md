@@ -29,6 +29,7 @@ Approved model: Hybrid shared catalog with branch-level overrides (ADR 0014)
 - Generate QR SVG locally in the browser using the existing QR utility; no third-party QR service receives the URL.
 - Display and download a separate SVG QR for each active branch.
 - Do not offer a QR for inactive branches or unpublished menus.
+- Branch slugs are immutable after creation so previously printed branch QR codes keep resolving to the same branch.
 - Preserve the existing primary-menu QR in the catalog page for backward compatibility.
 
 ## Remaining Phase 9 work
