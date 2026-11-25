@@ -13,10 +13,12 @@ interface Business {
     address: string | null;
     city: string | null;
     postal_code: string | null;
+    logo_url: string | null;
 }
 
 const props = defineProps<{
     business: Business;
+    features: { business_logo: boolean };
 }>();
 
 defineOptions({
@@ -39,7 +41,21 @@ const form = useForm({
     postal_code: props.business.postal_code ?? '',
 });
 
-const logoForm = useForm<{ logo: File | null }>({ logo: null });\n\nfunction submitLogo() {\n    logoForm.post('/business/logo', {\n        forceFormData: true,\n        preserveScroll: true,\n        onSuccess: () => logoForm.reset(),\n    });\n}\n\nfunction removeLogo() {\n    router.delete('/business/logo', { preserveScroll: true });\n}\n\nfunction submit() {
+const logoForm = useForm<{ logo: File | null }>({ logo: null });
+
+function submitLogo() {
+    logoForm.post('/business/logo', {
+        forceFormData: true,
+        preserveScroll: true,
+        onSuccess: () => logoForm.reset(),
+    });
+}
+
+function removeLogo() {
+    router.delete('/business/logo', { preserveScroll: true });
+}
+
+function submit() {
     form.put('/business/settings', {
         preserveScroll: true,
     });
