@@ -34,7 +34,9 @@ class PublicMenuCache
         Branch::query()
             ->where('business_id', $menu->business_id)
             ->get(['id'])
-            ->each(fn (Branch $branch): bool => Cache::forget($this->key($menu, $branch)));
+            ->each(function (Branch $branch) use ($menu): void {
+                Cache::forget($this->key($menu, $branch));
+            });
     }
 
     private function key(Menu $menu, ?Branch $branch = null): string
