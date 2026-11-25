@@ -39,11 +39,22 @@ class MenuThemeController
         $menu = $ensurePrimaryMenu->execute($business);
         $entitlements = new EntitlementService($business);
 
+        $templates = $registry->availableFor($business, $entitlements);
+        $theme = array_merge(self::DEFAULT_THEME, $menu->theme ?? []);
+
+        if (! isset($templates[$theme['template']])) {
+            $templates[$theme['template']] = [
+                'name' => 'قالب فعلی',
+                'description' => 'این قالب از قبل انتخاب شده و قابل انتخاب مجدد نیست.',
+                'layout' => $theme['template'],
+            ];
+        }
+
         return Inertia::render('Menu/Theme', [
             'menu' => [
-                'theme' => array_merge(self::DEFAULT_THEME, $menu->theme ?? []),
+                'theme' => $theme,
             ],
-            'templates' => $registry->availableFor($business, $entitlements),
+            'templates' => $templates,
             'features' => [
                 'custom_colors' => $entitlements->hasFeature('custom_colors'),
                 'font_selection' => $entitlements->hasFeature('font_selection'),
@@ -85,7 +96,11 @@ class MenuThemeController
                 ->firstOrFail();
 
             $entitlements = new EntitlementService($lockedBusiness);
-            $registry->findAvailable($lockedBusiness, $entitlements, $validated['template']);
+            $currentTemplate = $menu->theme['template'] ?? self::DEFAULT_THEME['template'];
+
+            if ($validated['template'] !== $currentTemplate) {
+                $registry->findAvailable($lockedBusiness, $entitlements, $validated['template']);
+            }
 
             $theme = self::DEFAULT_THEME;
             $theme['template'] = $validated['template'];
