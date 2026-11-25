@@ -4,6 +4,7 @@ namespace Tests\Concerns;
 
 use App\Enums\BusinessRole;
 use App\Models\User;
+use App\Modules\Branch\Actions\EnsurePrimaryBranchAction;
 use App\Modules\Business\Models\Business;
 use App\Modules\Category\Models\Category;
 use App\Modules\Menu\Actions\EnsurePrimaryMenuAction;
@@ -26,6 +27,7 @@ trait InteractsWithCatalog
         $business = $this->createBusinessFor($user, $role);
         $this->giveBusinessTrialSubscription($business, $planCode);
         $menu = app(EnsurePrimaryMenuAction::class)->execute($business);
+        app(EnsurePrimaryBranchAction::class)->execute($business);
 
         return [$user, $business, $menu];
     }
