@@ -99,7 +99,8 @@ class MenuThemeController
             $currentTemplate = $menu->theme['template'] ?? self::DEFAULT_THEME['template'];
 
             if ($validated['template'] !== $currentTemplate) {
-                $registry->findAvailable($lockedBusiness, $entitlements, $validated['template']);
+                $availableTemplates = $registry->availableFor($lockedBusiness, $entitlements);
+                abort_unless(isset($availableTemplates[$validated['template']]), 403);
             }
 
             $theme = self::DEFAULT_THEME;
