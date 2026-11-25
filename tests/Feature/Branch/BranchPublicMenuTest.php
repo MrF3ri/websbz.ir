@@ -112,7 +112,7 @@ class BranchPublicMenuTest extends TestCase
 
         $this->get(route('public.menu.show', [$business->slug, $menu->slug, $branch->slug]))
             ->assertOk()
-            ->assertSame([], []);
+            ->assertInertia(fn (Assert $page) => $page->has('categories', 0));
     }
 
     public function test_foreign_and_inactive_branch_urls_return_not_found_without_primary_fallback(): void
