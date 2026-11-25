@@ -74,7 +74,7 @@ class Product extends Model
         return $this->hasMany(ProductImage::class)->orderBy('sort_order')->orderBy('id');
     }
 
-    /** @return HasMany<ProductTranslation, $this> */
+    /** @return HasMany<BranchProductSetting, $this> */\n    public function branchSettings(): HasMany\n    {\n        return $this->hasMany(BranchProductSetting::class);\n    }\n\n    /** @return HasMany<ProductTranslation, $this> */
     public function translations(): HasMany
     {
         return $this->hasMany(ProductTranslation::class);
