@@ -5,6 +5,7 @@ namespace App\Modules\PublicMenu\Http\Controllers;
 use App\Enums\BusinessStatus;
 use App\Modules\Business\Models\Business;
 use App\Modules\Category\Models\Category;
+use App\Modules\Media\Models\ProductImage;
 use App\Modules\Menu\Enums\MenuStatus;
 use App\Modules\Product\Enums\ProductStatus;
 use App\Modules\Product\Models\Product;
@@ -14,12 +15,35 @@ use Inertia\Response;
 
 class PublicMenuController
 {
-    public function __construct(
-        private readonly PublicMenuCache $publicMenuCache,
-    ) {}
-
-    public function show(string $businessSlug, string $menuSlug): Response
+    /** @return array{url: string, width: int, height: int} */
+    private function imageData(ProductImage $image): array
     {
+        return [
+            'url' => route('media.public', $image->media->public_id),
+            'width' => $image->media->width,
+            'height' => $image->media->height,
+        ];
+    }
+
+    /**
+     * @return array{name: string, description: string|null, price: int, discount_price: int|null, images: array<int, array{url: string, width: int, height: int}>}
+     */
+    private function productData(Product $product): array
+    {
+        return [
+            'name' => $product->name,
+            'description' => $product->description,
+            'price' => $product->base_price,
+            'discount_price' => $product->discount_price,
+            'images' => $product->images->map(fn (ProductImage $image): array => $this->imageData($image))->values()->all(),
+        ];
+    }
+
+    public function show(
+        string $businessSlug,
+        string $menuSlug,
+        PublicMenuCache $publicMenuCache,
+    ): Response {
         $business = Business::query()
             ->where('slug', $businessSlug)
             ->where('status', BusinessStatus::Active)
@@ -30,7 +54,7 @@ class PublicMenuController
             ->where('status', MenuStatus::Published)
             ->firstOrFail();
 
-        $publicMenu = $this->publicMenuCache->remember($menu, function () use ($menu, $business): array {
+        $publicMenu = $publicMenuCache->remember($menu, function () use ($menu, $business): array {
             $categories = $menu->categories()
                 ->where('is_active', true)
                 ->whereHas('products', function ($query) use ($menu): void {
@@ -46,7 +70,7 @@ class PublicMenuController
                         ->where('is_available', true)
                         ->orderBy('sort_order')
                         ->orderBy('id');
-                }])
+                }, 'products.images.media'])
                 ->orderBy('sort_order')
                 ->orderBy('id')
                 ->get();
@@ -63,12 +87,7 @@ class PublicMenuController
                 ],
                 'categories' => $categories->map(fn (Category $category): array => [
                     'name' => $category->name,
-                    'products' => $category->products->map(fn (Product $product): array => [
-                        'name' => $product->name,
-                        'description' => $product->description,
-                        'price' => $product->base_price,
-                        'discount_price' => $product->discount_price,
-                    ])->values()->all(),
+                    'products' => $category->products->map(fn (Product $product): array => $this->productData($product))->values()->all(),
                 ])->values()->all(),
             ];
         });

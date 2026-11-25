@@ -30,8 +30,11 @@ type Category = {
     products_count: number;
 };
 
+type ProductImage = { public_id: string; url: string; width: number; height: number };
+
 type Product = {
     public_id: string;
+    images: ProductImage[];
     category_public_id: string;
     category_name: string;
     name: string;
@@ -114,6 +117,11 @@ const numberFormatter = new Intl.NumberFormat('fa-IR');
 const entitlements = computed(() => page.props.entitlements);
 const canDiscount = computed(() => entitlements.value?.features.product_discount === true);
 const canToggleAvailability = computed(() => entitlements.value?.features.product_availability_toggle === true);
+const imageLimit = computed(() => {
+    const limit = entitlements.value?.features.max_product_images;
+    return typeof limit === 'number' ? limit : 0;
+});
+const canUploadImages = computed(() => imageLimit.value === -1 || imageLimit.value > 0);
 
 const qrSvg = computed(() => (
     props.menu.status === 'published' ? createQrSvg(props.menu.public_url) : null
@@ -267,6 +275,48 @@ function cancelProductEdit(): void {
     productForm.is_available = true;
     productForm.status = 'draft';
     productForm.clearErrors();
+}
+
+function uploadProductImage(product: Product, event: Event): void {
+    const input = event.target;
+    if (!(input instanceof HTMLInputElement)) return;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    serverError.value = '';
+    router.post(`/catalog/products/${product.public_id}/images`, { image: file }, {
+        forceFormData: true,
+        preserveScroll: true,
+        onSuccess: () => { successMessage.value = 'تصویر محصول بارگذاری شد.'; },
+        onError: (errors) => { serverError.value = errors.image ?? 'بارگذاری تصویر انجام نشد.'; },
+        onFinish: () => { input.value = ''; },
+    });
+}
+
+function reorderProductImages(product: Product, image: ProductImage, direction: -1 | 1): void {
+    const current = [...product.images];
+    const index = current.findIndex((item) => item.public_id === image.public_id);
+    const target = index + direction;
+    if (index < 0 || target < 0 || target >= current.length) return;
+    [current[index], current[target]] = [current[target], current[index]];
+
+    router.put(`/catalog/products/${product.public_id}/images/reorder`, {
+        media_public_ids: current.map((item) => item.public_id),
+    }, {
+        preserveScroll: true,
+        onSuccess: () => { successMessage.value = 'ترتیب تصاویر ذخیره شد.'; },
+        onError: () => { serverError.value = 'مرتب‌سازی تصاویر انجام نشد.'; },
+    });
+}
+
+function deleteProductImage(product: Product, image: ProductImage): void {
+    if (!window.confirm('این تصویر از محصول حذف شود؟')) return;
+
+    router.delete(`/catalog/products/${product.public_id}/images/${image.public_id}`, {
+        preserveScroll: true,
+        onSuccess: () => { successMessage.value = 'تصویر محصول حذف شد.'; },
+        onError: () => { serverError.value = 'حذف تصویر انجام نشد.'; },
+    });
 }
 
 function deleteProduct(product: Product): void {
@@ -834,6 +884,25 @@ function goToPage(pageNumber: number): void {
                                     <p v-if="product.description" class="mt-1 max-w-xs truncate text-xs text-muted-foreground">
                                         {{ product.description }}
                                     </p>
+                                    <div v-if="product.images.length" class="mt-2 flex items-center gap-2">
+                                        <div v-for="(image, imageIndex) in product.images" :key="image.public_id" class="relative">
+                                            <img :src="image.url" :alt="`تصویر ${product.name}`" width="48" height="48" class="size-12 rounded-md object-cover" />
+                                            <button type="button" class="absolute -right-1 -top-1 rounded-full bg-background p-0.5 text-foreground shadow" :disabled="imageIndex === 0" :aria-label="`انتقال تصویر ${product.name} به بالا`" @click="reorderProductImages(product, image, -1)">
+                                                <ChevronUp class="size-3" />
+                                            </button>
+                                            <button type="button" class="absolute -right-1 -bottom-1 rounded-full bg-background p-0.5 text-foreground shadow" :disabled="imageIndex === product.images.length - 1" :aria-label="`انتقال تصویر ${product.name} به پایین`" @click="reorderProductImages(product, image, 1)">
+                                                <ChevronDown class="size-3" />
+                                            </button>
+                                            <button type="button" class="absolute -left-1 -top-1 rounded-full bg-destructive p-0.5 text-white" :aria-label="`حذف تصویر ${product.name}`" @click="deleteProductImage(product, image)">
+                                                <X class="size-3" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <label v-if="canUploadImages && (imageLimit === -1 || product.images.length < imageLimit)" class="mt-2 inline-flex cursor-pointer items-center text-xs text-primary underline underline-offset-4">
+                                        افزودن تصویر
+                                        <input type="file" accept="image/jpeg,image/png,image/webp" class="sr-only" @change="uploadProductImage(product, $event)" />
+                                    </label>
+                                    <p v-if="imageLimit === 0" class="mt-2 text-xs text-muted-foreground">تصویر محصول در طرح فعلی فعال نیست.</p>
                                 </td>
                                 <td class="px-4 py-3 text-muted-foreground">{{ product.category_name }}</td>
                                 <td class="px-4 py-3">

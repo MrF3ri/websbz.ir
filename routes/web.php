@@ -5,6 +5,7 @@ use App\Modules\Business\Http\Controllers\BusinessOnboardingController;
 use App\Modules\Business\Http\Controllers\BusinessSettingsController;
 use App\Modules\Catalog\Http\Controllers\CatalogController;
 use App\Modules\Category\Http\Controllers\CategoryController;
+use App\Modules\Media\Http\Controllers\MediaController;
 use App\Modules\Menu\Http\Controllers\MenuPublicationController;
 use App\Modules\Platform\Http\Controllers\AdminAuditLogController;
 use App\Modules\Platform\Http\Controllers\AdminBusinessController;
@@ -21,6 +22,8 @@ use App\Modules\Tenancy\Http\Middleware\TenantMiddleware;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'Welcome')->name('home');
+
+Route::get('/media/{mediaPublicId}', [MediaController::class, 'publicImage'])->name('media.public');
 
 Route::get('/menu/{businessSlug}/{menuSlug}', [PublicMenuController::class, 'show'])
     ->name('public.menu.show');
@@ -76,6 +79,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('/catalog/categories/{categoryPublicId}', [CategoryController::class, 'update'])->name('catalog.categories.update');
         Route::delete('/catalog/categories/{categoryPublicId}', [CategoryController::class, 'destroy'])->name('catalog.categories.destroy');
         Route::post('/catalog/products', [ProductController::class, 'store'])->name('catalog.products.store');
+        Route::post('/catalog/products/{productPublicId}/images', [MediaController::class, 'store'])->name('catalog.products.images.store');
+        Route::delete('/catalog/products/{productPublicId}/images/{mediaPublicId}', [MediaController::class, 'destroy'])->name('catalog.products.images.destroy');
+        Route::put('/catalog/products/{productPublicId}/images/reorder', [MediaController::class, 'reorder'])->name('catalog.products.images.reorder');
         Route::put('/catalog/categories/{categoryPublicId}/products/reorder', [ProductController::class, 'reorder'])->name('catalog.products.reorder');
         Route::put('/catalog/products/{productPublicId}', [ProductController::class, 'update'])->name('catalog.products.update');
         Route::delete('/catalog/products/{productPublicId}', [ProductController::class, 'destroy'])->name('catalog.products.destroy');
