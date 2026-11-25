@@ -69,7 +69,7 @@ class ProductController
                 'category_id' => $lockedCategory->getKey(),
                 'name' => $data['name'],
                 'description' => $data['description'] ?? null,
-                'label' => $data['label'] ?? null,
+                'label' => array_key_exists('label', $data) ? $data['label'] : $lockedProduct->label?->value,
                 'base_price' => $data['base_price'],
                 'discount_price' => $data['discount_price'] ?? null,
                 'is_available' => $data['is_available'] ?? true,
@@ -193,7 +193,7 @@ class ProductController
             $enforcement->requireFeature($business, 'product_availability_toggle');
         }
 
-        $label = $data['label'] ?? null;
+        $label = array_key_exists('label', $data) ? $data['label'] : $product->label?->value;
 
         if ($label !== null && $label !== $product->label?->value) {
             $enforcement->requireFeature($business, 'product_labels');
