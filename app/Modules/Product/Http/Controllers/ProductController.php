@@ -63,12 +63,13 @@ class ProductController
             $lockedProduct = $lockedMenu->products()->whereKey($product->getKey())->lockForUpdate()->firstOrFail();
             $lockedCategory = $lockedMenu->categories()->whereKey($category->getKey())->firstOrFail();
 
-            $this->enforceOptionalFeatures($business, $data);
+            $this->enforceOptionalFeatures($business, $data, $lockedProduct);
 
             $lockedProduct->update([
                 'category_id' => $lockedCategory->getKey(),
                 'name' => $data['name'],
                 'description' => $data['description'] ?? null,
+                'label' => array_key_exists('label', $data) ? $data['label'] : $lockedProduct->label?->value,
                 'base_price' => $data['base_price'],
                 'discount_price' => $data['discount_price'] ?? null,
                 'is_available' => $data['is_available'] ?? true,
@@ -180,7 +181,7 @@ class ProductController
     /**
      * @param  array<string, mixed>  $data
      */
-    private function enforceOptionalFeatures(Business $business, array $data): void
+    private function enforceOptionalFeatures(Business $business, array $data, Product $product): void
     {
         $enforcement = new EnforcementService(new EntitlementService($business));
 
@@ -190,6 +191,12 @@ class ProductController
 
         if (($data['is_available'] ?? true) === false) {
             $enforcement->requireFeature($business, 'product_availability_toggle');
+        }
+
+        $label = array_key_exists('label', $data) ? $data['label'] : $product->label?->value;
+
+        if ($label !== null && $label !== $product->label?->value) {
+            $enforcement->requireFeature($business, 'product_labels');
         }
     }
 }

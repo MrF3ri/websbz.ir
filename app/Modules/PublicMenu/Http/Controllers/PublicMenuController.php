@@ -78,13 +78,14 @@ class PublicMenuController
     }
 
     /**
-     * @return array{name: string, description: string|null, price: int, discount_price: int|null, images: array<int, array{url: string, srcset: string, sizes: string, width: int, height: int}>}
+     * @return array{name: string, description: string|null, label: string|null, price: int, discount_price: int|null, images: array<int, array{url: string, srcset: string, sizes: string, width: int, height: int}>}
      */
     private function productData(Product $product): array
     {
         return [
             'name' => $product->name,
             'description' => $product->description,
+            'label' => $product->label?->value,
             'price' => $product->base_price,
             'discount_price' => $product->discount_price,
             'images' => $product->images->map(fn (ProductImage $image): array => $this->imageData($image))->values()->all(),

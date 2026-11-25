@@ -3,6 +3,7 @@ import { Head } from '@inertiajs/vue3';
 
 type PublicProduct = {
     name: string;
+    label: 'new' | 'popular' | 'recommended' | 'chef_special' | null;
     images: { url: string; srcset: string; sizes: string; width: number; height: number }[];
     description: string | null;
     price: number;
@@ -32,6 +33,8 @@ defineProps<{
 const tomanFormatter = new Intl.NumberFormat('fa-IR', {
     maximumFractionDigits: 0,
 });
+
+const productLabelTitles = { new: 'جدید', popular: 'پرفروش', recommended: 'پیشنهاد ویژه', chef_special: 'پیشنهاد سرآشپز' } as const;
 
 function formatPrice(value: number): string {
     return tomanFormatter.format(value) + ' تومان';
@@ -103,7 +106,10 @@ function formatPrice(value: number): string {
                             </div>
                             <div class="flex items-start justify-between gap-4">
                                 <div class="min-w-0 flex-1">
-                                    <h3 class="font-semibold">{{ product.name }}</h3>
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <h3 class="font-semibold">{{ product.name }}</h3>
+                                        <span v-if="product.label" class="rounded-full px-2 py-0.5 text-[11px] font-semibold" :class="{ new: 'bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-200', popular: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200', recommended: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200', chef_special: 'bg-violet-100 text-violet-800 dark:bg-violet-900/40 dark:text-violet-200' }[product.label]">{{ productLabelTitles[product.label] }}</span>
+                                    </div>
                                     <p v-if="product.description" class="mt-1 whitespace-pre-line text-sm leading-6 text-stone-500 dark:text-stone-400">
                                         {{ product.description }}
                                     </p>

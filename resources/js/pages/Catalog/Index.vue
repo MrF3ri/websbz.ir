@@ -32,6 +32,8 @@ type Category = {
 
 type ProductImage = { public_id: string; url: string; width: number; height: number };
 
+type ProductLabel = 'new' | 'popular' | 'recommended' | 'chef_special';
+
 type Product = {
     public_id: string;
     images: ProductImage[];
@@ -39,6 +41,7 @@ type Product = {
     category_name: string;
     name: string;
     description: string | null;
+    label: ProductLabel | null;
     base_price: number;
     discount_price: number | null;
     is_available: boolean;
@@ -96,6 +99,7 @@ const productForm = useForm({
     category_public_id: props.categories[0]?.public_id ?? '',
     name: '',
     description: '',
+    label: null as ProductLabel | null,
     base_price: 0,
     discount_price: null as number | null,
     is_available: true,
@@ -116,6 +120,13 @@ const numberFormatter = new Intl.NumberFormat('fa-IR');
 
 const entitlements = computed(() => page.props.entitlements);
 const canDiscount = computed(() => entitlements.value?.features.product_discount === true);
+const canLabelProducts = computed(() => entitlements.value?.features.product_labels === true);
+const productLabelTitles: Record<ProductLabel, string> = {
+    new: 'جدید',
+    popular: 'پرفروش',
+    recommended: 'پیشنهاد ویژه',
+    chef_special: 'پیشنهاد سرآشپز',
+};
 const canToggleAvailability = computed(() => entitlements.value?.features.product_availability_toggle === true);
 const imageLimit = computed(() => {
     const limit = entitlements.value?.features.max_product_images;
@@ -249,6 +260,7 @@ function submitProduct(): void {
             productForm.category_public_id = props.categories[0]?.public_id ?? '';
             productForm.base_price = 0;
             productForm.discount_price = null;
+            productForm.label = null;
             productForm.is_available = true;
             productForm.status = 'draft';
         },
@@ -260,6 +272,7 @@ function editProduct(product: Product): void {
     productForm.category_public_id = product.category_public_id;
     productForm.name = product.name;
     productForm.description = product.description ?? '';
+    productForm.label = product.label;
     productForm.base_price = product.base_price;
     productForm.discount_price = product.discount_price;
     productForm.is_available = product.is_available;
@@ -272,6 +285,7 @@ function cancelProductEdit(): void {
     productForm.category_public_id = props.categories[0]?.public_id ?? '';
     productForm.base_price = 0;
     productForm.discount_price = null;
+    productForm.label = null;
     productForm.is_available = true;
     productForm.status = 'draft';
     productForm.clearErrors();
@@ -747,6 +761,24 @@ function goToPage(pageNumber: number): void {
                         </div>
 
                         <div class="grid gap-2 sm:col-span-2">
+                            <Label for="product-label">برچسب محصول</Label>
+                            <select
+                                id="product-label"
+                                v-model="productForm.label"
+                                class="h-10 rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+                                :disabled="productForm.processing || !canLabelProducts"
+                            >
+                                <option :value="null">بدون برچسب</option>
+                                <option value="new">جدید</option>
+                                <option value="popular">پرفروش</option>
+                                <option value="recommended">پیشنهاد ویژه</option>
+                                <option value="chef_special">پیشنهاد سرآشپز</option>
+                            </select>
+                            <p v-if="!canLabelProducts" class="text-xs text-muted-foreground">برچسب‌گذاری محصولات در طرح فعلی فعال نیست؛ برچسب‌های قبلی در صورت وجود حفظ می‌شوند.</p>
+                            <p v-if="productForm.errors.label" class="text-sm text-destructive" role="alert">{{ productForm.errors.label }}</p>
+                        </div>
+
+                        <div class="grid gap-2 sm:col-span-2">
                             <Label for="product-description">توضیحات</Label>
                             <textarea
                                 id="product-description"
@@ -880,7 +912,10 @@ function goToPage(pageNumber: number): void {
                         <tbody class="divide-y divide-border">
                             <tr v-for="(product, index) in products.data" :key="product.public_id">
                                 <td class="px-4 py-3">
-                                    <p class="font-medium text-foreground">{{ product.name }}</p>
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <p class="font-medium text-foreground">{{ product.name }}</p>
+                                        <span v-if="product.label" class="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">{{ productLabelTitles[product.label] }}</span>
+                                    </div>
                                     <p v-if="product.description" class="mt-1 max-w-xs truncate text-xs text-muted-foreground">
                                         {{ product.description }}
                                     </p>

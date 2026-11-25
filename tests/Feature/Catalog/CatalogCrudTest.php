@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Catalog;
 
+use App\Modules\Product\Enums\ProductLabel;
 use App\Modules\Product\Enums\ProductStatus;
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -66,6 +67,7 @@ class CatalogCrudTest extends TestCase
                 'category_public_id' => $category->public_id,
                 'name' => 'اسپرسو',
                 'description' => 'قهوه تازه',
+                'label' => ProductLabel::Recommended->value,
                 'base_price' => 100000,
                 'discount_price' => 90000,
                 'is_available' => true,
@@ -80,6 +82,7 @@ class CatalogCrudTest extends TestCase
         $this->assertSame(100000, $product->base_price);
         $this->assertSame(90000, $product->discount_price);
         $this->assertSame(ProductStatus::Published, $product->status);
+        $this->assertSame(ProductLabel::Recommended, $product->label);
 
         $this->actingAs($user)
             ->put(route('catalog.products.update', $product->public_id), [
@@ -103,6 +106,7 @@ class CatalogCrudTest extends TestCase
             'base_price' => 120000,
             'discount_price' => null,
             'status' => ProductStatus::Draft->value,
+            'label' => ProductLabel::Recommended->value,
         ]);
 
         $this->actingAs($user)
