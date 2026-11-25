@@ -12,9 +12,9 @@ use App\Modules\Product\Enums\ProductStatus;
 use App\Modules\Product\Models\Product;
 use App\Modules\PublicMenu\Services\PublicMenuCache;
 use App\Modules\Subscription\Services\EntitlementService;
-use LogicException;
 use Inertia\Inertia;
 use Inertia\Response;
+use LogicException;
 
 class PublicMenuController
 {
