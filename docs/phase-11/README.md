@@ -33,6 +33,6 @@ Pull request: #71 (Draft)
 
 ## CI verification for the current PR head
 
-- SQLite test suite and quality checks: passed (220 passed, 7 skipped).
-- PostgreSQL test suite: passed (227 passed).
+- SQLite test suite and quality checks: passed (221 passed, 7 skipped).
+- PostgreSQL test suite: passed (228 passed).
 - Production image, Compose, and Nginx validation: passed.
