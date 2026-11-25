@@ -1,8 +1,8 @@
 # Phase 12 — Localization and Translation Management
 
 Status: In progress  
-Current increment: 12.4 — Translation completeness and validation  
-Implementation branch: `feat/phase-12-translation-completeness`
+Current increment: 12.5 — Translation tenant-isolation and cache regression coverage  
+Implementation branch: `test/phase-12-translation-isolation`
 
 ## Approved scope
 
@@ -49,10 +49,24 @@ Economic and Professional remain single-language. Locale availability is control
 - Show completed, total, and remaining field counts in the translation editor.
 - Add a request-level regression test proving blank required menu/category/product text is rejected before any translation rows are persisted.
 
+## Delivered in increment 12.4 — merged PR #86
+
+- Count product-description translations only when the source product has a non-empty description.
+- Extract completeness calculation into a typed pure helper.
+- Add Vitest coverage for complete, incomplete, optional-description, and whitespace-only cases.
+- Show completed, total, and remaining translation fields in the translation editor.
+- Add request-level coverage proving blank required menu/category/product text is rejected before translation rows are persisted.
+
+## Increment 12.5 — translation tenant-isolation and cache regression coverage
+
+- Verify a forged foreign active-business session cannot write translations for another tenant's menu.
+- Verify translation writes invalidate a warm public-menu cache and translated content is visible on the next request.
+- Preserve the existing per-menu transaction and row-lock boundary.
+
 ## Remaining Phase 12 work
 
 1. Review translation behavior for banner and business-introduction fields; these fields are not part of the approved normalized translation tables yet.
-2. Add broader SQLite/PostgreSQL coverage for concurrent translation writes and tenant isolation.
+2. Add broader PostgreSQL concurrency coverage for simultaneous translation writes if the CI test harness can exercise independent connections deterministically.
 3. Reconcile the phase roadmap and run the full repository Release Gate when all product phases are complete.
 
 ## Acceptance criteria
