@@ -28,7 +28,7 @@ defineProps<{
         slug: string;
         locale: string;
         theme: { template: string; primary_color: string; font: string; mode: string };
-        image_slider_enabled: boolean;
+        image_slider_enabled: boolean;\n        advertising_banner: { title: string | null; message: string | null; cta_label: string | null; cta_url: string | null } | null;
     };
     categories: PublicCategory[];
 }>();
@@ -89,6 +89,20 @@ function formatPrice(value: number): string {
                     منوی رسمی {{ business.name }}
                 </p>
             </header>
+
+            <section v-if="menu.advertising_banner" class="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-5 text-amber-950 shadow-sm dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-100 sm:px-7">
+                <h2 v-if="menu.advertising_banner.title" class="text-lg font-bold">{{ menu.advertising_banner.title }}</h2>
+                <p v-if="menu.advertising_banner.message" class="mt-2 whitespace-pre-line text-sm leading-7">{{ menu.advertising_banner.message }}</p>
+                <a
+                    v-if="menu.advertising_banner.cta_label && menu.advertising_banner.cta_url"
+                    :href="menu.advertising_banner.cta_url"
+                    target="_blank"
+                    rel="noopener noreferrer nofollow"
+                    class="mt-4 inline-flex items-center rounded-lg bg-amber-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-amber-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-700 dark:bg-amber-200 dark:text-amber-950 dark:hover:bg-amber-100"
+                >
+                    {{ menu.advertising_banner.cta_label }}
+                </a>
+            </section>
 
             <div v-if="categories.length === 0" class="rounded-2xl border border-dashed border-stone-300 bg-white px-6 py-12 text-center text-sm text-stone-500 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-400">
                 در حال حاضر محصولی برای نمایش وجود ندارد.
