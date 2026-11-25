@@ -3,9 +3,9 @@
 namespace Tests\Feature\PublicMenu;
 
 use App\Enums\BusinessStatus;
-use App\Modules\Menu\Enums\MenuStatus;
 use App\Modules\Media\Models\Media;
 use App\Modules\Media\Models\ProductImage;
+use App\Modules\Menu\Enums\MenuStatus;
 use App\Modules\Product\Enums\ProductLabel;
 use App\Modules\Product\Enums\ProductStatus;
 use Illuminate\Database\Events\QueryExecuted;
