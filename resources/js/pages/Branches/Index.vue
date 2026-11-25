@@ -152,12 +152,21 @@ function daySummary(branch: Branch): string {
     return openDays === 0 ? 'تمام روزها تعطیل' : `${numberFormatter.format(openDays)} روز دارای ساعت کاری`;
 }
 
+const branchQrDataUrls = computed<Record<string, string>>(() => {
+    const urls: Record<string, string> = {};
+
+    for (const branch of props.branches) {
+        if (!branch.public_url) continue;
+
+        const svg = createQrSvg(branch.public_url);
+        urls[branch.public_id] = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    }
+
+    return urls;
+});
+
 function branchQrDataUrl(branch: Branch): string {
-    if (!branch.public_url) return '';
-
-    const svg = createQrSvg(branch.public_url);
-
-    return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    return branchQrDataUrls.value[branch.public_id] ?? '';
 }
 </script>
 
