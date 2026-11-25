@@ -102,6 +102,7 @@ class CatalogController
                     'category_name' => $category->name,
                     'name' => $product->name,
                     'description' => $product->description,
+                    'label' => $product->label?->value,
                     'base_price' => $product->base_price,
                     'discount_price' => $product->discount_price,
                     'is_available' => $product->is_available,
