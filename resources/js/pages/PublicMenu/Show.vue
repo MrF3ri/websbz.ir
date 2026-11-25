@@ -2,6 +2,7 @@
 import { Head } from '@inertiajs/vue3';
 
 type PublicProduct = {
+    public_id: string;
     name: string;
     label: 'new' | 'popular' | 'recommended' | 'chef_special' | null;
     images: { url: string; srcset: string; sizes: string; width: number; height: number }[];
@@ -26,6 +27,7 @@ defineProps<{
         slug: string;
         locale: string;
         theme: { template: string; primary_color: string; font: string; mode: string };
+        image_slider_enabled: boolean;
     };
     categories: PublicCategory[];
 }>();
@@ -35,6 +37,25 @@ const tomanFormatter = new Intl.NumberFormat('fa-IR', {
 });
 
 const productLabelTitles = { new: 'جدید', popular: 'پرفروش', recommended: 'پیشنهاد ویژه', chef_special: 'پیشنهاد سرآشپز' } as const;
+const imageSliderRefs = new Map<string, HTMLDivElement>();
+
+function setImageSliderRef(publicId: string, element: unknown): void {
+    if (element instanceof HTMLDivElement) {
+        imageSliderRefs.set(publicId, element);
+    } else {
+        imageSliderRefs.delete(publicId);
+    }
+}
+
+function scrollProductImages(publicId: string, direction: -1 | 1): void {
+    const element = imageSliderRefs.get(publicId);
+    if (!element) return;
+
+    element.scrollBy({
+        left: direction * Math.max(220, element.clientWidth * 0.75),
+        behavior: 'smooth',
+    });
+}
 
 function formatPrice(value: number): string {
     return tomanFormatter.format(value) + ' تومان';
@@ -85,11 +106,22 @@ function formatPrice(value: number): string {
                     <div class="overflow-hidden bg-white dark:bg-stone-900" :class="{ classic: 'rounded-2xl border border-stone-200 shadow-sm dark:border-stone-800', minimal: 'rounded-lg border-0 shadow-none', editorial: 'rounded-none border-y border-stone-300 dark:border-stone-700', modern: 'rounded-3xl border border-stone-200 shadow-lg dark:border-stone-700', cafe: 'rounded-2xl border border-amber-200 dark:border-amber-900', contrast: 'rounded-md border-2 border-stone-900 shadow-md dark:border-white' }[menu.theme.template] ?? 'rounded-2xl border border-stone-200 shadow-sm dark:border-stone-800'">
                         <article
                             v-for="(product, productIndex) in category.products"
-                            :key="product.name + '-' + productIndex"
+                            :key="product.public_id"
                             class="px-5 py-4"
                             :class="{ 'border-t border-stone-100 dark:border-stone-800': productIndex > 0 }"
                         >
-                            <div v-if="product.images.length" class="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                            <div v-if="menu.image_slider_enabled && product.images.length > 1" class="mb-4">
+                                <div class="mb-2 flex justify-end gap-2" dir="rtl">
+                                    <button type="button" class="rounded-md border border-stone-200 px-3 py-1 text-xs text-stone-600 transition hover:bg-stone-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--menu-accent)] dark:border-stone-700 dark:text-stone-300 dark:hover:bg-stone-800" :aria-label="'تصاویر قبلی ' + product.name" @click="scrollProductImages(product.public_id, -1)">قبلی</button>
+                                    <button type="button" class="rounded-md border border-stone-200 px-3 py-1 text-xs text-stone-600 transition hover:bg-stone-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--menu-accent)] dark:border-stone-700 dark:text-stone-300 dark:hover:bg-stone-800" :aria-label="'تصاویر بعدی ' + product.name" @click="scrollProductImages(product.public_id, 1)">بعدی</button>
+                                </div>
+                                <div :ref="(element) => setImageSliderRef(product.public_id, element)" class="flex snap-x snap-mandatory gap-2 overflow-x-auto scroll-smooth pb-2" dir="ltr" tabindex="0" role="region" :aria-label="'گالری تصاویر ' + product.name">
+                                    <div v-for="image in product.images" :key="image.url" class="w-[82%] shrink-0 snap-center sm:w-[62%]">
+                                        <img :src="image.url" :srcset="image.srcset" :sizes="image.sizes" :alt="'تصویر ' + product.name" :width="image.width" :height="image.height" loading="lazy" decoding="async" class="aspect-[4/3] w-full rounded-xl object-cover" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div v-else-if="product.images.length" class="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
                                 <img
                                     v-for="image in product.images"
                                     :key="image.url"

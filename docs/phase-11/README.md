@@ -1,9 +1,9 @@
 # Phase 11 — Public Menu Customization
 
 Status: In progress  
-Current increment: 11.3 — Plan-gated product labels  
-Implementation branch: `feat/phase-11-product-labels`  
-Pull request: #73 (Draft)
+Current increment: 11.4 — Subscription-gated image slider  
+Implementation branch: `feat/phase-11-image-slider`  
+Pull request: #74 (Draft)
 
 ## Delivered in increment 11.1
 
@@ -35,10 +35,19 @@ Pull request: #73 (Draft)
 - Add SQLite/PostgreSQL tests for entitlement enforcement, downgrade behavior, and public rendering.
 - Record the allow-list and downgrade behavior in ADR 0017.
 
+## Increment 11.4 — subscription-gated image slider
+
+- Add a subscription-snapshot-driven image slider to public product cards when more than one image exists.
+- Keep the responsive image grid for Economic plans and products with one image.
+- Add keyboard focus, previous/next controls, scroll-snap behavior, and accessible labels.
+- Resolve the `image_slider` entitlement outside the cached public-menu payload so subscription changes take effect immediately.
+- Add coverage for entitlement changes while the public-menu catalog cache remains warm.
+- Record the behavior in ADR 0018.
+
 ## Remaining Phase 11 work
 
 1. Add visual regression coverage for all template previews and test mobile/desktop breakpoints.
-2. Add plan-gated public-menu components: image slider, advertising banner, and business introduction.
+2. Add plan-gated public-menu components: advertising banner and business introduction.
 3. Add Top-plan controlled custom-design settings without arbitrary user HTML, CSS, or JavaScript.
 4. Verify accessibility, cache invalidation, tenant isolation, storage-failure recovery, and SQLite/PostgreSQL parity for all new features.
 
@@ -67,11 +76,21 @@ Pull request: #73 (Draft)
 - Pint: 236 files passed; PHPStan reported no errors.
 - Production image build, Compose validation, and Nginx validation: passed.
 
-### Increment 11.3 — PR #73
+### Increment 11.3 — merged PR #73
 
 - SQLite: 233 passed, 7 skipped (500 assertions).
 - PostgreSQL: 240 passed (583 assertions).
 - Catalog entitlement, downgrade-preservation, and public-menu label tests: passed.
+- Backblaze B2 S3 integration: passed in both database jobs.
+- Frontend unit tests: 7 passed; Vue/TypeScript checks passed.
+- Pint: 238 files passed; PHPStan reported no errors.
+- Production image build, Compose validation, and Nginx validation: passed.
+
+### Increment 11.4 — PR #74
+
+- SQLite: 234 passed, 7 skipped (522 assertions).
+- PostgreSQL test suite: passed.
+- PublicMenuTest image-slider entitlement/cache coverage: passed.
 - Backblaze B2 S3 integration: passed in both database jobs.
 - Frontend unit tests: 7 passed; Vue/TypeScript checks passed.
 - Pint: 238 files passed; PHPStan reported no errors.
