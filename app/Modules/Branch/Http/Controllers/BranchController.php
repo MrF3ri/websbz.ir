@@ -25,8 +25,8 @@ class BranchController
         $business = $this->resolveBusiness($currentBusiness);
         Gate::authorize('view', $business);
 
-        $menu = Menu::query()->where('business_id', $business->getKey())->first();
-        $menuIsPublished = $menu !== null && $menu->status === MenuStatus::Published;
+        $menu = Menu::query()->where('business_id', $business->getKey())->firstOrFail();
+        $menuIsPublished = $menu->status === MenuStatus::Published;
 
         $branches = $business->branches()
             ->orderByDesc('is_primary')
@@ -48,7 +48,7 @@ class BranchController
             ->map(function (Branch $branch) use ($business, $menu, $menuIsPublished): Branch {
                 $branch->setAttribute(
                     'public_url',
-                    $menuIsPublished && $branch->status === 'active' && $menu !== null
+                    $menuIsPublished && $branch->status === 'active'
                         ? route('public.menu.branch.show', [$business->slug, $menu->slug, $branch->slug])
                         : null,
                 );
