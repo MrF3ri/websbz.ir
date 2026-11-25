@@ -4,9 +4,9 @@ namespace App\Modules\Menu\Http\Controllers;
 
 use App\Modules\Business\Models\Business;
 use App\Modules\Localization\Services\LocaleRegistry;
+use App\Modules\Menu\Actions\EnsurePrimaryMenuAction;
 use App\Modules\Menu\Http\Requests\SaveMenuTranslationsRequest;
 use App\Modules\Menu\Models\Menu;
-use App\Modules\Menu\Actions\EnsurePrimaryMenuAction;
 use App\Modules\PublicMenu\Services\PublicMenuCache;
 use App\Modules\Tenancy\Services\CurrentBusiness;
 use Illuminate\Http\RedirectResponse;
