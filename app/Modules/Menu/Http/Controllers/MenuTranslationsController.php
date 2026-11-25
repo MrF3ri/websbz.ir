@@ -107,12 +107,6 @@ class MenuTranslationsController
                 ->all();
             $expectedCategoryIds = $categories->pluck('public_id')->sort()->values()->all();
 
-            if ($submittedCategoryIds !== $expectedCategoryIds) {
-                throw ValidationException::withMessages([
-                    'categories' => 'فهرست دسته‌بندی‌ها باید دقیقاً متعلق به همین منو باشد.',
-                ]);
-            }
-
             $submittedProductIds = collect($data['products'])
                 ->pluck('public_id')
                 ->sort()
@@ -120,10 +114,18 @@ class MenuTranslationsController
                 ->all();
             $expectedProductIds = $products->pluck('public_id')->sort()->values()->all();
 
+            $errors = [];
+
+            if ($submittedCategoryIds !== $expectedCategoryIds) {
+                $errors['categories'] = 'فهرست دسته‌بندی‌ها باید دقیقاً متعلق به همین منو باشد.';
+            }
+
             if ($submittedProductIds !== $expectedProductIds) {
-                throw ValidationException::withMessages([
-                    'products' => 'فهرست محصولات باید دقیقاً متعلق به همین منو باشد.',
-                ]);
+                $errors['products'] = 'فهرست محصولات باید دقیقاً متعلق به همین منو باشد.';
+            }
+
+            if ($errors !== []) {
+                throw ValidationException::withMessages($errors);
             }
 
             $lockedMenu->translations()->updateOrCreate(
