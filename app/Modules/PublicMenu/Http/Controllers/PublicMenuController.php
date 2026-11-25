@@ -105,6 +105,12 @@ class PublicMenuController
                     'title' => $menu->title,
                     'slug' => $menu->slug,
                     'locale' => $menu->default_locale,
+                    'theme' => array_merge([
+                        'template' => 'classic',
+                        'primary_color' => '#365B4A',
+                        'font' => 'system',
+                        'mode' => 'light',
+                    ], array_intersect_key($menu->theme ?? [], array_flip(['template', 'primary_color', 'font', 'mode']))),
                 ],
                 'categories' => $categories->map(fn (Category $category): array => [
                     'name' => $category->name,
