@@ -15,9 +15,11 @@ use Inertia\Response;
 
 class PublicMenuController
 {
-    public function __construct(private readonly PublicMenuCache $publicMenuCache) {}
-
-    public function show(string $businessSlug, string $menuSlug): Response
+    public function show(
+        string $businessSlug,
+        string $menuSlug,
+        PublicMenuCache $publicMenuCache,
+    ): Response
     {
         $business = Business::query()
             ->where('slug', $businessSlug)
@@ -29,7 +31,7 @@ class PublicMenuController
             ->where('status', MenuStatus::Published)
             ->firstOrFail();
 
-        $publicMenu = $this->publicMenuCache->remember($menu, function () use ($menu, $business): array {
+        $publicMenu = $publicMenuCache->remember($menu, function () use ($menu, $business): array {
             $categories = $menu->categories()
                 ->where('is_active', true)
                 ->whereHas('products', function ($query) use ($menu): void {
