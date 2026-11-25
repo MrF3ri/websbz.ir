@@ -100,6 +100,46 @@ class MenuTranslationsTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_translation_editor_rejects_blank_required_text_without_persisting_partial_rows(): void
+    {
+        [$user, , $menu] = $this->createCatalogTenant('top');
+        $category = $this->createCatalogCategory($menu, 'قهوه');
+        $product = $this->createCatalogProduct($menu, $category, 'اسپرسو');
+
+        $this->actingAs($user)
+            ->put(route('catalog.menu.translations.update', 'en'), [
+                'menu_title' => ' ',
+                'categories' => [
+                    ['public_id' => $category->public_id, 'name' => ' '],
+                ],
+                'products' => [
+                    [
+                        'public_id' => $product->public_id,
+                        'name' => '',
+                        'description' => 'Optional description',
+                    ],
+                ],
+            ])
+            ->assertSessionHasErrors([
+                'menu_title',
+                'categories.0.name',
+                'products.0.name',
+            ]);
+
+        $this->assertDatabaseMissing('menu_translations', [
+            'menu_id' => $menu->getKey(),
+            'locale' => 'en',
+        ]);
+        $this->assertDatabaseMissing('category_translations', [
+            'category_id' => $category->getKey(),
+            'locale' => 'en',
+        ]);
+        $this->assertDatabaseMissing('product_translations', [
+            'product_id' => $product->getKey(),
+            'locale' => 'en',
+        ]);
+    }
+
     public function test_translation_update_rejects_category_and_product_ids_from_another_menu(): void
     {
         [$userA, , $menuA] = $this->createCatalogTenant('top');
