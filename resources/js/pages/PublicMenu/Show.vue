@@ -39,9 +39,9 @@ const props = defineProps<{
 }>();
 
 const copy = {
-    fa: { officialMenu: 'منوی رسمی', empty: 'در حال حاضر محصولی برای نمایش وجود ندارد.', category: 'دسته‌بندی', previous: 'قبلی', next: 'بعدی', gallery: 'گالری تصاویر', image: 'تصویر', digitalMenu: 'منوی دیجیتال', toman: 'تومان', labels: { new: 'جدید', popular: 'پرفروش', recommended: 'پیشنهاد ویژه', chef_special: 'پیشنهاد سرآشپز' } },
-    en: { officialMenu: 'Official menu', empty: 'There are no products to display right now.', category: 'Category', previous: 'Previous', next: 'Next', gallery: 'Image gallery', image: 'Image', digitalMenu: 'Digital menu', toman: 'Toman', labels: { new: 'New', popular: 'Popular', recommended: 'Recommended', chef_special: "Chef's special" } },
-    ar: { officialMenu: 'القائمة الرسمية', empty: 'لا توجد منتجات للعرض حالياً.', category: 'الفئة', previous: 'السابق', next: 'التالي', gallery: 'معرض الصور', image: 'صورة', digitalMenu: 'القائمة الرقمية', toman: 'تومان', labels: { new: 'جديد', popular: 'الأكثر مبيعاً', recommended: 'موصى به', chef_special: 'اختيار الشيف' } },
+    fa: { officialMenu: 'منوی رسمی', banner: 'بنر تبلیغاتی', language: 'زبان', empty: 'در حال حاضر محصولی برای نمایش وجود ندارد.', category: 'دسته‌بندی', previous: 'قبلی', next: 'بعدی', gallery: 'گالری تصاویر', image: 'تصویر', digitalMenu: 'منوی دیجیتال', toman: 'تومان', labels: { new: 'جدید', popular: 'پرفروش', recommended: 'پیشنهاد ویژه', chef_special: 'پیشنهاد سرآشپز' } },
+    en: { officialMenu: 'Official menu', banner: 'Promotion', language: 'Language', empty: 'There are no products to display right now.', category: 'Category', previous: 'Previous', next: 'Next', gallery: 'Image gallery', image: 'Image', digitalMenu: 'Digital menu', toman: 'Toman', labels: { new: 'New', popular: 'Popular', recommended: 'Recommended', chef_special: "Chef's special" } },
+    ar: { officialMenu: 'القائمة الرسمية', banner: 'إعلان', language: 'اللغة', empty: 'لا توجد منتجات للعرض حالياً.', category: 'الفئة', previous: 'السابق', next: 'التالي', gallery: 'معرض الصور', image: 'صورة', digitalMenu: 'القائمة الرقمية', toman: 'تومان', labels: { new: 'جديد', popular: 'الأكثر مبيعاً', recommended: 'موصى به', chef_special: 'اختيار الشيف' } },
 } as const;
 const labels = copy[props.menu.locale] ?? copy.fa;
 const tomanFormatter = new Intl.NumberFormat(props.menu.locale, { maximumFractionDigits: 0 });
@@ -122,7 +122,7 @@ function formatPrice(value: number): string {
         <meta
             head-key="description"
             name="description"
-            :content="'منوی ' + business.name + ' - ' + menu.title"
+            :content="labels.officialMenu + ' ' + business.name + ' - ' + menu.title"
         />
         <meta head-key="robots" name="robots" content="index,follow" />
     </Head>
@@ -131,7 +131,7 @@ function formatPrice(value: number): string {
     <main id="public-menu-main" aria-labelledby="public-menu-title" :dir="menu.direction" :lang="menu.locale" :data-template="menu.theme.template" :style="{ '--menu-accent': menu.theme.primary_color }"  :class="['min-h-screen bg-stone-50 px-4 py-8 text-stone-900 dark:bg-stone-950 dark:text-stone-100 sm:py-12', menu.theme.font === 'serif' ? 'font-serif' : menu.theme.font === 'rounded' ? 'font-sans tracking-wide' : 'font-sans']">
         <div class="mx-auto w-full max-w-3xl" :class="densityClasses[menu.theme.density] ?? densityClasses.comfortable">
             <header class="border border-stone-200 bg-white px-6 py-8 text-center shadow-sm dark:border-stone-800 dark:bg-stone-900 sm:px-10"  :class="{ classic: 'rounded-3xl shadow-sm', minimal: 'rounded-xl border-0 shadow-none', editorial: 'rounded-none border-x-0 border-t-0 shadow-none', modern: 'rounded-2xl border-2 border-stone-100 shadow-lg dark:border-stone-700', cafe: 'rounded-[2rem] border-amber-200 dark:border-amber-900', contrast: 'rounded-md border-2 border-stone-900 shadow-md dark:border-white' }[menu.theme.template] ?? 'rounded-3xl'">
-                <div v-if="menu.available_locales.length > 1" class="mb-5 flex justify-center gap-2" :dir="menu.direction" aria-label="Language selection">
+                <div v-if="menu.available_locales.length > 1" class="mb-5 flex justify-center gap-2" :dir="menu.direction"  :aria-label="labels.language">
                     <a
                         v-for="locale in menu.available_locales"
                         :key="locale.code"
@@ -155,7 +155,7 @@ function formatPrice(value: number): string {
                 </p>
             </header>
 
-            <section v-if="menu.advertising_banner"  :aria-label="labels.officialMenu" class="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-5 text-amber-950 shadow-sm dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-100 sm:px-7">
+            <section v-if="menu.advertising_banner"   :aria-label="labels.banner" class="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-5 text-amber-950 shadow-sm dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-100 sm:px-7">
                 <h2 v-if="menu.advertising_banner.title" class="text-lg font-bold">{{ menu.advertising_banner.title }}</h2>
                 <p v-if="menu.advertising_banner.message" class="mt-2 whitespace-pre-line text-sm leading-7">{{ menu.advertising_banner.message }}</p>
                 <a
@@ -192,7 +192,7 @@ function formatPrice(value: number): string {
                             :class="[productPaddingClasses[menu.theme.density] ?? productPaddingClasses.comfortable, productIndex > 0 ? 'border-t border-stone-100 dark:border-stone-800' : '']"
                         >
                             <div v-if="menu.image_slider_enabled && product.images.length > 1" class="mb-4">
-                                <div class="mb-2 flex justify-end gap-2" dir="rtl">
+                                <div class="mb-2 flex justify-end gap-2" :dir="menu.direction">
                                     <button type="button" class="rounded-md border border-stone-200 px-3 py-1 text-xs text-stone-600 transition hover:bg-stone-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--menu-accent)] dark:border-stone-700 dark:text-stone-300 dark:hover:bg-stone-800"  :aria-label="labels.previous + ' ' + product.name" @click="scrollProductImages(product.public_id, -1)">{{ labels.previous }}</button>
                                     <button type="button" class="rounded-md border border-stone-200 px-3 py-1 text-xs text-stone-600 transition hover:bg-stone-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--menu-accent)] dark:border-stone-700 dark:text-stone-300 dark:hover:bg-stone-800"  :aria-label="labels.next + ' ' + product.name" @click="scrollProductImages(product.public_id, 1)">{{ labels.next }}</button>
                                 </div>
@@ -209,7 +209,7 @@ function formatPrice(value: number): string {
                                     :src="image.url"
                                     :srcset="image.srcset"
                                     :sizes="image.sizes"
-                                    :alt="'تصویر ' + product.name + '، شماره ' + (imageIndex + 1)"
+                                    :alt="labels.image + ' ' + product.name + ' ' + (imageIndex + 1)"
                                     :width="image.width"
                                     :height="image.height"
                                     loading="lazy"
