@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\Concerns\InteractsWithCatalog;
 use Tests\TestCase;
-use App\Modules\Media\Models\BusinessLogo;
 
 class BusinessLogoTest extends TestCase
 {
