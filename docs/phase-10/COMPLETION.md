@@ -15,7 +15,7 @@ This is an implementation checklist, not a release approval.
 ## Still requires external verification
 
 - The PostgreSQL multi-process concurrency test must run and pass in GitHub Actions.
-- The opt-in S3 integration test must run against an owner-provisioned non-production bucket. A fake disk is not evidence of provider compatibility.
+- The S3 Flysystem adapter is installed and locked. The opt-in S3 integration test must still run against an owner-provisioned non-production bucket. A fake disk is not evidence of provider compatibility.
 - The bucket must be private and use the lifecycle policy in S3-VERIFICATION.md.
 - All SQLite, PostgreSQL, frontend, static-analysis, dependency-audit, and production-image checks must pass on the final PR head.
 

@@ -1,6 +1,6 @@
 # Phase 10 — S3-compatible storage verification
 
-The repository currently contains S3 disk configuration, but composer.lock does not yet include league/flysystem-aws-s3-v3. Therefore the S3 driver is not operational until that adapter dependency is added and composer.lock is regenerated. The application is designed to serve media through its own authorization-checked route; the bucket must not be public.
+The S3 Flysystem adapter league/flysystem-aws-s3-v3 is now included in composer.json and composer.lock. The application serves media through its own authorization-checked route; the bucket must not be public.
 
 ## Non-production bucket requirements
 
@@ -30,7 +30,7 @@ Recommended baseline lifecycle rule:
 
 ## Integration test
 
-The opt-in S3MediaStorageIntegrationTest exercises upload, variant creation, authenticated public delivery, and deletion against the configured bucket. It skips when the Flysystem S3 adapter is not installed; adding and locking that package is a prerequisite for a real-bucket run.
+The opt-in S3MediaStorageIntegrationTest exercises upload, variant creation, authenticated public delivery, and deletion against the configured bucket. It is skipped unless explicit non-production bucket opt-in and valid credentials are supplied.
 
 Enable it only against a dedicated non-production bucket:
 

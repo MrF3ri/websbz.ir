@@ -22,8 +22,8 @@ The GitHub Actions jobs and owner-side local suite must pass. PostgreSQL is requ
 
 ## Remaining work
 
-- Run the new responsive-variant, gallery, storage-failure, and PostgreSQL multi-process concurrency tests in CI; implementation is not considered verified until the runs pass.
-- Add and lock the missing league/flysystem-aws-s3-v3 Composer adapter, then run the opt-in S3 integration test against a real non-production bucket and apply the lifecycle policy in S3-VERIFICATION.md. This also requires owner-provisioned credentials and endpoint configuration; it cannot be certified using a fake disk.
+- Responsive-variant, gallery, storage-failure, and PostgreSQL multi-process concurrency tests have been added. Their CI runs must pass on the final PR head.
+- The S3 adapter is now included in composer.json and composer.lock. Run the opt-in S3 integration test against a real non-production bucket and apply the lifecycle policy in S3-VERIFICATION.md. This requires owner-provisioned credentials and endpoint configuration; it cannot be certified using a fake disk.
 - Run the full Release Gate separately; Phase 10 completion alone does not make the product production-ready.
 
 ## Security notes
