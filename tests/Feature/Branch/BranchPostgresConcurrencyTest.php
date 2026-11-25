@@ -6,7 +6,6 @@ use App\Modules\Branch\Actions\CreateBranchAction;
 use App\Modules\Branch\Actions\EnsurePrimaryBranchAction;
 use App\Modules\Branch\Models\Branch;
 use App\Modules\Business\Models\Business;
-use App\Modules\Category\Models\Category;
 use App\Modules\Menu\Models\Menu;
 use App\Modules\Product\Models\Product;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
@@ -40,9 +39,9 @@ class BranchPostgresConcurrencyTest extends TestCase
             $menu,
             null,
             'Concurrent Branch A',
+            'Concurrent Branch B',
             'concurrent-branch-a',
-            'first',
-            'second',
+            'concurrent-branch-b',
         );
 
         $this->assertSame('success', $first['status']);
@@ -102,9 +101,9 @@ class BranchPostgresConcurrencyTest extends TestCase
             $menu,
             null,
             'Rolled Back Branch',
+            'Branch After Rollback',
             'rolled-back-branch',
-            'first',
-            'second',
+            'branch-after-rollback',
             firstWorkerFailsAfterLock: true,
         );
 
@@ -120,7 +119,6 @@ class BranchPostgresConcurrencyTest extends TestCase
 
     /**
      * @param  'create-branch'|'update-settings'  $operation
-     * @param  array{0: array{status: string, message?: string}, 1: array{status: string, message?: string}}  $unused
      * @return array{0: array{status: string, message?: string}, 1: array{status: string, message?: string}}
      */
     private function runContendedPair(
