@@ -95,6 +95,47 @@ class PublicMenuController
         ];
     }
 
+    /**
+     * Return only validated banner fields. Persisted JSON is not trusted as markup or a URL source.
+     *
+     * @return array{title: string|null, message: string|null, cta_label: string|null, cta_url: string|null}|null
+     */
+    private function bannerData(Menu $menu): ?array
+    {
+        $banner = $menu->advertising_banner;
+
+        if (! is_array($banner)) {
+            return null;
+        }
+
+        $title = is_string($banner['title'] ?? null) ? mb_substr(trim($banner['title']), 0, 100) : null;
+        $message = is_string($banner['message'] ?? null) ? mb_substr(trim($banner['message']), 0, 300) : null;
+        $ctaLabel = is_string($banner['cta_label'] ?? null) ? mb_substr(trim($banner['cta_label']), 0, 40) : null;
+        $ctaUrl = $banner['cta_url'] ?? null;
+
+        if (
+            ! is_string($ctaUrl)
+            || ! str_starts_with($ctaUrl, 'https://')
+            || filter_var($ctaUrl, FILTER_VALIDATE_URL) === false
+            || $ctaLabel === null
+            || $ctaLabel === ''
+        ) {
+            $ctaLabel = null;
+            $ctaUrl = null;
+        }
+
+        $data = [
+            'title' => $title !== '' ? $title : null,
+            'message' => $message !== '' ? $message : null,
+            'cta_label' => $ctaLabel,
+            'cta_url' => $ctaUrl,
+        ];
+
+        return count(array_filter($data, fn ($value): bool => $value !== null)) > 0
+            ? $data
+            : null;
+    }
+
     public function show(
         string $businessSlug,
         string $menuSlug,
@@ -154,6 +195,9 @@ class PublicMenuController
         if (is_array($publicMenu) && is_array($publicMenu['menu'] ?? null) && is_array($publicMenu['business'] ?? null)) {
             $entitlements = new EntitlementService($business);
             $publicMenu['menu']['image_slider_enabled'] = $entitlements->hasFeature('image_slider');
+            $publicMenu['menu']['advertising_banner'] = $entitlements->hasFeature('advertising_banner')
+                ? $this->bannerData($menu)
+                : null;
             $publicMenu['business']['introduction'] = $entitlements->hasFeature('business_introduction')
                 ? $business->introduction
                 : null;

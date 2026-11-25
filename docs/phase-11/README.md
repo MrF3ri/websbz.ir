@@ -1,9 +1,9 @@
 # Phase 11 — Public Menu Customization
 
 Status: In progress  
-Current increment: 11.5 — Subscription-gated business introduction  
-Implementation branch: `feat/phase-11-business-introduction`  
-Pull request: #75 (Draft)
+Current increment: 11.6 — Subscription-gated advertising banner  
+Implementation branch: `feat/phase-11-advertising-banner`  
+Pull request: #76 (Draft)
 
 ## Delivered in increment 11.1
 
@@ -54,12 +54,21 @@ Pull request: #75 (Draft)
 - Add tests for Professional/Economic access, downgrade behavior, and public rendering.
 - Record the behavior in ADR 0019.
 
+## Delivered in increment 11.6
+
+- Add a fixed-field advertising banner to menu settings: title, message, CTA label, and HTTPS CTA URL.
+- Gate new or changed banner content through the `advertising_banner` subscription snapshot.
+- Preserve existing banners after downgrade, allow removal, and hide them from the public menu without entitlement.
+- Render escaped plain text and a safe external CTA link; no arbitrary HTML, CSS, or JavaScript.
+- Resolve the banner entitlement outside cached public-menu data so downgrades take effect immediately.
+- Add tests for plan access, HTTPS validation, downgrade behavior, and public rendering.
+- Record the decision in ADR 0020.
+
 ## Remaining Phase 11 work
 
 1. Add visual regression coverage for all template previews and test mobile/desktop breakpoints.
-2. Add the plan-gated advertising banner.
-3. Add Top-plan controlled custom-design settings without arbitrary user HTML, CSS, or JavaScript.
-4. Verify accessibility, cache invalidation, tenant isolation, storage-failure recovery, and SQLite/PostgreSQL parity for all new features.
+2. Add Top-plan controlled custom-design settings without arbitrary user HTML, CSS, or JavaScript.
+3. Verify accessibility, cache invalidation, tenant isolation, storage-failure recovery, and SQLite/PostgreSQL parity for all new features.
 
 ## Operational constraints
 
@@ -106,11 +115,21 @@ Pull request: #75 (Draft)
 - Pint: 238 files passed; PHPStan reported no errors.
 - Production image build, Compose validation, and Nginx validation: passed.
 
-### Increment 11.5 — PR #75
+### Increment 11.5 — merged PR #75
 
 - SQLite: 238 passed, 7 skipped (553 assertions).
 - PostgreSQL: 245 passed (636 assertions).
 - BusinessIntroductionTest, downgrade preservation, and public-menu entitlement tests: passed.
+- Backblaze B2 S3 integration: passed in both database jobs.
+- Frontend test files: 2 passed; Vue/TypeScript checks passed.
+- PHPStan reported no errors; all CI quality checks passed.
+- Production image build, Compose validation, and Nginx validation: passed.
+
+### Increment 11.6 — PR #76
+
+- SQLite: 244 passed, 7 skipped.
+- PostgreSQL test suite: passed.
+- MenuBannerTest: plan gating, downgrade preservation/removal, HTTPS validation, and public rendering passed.
 - Backblaze B2 S3 integration: passed in both database jobs.
 - Frontend test files: 2 passed; Vue/TypeScript checks passed.
 - PHPStan reported no errors; all CI quality checks passed.

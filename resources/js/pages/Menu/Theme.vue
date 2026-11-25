@@ -2,14 +2,17 @@
 import { Head, useForm } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Button } from '@/components/ui/button';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 type Template = { name: string; description: string; layout: string };
 
 const props = defineProps<{
-    menu: { theme: { template: string; primary_color: string; font: string; mode: string } };
+    menu: {
+        theme: { template: string; primary_color: string; font: string; mode: string };
+        advertising_banner: { title: string | null; message: string | null; cta_label: string | null; cta_url: string | null } | null;
+    };
     templates: Record<string, Template>;
-    features: { custom_colors: boolean; font_selection: boolean; dark_mode: boolean };
+    features: { custom_colors: boolean; font_selection: boolean; dark_mode: boolean; advertising_banner: boolean };
 }>();
 
 const form = useForm({
@@ -18,6 +21,28 @@ const form = useForm({
     font: props.menu.theme.font,
     mode: props.menu.theme.mode,
 });
+
+const bannerForm = useForm({
+    title: props.menu.advertising_banner?.title ?? '',
+    message: props.menu.advertising_banner?.message ?? '',
+    cta_label: props.menu.advertising_banner?.cta_label ?? '',
+    cta_url: props.menu.advertising_banner?.cta_url ?? '',
+});
+
+const hasBannerContent = computed(() => Boolean(
+    bannerForm.title || bannerForm.message || bannerForm.cta_label || bannerForm.cta_url
+));
+
+function saveBanner(): void {
+    bannerForm.put('/catalog/menu/banner', { preserveScroll: true });
+}
+
+function clearBanner(): void {
+    bannerForm.title = '';
+    bannerForm.message = '';
+    bannerForm.cta_label = '';
+    bannerForm.cta_url = '';
+}
 
 const previewMode = ref<'mobile' | 'desktop'>('mobile');
 
@@ -120,6 +145,42 @@ function save(): void {
                         <label class="flex items-center gap-2 text-sm"><input v-model="form.mode" type="radio" value="dark" :disabled="!features.dark_mode" /> تاریک</label>
                     </div>
                     <p v-if="!features.dark_mode" class="text-xs text-muted-foreground">حالت تاریک در طرح فعلی فعال نیست.</p>
+                </div>
+            </section>
+
+            <section class="space-y-4 rounded-xl border border-border bg-card p-5">
+                <div>
+                    <h2 class="font-semibold">بنر تبلیغاتی</h2>
+                    <p class="mt-1 text-sm text-muted-foreground">پیام یا پیشنهاد ویژه را در منوی عمومی نمایش دهید. فقط متن ساده و پیوند امن HTTPS پذیرفته می‌شود.</p>
+                </div>
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <div class="space-y-2">
+                        <label for="banner-title" class="text-sm font-medium">عنوان بنر</label>
+                        <input id="banner-title" v-model="bannerForm.title" maxlength="100" class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"  :readonly="!features.advertising_banner && hasBannerContent" :disabled="!features.advertising_banner && !hasBannerContent" />
+                        <p v-if="bannerForm.errors.title" class="text-xs text-destructive" role="alert">{{ bannerForm.errors.title }}</p>
+                    </div>
+                    <div class="space-y-2">
+                        <label for="banner-cta-label" class="text-sm font-medium">متن دکمه (اختیاری)</label>
+                        <input id="banner-cta-label" v-model="bannerForm.cta_label" maxlength="40" class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm" :readonly="!features.advertising_banner && hasBannerContent" :disabled="!features.advertising_banner && !hasBannerContent" />
+                        <p v-if="bannerForm.errors.cta_label" class="text-xs text-destructive" role="alert">{{ bannerForm.errors.cta_label }}</p>
+                    </div>
+                    <div class="space-y-2 sm:col-span-2">
+                        <label for="banner-message" class="text-sm font-medium">متن پیام</label>
+                        <textarea id="banner-message" v-model="bannerForm.message" rows="3" maxlength="300" class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm leading-6" :readonly="!features.advertising_banner && hasBannerContent" :disabled="!features.advertising_banner && !hasBannerContent"></textarea>
+                        <p v-if="bannerForm.errors.message" class="text-xs text-destructive" role="alert">{{ bannerForm.errors.message }}</p>
+                    </div>
+                    <div class="space-y-2 sm:col-span-2">
+                        <label for="banner-cta-url" class="text-sm font-medium">پیوند دکمه (HTTPS)</label>
+                        <input id="banner-cta-url" v-model="bannerForm.cta_url" type="url" maxlength="2048" placeholder="https://example.com/offer" dir="ltr" class="h-10 w-full rounded-md border border-input bg-background px-3 text-left text-sm" :readonly="!features.advertising_banner && hasBannerContent" :disabled="!features.advertising_banner && !hasBannerContent" />
+                        <p v-if="bannerForm.errors.cta_url" class="text-xs text-destructive" role="alert">{{ bannerForm.errors.cta_url }}</p>
+                    </div>
+                </div>
+                <p v-if="!features.advertising_banner" class="text-xs text-muted-foreground">بنر تبلیغاتی در طرح فعلی فعال نیست. بنر قبلی حفظ می‌شود و می‌توانید آن را حذف کنید.</p>
+                <div class="flex flex-wrap items-center gap-2">
+                    <Button type="button"  :disabled="bannerForm.processing" @click="saveBanner">
+                        {{ bannerForm.processing ? 'در حال ذخیره...' : 'ذخیره بنر' }}
+                    </Button>
+                    <Button v-if="!features.advertising_banner && hasBannerContent" type="button" variant="outline" :disabled="bannerForm.processing" @click="clearBanner">حذف بنر قبلی</Button>
                 </div>
             </section>
 

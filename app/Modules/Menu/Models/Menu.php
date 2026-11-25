@@ -20,6 +20,7 @@ use Illuminate\Support\Str;
  * @property MenuStatus $status
  * @property string $default_locale
  * @property array<string, string>|null $theme
+ * @property array{title: string|null, message: string|null, cta_label: string|null, cta_url: string|null}|null $advertising_banner
  */
 class Menu extends Model
 {
@@ -30,6 +31,7 @@ class Menu extends Model
         'status',
         'default_locale',
         'theme',
+        'advertising_banner',
     ];
 
     protected $attributes = [
@@ -70,6 +72,7 @@ class Menu extends Model
         return [
             'status' => MenuStatus::class,
             'theme' => 'array',
+            'advertising_banner' => 'array',
         ];
     }
 }
