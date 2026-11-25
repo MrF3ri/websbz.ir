@@ -2,7 +2,9 @@
 
 namespace Tests\Feature\Menu;
 
+use App\Modules\Menu\Enums\MenuStatus;
 use App\Modules\Menu\Services\MenuThemeRegistry;
+use App\Modules\Product\Enums\ProductStatus;
 use App\Modules\Subscription\Services\EntitlementService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -26,7 +28,7 @@ class MenuThemeTest extends TestCase
         [, $professional] = $this->createCatalogTenant('professional');
         [, $top] = $this->createCatalogTenant('top');
 
-        $registry = new MenuThemeRegistry();
+        $registry = app(MenuThemeRegistry::class);
 
         $this->assertCount(3, $registry->availableFor($economic, new EntitlementService($economic)));
         $this->assertCount(6, $registry->availableFor($professional, new EntitlementService($professional)));
@@ -101,10 +103,10 @@ class MenuThemeTest extends TestCase
             $menu,
             $category,
             'Espresso',
-            status: \App\Modules\Product\Enums\ProductStatus::Published,
+            status: ProductStatus::Published,
         );
         $menu->update([
-            'status' => \App\Modules\Menu\Enums\MenuStatus::Published,
+            'status' => MenuStatus::Published,
             'theme' => [
                 'template' => 'modern',
                 'primary_color' => '#123456',
