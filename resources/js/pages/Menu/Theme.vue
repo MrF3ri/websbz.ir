@@ -7,7 +7,10 @@ import { computed, ref } from 'vue';
 type Template = { name: string; description: string; layout: string };
 
 const props = defineProps<{
-    menu: {\n        theme: { template: string; primary_color: string; font: string; mode: string };\n        advertising_banner: { title: string | null; message: string | null; cta_label: string | null; cta_url: string | null } | null;\n    };
+    menu: {
+        theme: { template: string; primary_color: string; font: string; mode: string };
+        advertising_banner: { title: string | null; message: string | null; cta_label: string | null; cta_url: string | null } | null;
+    };
     templates: Record<string, Template>;
     features: { custom_colors: boolean; font_selection: boolean; dark_mode: boolean; advertising_banner: boolean };
 }>();
@@ -19,7 +22,29 @@ const form = useForm({
     mode: props.menu.theme.mode,
 });
 
-const bannerForm = useForm({\n    title: props.menu.advertising_banner?.title ?? '',\n    message: props.menu.advertising_banner?.message ?? '',\n    cta_label: props.menu.advertising_banner?.cta_label ?? '',\n    cta_url: props.menu.advertising_banner?.cta_url ?? '',\n});\n\nconst hasBannerContent = computed(() => Boolean(\n    bannerForm.title || bannerForm.message || bannerForm.cta_label || bannerForm.cta_url\n));\n\nfunction saveBanner(): void {\n    bannerForm.put('/catalog/menu/banner', { preserveScroll: true });\n}\n\nfunction clearBanner(): void {\n    bannerForm.title = '';\n    bannerForm.message = '';\n    bannerForm.cta_label = '';\n    bannerForm.cta_url = '';\n}\n\nconst previewMode = ref<'mobile' | 'desktop'>('mobile');
+const bannerForm = useForm({
+    title: props.menu.advertising_banner?.title ?? '',
+    message: props.menu.advertising_banner?.message ?? '',
+    cta_label: props.menu.advertising_banner?.cta_label ?? '',
+    cta_url: props.menu.advertising_banner?.cta_url ?? '',
+});
+
+const hasBannerContent = computed(() => Boolean(
+    bannerForm.title || bannerForm.message || bannerForm.cta_label || bannerForm.cta_url
+));
+
+function saveBanner(): void {
+    bannerForm.put('/catalog/menu/banner', { preserveScroll: true });
+}
+
+function clearBanner(): void {
+    bannerForm.title = '';
+    bannerForm.message = '';
+    bannerForm.cta_label = '';
+    bannerForm.cta_url = '';
+}
+
+const previewMode = ref<'mobile' | 'desktop'>('mobile');
 
 const previewClasses: Record<string, string> = {
     classic: 'rounded-xl border border-stone-200 bg-white shadow-sm',
