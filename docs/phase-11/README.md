@@ -1,8 +1,7 @@
 # Phase 11 — Public Menu Customization
 
-Status: In progress  
-Current increment: 11.12 — Cross-feature write tenant-isolation audit  
-Implementation branch: `feat/phase-11-write-tenant-isolation`
+Status: Complete  
+Completed through PR #82; next phase: Phase 12 — Localization and Translation Management
 
 ## Delivered in increment 11.1
 
@@ -216,8 +215,10 @@ Implementation branch: `feat/phase-11-write-tenant-isolation`
 - MenuTenantIntegrationTest passed on both database engines.
 - Frontend unit tests, Vue/TypeScript checks, PHPStan, and Production image validation passed.
 
-### Increment 11.12 — current branch
+### Increment 11.12 — merged PR #82
 
-- Product, business-settings, and logo write-isolation tests are in progress; CI verification is pending.
-
-- Accessibility improvements and nested tenant-route isolation coverage are in progress; CI verification is pending.
+- SQLite: 258 passed, 7 skipped.
+- PostgreSQL: 265 passed.
+- MenuCustomizationTenantIsolationTest passed on both database engines.
+- Product update, business settings/introduction, and business-logo upload were verified against forged foreign active-business sessions.
+- Frontend unit tests, Vue/TypeScript checks, PHPStan, and Production image validation passed.
