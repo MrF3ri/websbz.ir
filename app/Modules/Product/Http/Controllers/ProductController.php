@@ -6,6 +6,8 @@ use App\Modules\Business\Models\Business;
 use App\Modules\Category\Models\Category;
 use App\Modules\Menu\Actions\EnsurePrimaryMenuAction;
 use App\Modules\Menu\Models\Menu;
+use App\Modules\Media\Models\Media;
+use App\Modules\Media\Models\ProductImage;
 use App\Modules\Product\Actions\CreateProductAction;
 use App\Modules\Product\Http\Requests\ReorderProductsRequest;
 use App\Modules\Product\Http\Requests\SaveProductRequest;
@@ -87,7 +89,8 @@ class ProductController
         $menu = $this->currentMenu($currentBusiness, $ensurePrimaryMenu);
         $product = $this->resolveProduct($menu, $productPublicId);
         Gate::authorize('delete', $product);
-        $mediaItems = $product->images()->with('media')->get()->pluck('media')->filter();
+        $mediaItems = $product->images()->with('media')->get()
+            ->map(fn (ProductImage $image): Media => $image->media);
 
         DB::transaction(function () use ($menu, $product, $mediaItems): void {
             $lockedMenu = Menu::query()->whereKey($menu->getKey())->lockForUpdate()->firstOrFail();
