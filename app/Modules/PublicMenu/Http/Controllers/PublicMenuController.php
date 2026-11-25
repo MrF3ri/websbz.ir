@@ -151,12 +151,12 @@ class PublicMenuController
             ];
         });
 
-        if (! is_array($publicMenu) || ! is_array($publicMenu['menu'] ?? null)) {
+        if (is_array($publicMenu) && is_array($publicMenu['menu'] ?? null)) {
+            $publicMenu['menu']['image_slider_enabled'] = (new EntitlementService($business))
+                ->hasFeature('image_slider');
+        } else {
             throw new LogicException('The cached public menu payload is invalid.');
         }
-
-        $publicMenu['menu']['image_slider_enabled'] = (new EntitlementService($business))
-            ->hasFeature('image_slider');
 
         return Inertia::render('PublicMenu/Show', $publicMenu);
     }
