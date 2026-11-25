@@ -73,6 +73,14 @@ Implementation branch: `feat/phase-11-accessibility-tenant-audit`
 - Add tests for Top access, Professional denial, downgrade preservation/reset, and public renderer fallbacks.
 - Record the behavior in ADR 0021.
 
+## Delivered in increment 11.8 — merged PR #78
+
+- Extract the six allow-listed template preview styles into a typed frontend module.
+- Give each template a distinct frame, header, and product-card treatment.
+- Keep mobile and desktop preview widths explicit and deterministic.
+- Add Vitest coverage for all six template IDs, distinct visual treatments, responsive widths, and unknown-template fallback.
+- Improve preview control accessibility with group semantics, pressed states, and decorative preview hiding.
+
 ## Delivered in increment 11.9 — merged PR #79
 
 - Add cache-invalidation regression tests for theme updates and business-logo upload/removal against a warm public-menu cache.
