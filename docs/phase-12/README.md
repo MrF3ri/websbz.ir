@@ -1,8 +1,8 @@
 # Phase 12 — Localization and Translation Management
 
-Status: In progress  
-Current increment: 12.6 — PostgreSQL translation write concurrency  
-Implementation branch: `test/phase-12-translation-postgres-concurrency`
+Status: Feature implementation complete; repository-wide Release Gate pending  
+Current increment: 12.6 — PostgreSQL translation write concurrency (delivered)  
+Implementation branch: `main`
 
 ## Approved scope
 
@@ -63,7 +63,7 @@ Economic and Professional remain single-language. Locale availability is control
 - Verify translation writes invalidate a warm public-menu cache and translated content is visible on the next request.
 - Preserve the existing per-menu transaction and row-lock boundary.
 
-## Increment 12.6 — PostgreSQL translation write concurrency (in review)
+## Delivered in increment 12.6 — merged PR #95: PostgreSQL translation write concurrency
 
 - Extract the existing per-menu transaction and row-lock logic into `SaveMenuTranslationsAction`; the HTTP controller remains responsible for tenant authorization, locale entitlement, and cache invalidation.
 - Exercise concurrent writes for English and Arabic on the same menu using independent PostgreSQL connections.
@@ -77,7 +77,7 @@ The approved normalized translation schema and Phase 12 tasks cover menu, catego
 
 ## Remaining Phase 12 work
 
-1. Reconcile the phase roadmap and run the full repository Release Gate when all product phases are complete.
+1. Include Phase 12 in the full repository Release Gate after all product phases are complete.
 
 ## Acceptance criteria
 
@@ -102,4 +102,4 @@ The approved normalized translation schema and Phase 12 tasks cover menu, catego
 
 ## CI verification
 
-GitHub Actions verification is pending for the current branch head.
+PR #95 passed the exact-head SQLite test/quality checks, PostgreSQL test suite, and production image/Compose validation before merge. The verified PR head was `0d72e2dd99062f39708c15d8d361e884e7af89d8`; merge commit: `47bb089fe34ab8988020a9c4e317d5b407b1d5be`.
