@@ -25,7 +25,7 @@ class BusinessSettingsController
 
         Gate::authorize('view', $business);
 
-        $logo = $business->logo()->first();
+        $logo = $business->logo()->with('media')->first();
 
         return Inertia::render('Business/Settings', [
             'business' => array_merge($business->only([
@@ -36,7 +36,7 @@ class BusinessSettingsController
                 'city',
                 'postal_code',
             ]), [
-                'logo_url' => $logo ? route('media.business-logo', [$business->public_id, $logo->public_id]) : null,
+                'logo_url' => $logo ? route('media.business-logo', [$business->public_id, $logo->media->public_id]) : null,
             ]),
             'features' => [
                 'business_logo' => (new EntitlementService($business))->hasFeature('business_logo'),
