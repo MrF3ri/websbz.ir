@@ -232,7 +232,7 @@ function branchQrDataUrl(branch: Branch): string {
                     <p v-if="branch.address" class="mt-3 flex items-start gap-2 text-sm text-muted-foreground"><MapPin class="mt-0.5 size-4 shrink-0" />{{ branch.address }}</p>
                     <p v-if="branch.phone" dir="ltr" class="mt-2 text-left text-sm text-muted-foreground">{{ branch.phone }}</p>
                     <div v-if="branch.public_url" class="mt-4 flex flex-col items-center gap-3 rounded-lg border border-border bg-muted/20 p-3 sm:flex-row sm:items-center">
-                        <img :src="branchQrDataUrl(branch)" :alt="QR منوی شعبه" width="112" height="112" class="size-28 rounded-md border border-border bg-white p-1" />
+                        <img :src="branchQrDataUrl(branch)" :alt="'QR منوی شعبه ' + branch.name" width="112" height="112" class="size-28 rounded-md border border-border bg-white p-1" />
                         <div class="min-w-0 flex-1 space-y-2 text-center sm:text-right">
                             <div class="flex items-center justify-center gap-2 text-sm font-medium sm:justify-start"><QrCode class="size-4 text-primary" /> منوی عمومی این شعبه</div>
                             <a :href="branch.public_url" target="_blank" rel="noopener noreferrer" class="text-sm text-primary underline underline-offset-4">مشاهده منوی شعبه</a>
