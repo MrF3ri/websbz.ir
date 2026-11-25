@@ -26,7 +26,7 @@ Pull request: #73 (Draft)
 - Invalidate public-menu cache after logo changes and clean up replaced media objects.
 - Add ADR 0016 for the private logo storage and tenant isolation contract.
 
-## Delivered in increment 11.3 (implementation in progress)
+## Delivered in increment 11.3
 
 - Add a server-owned product-label registry (`new`, `popular`, `recommended`, `chef_special`).
 - Gate new and changed labels through the `product_labels` subscription snapshot on the server.
@@ -65,4 +65,14 @@ Pull request: #73 (Draft)
 - BusinessLogoTest and Backblaze B2 S3 integration: passed.
 - Frontend unit tests: 7 passed; Vue/TypeScript checks passed.
 - Pint: 236 files passed; PHPStan reported no errors.
+- Production image build, Compose validation, and Nginx validation: passed.
+
+### Increment 11.3 — PR #73
+
+- SQLite: 233 passed, 7 skipped (500 assertions).
+- PostgreSQL: 240 passed (583 assertions).
+- Catalog entitlement, downgrade-preservation, and public-menu label tests: passed.
+- Backblaze B2 S3 integration: passed in both database jobs.
+- Frontend unit tests: 7 passed; Vue/TypeScript checks passed.
+- Pint: 238 files passed; PHPStan reported no errors.
 - Production image build, Compose validation, and Nginx validation: passed.
