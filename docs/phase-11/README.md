@@ -1,8 +1,8 @@
 # Phase 11 — Public Menu Customization
 
 Status: In progress  
-Current increment: 11.10 — Accessibility and tenant-isolation audit  
-Implementation branch: `feat/phase-11-accessibility-tenant-audit`
+Current increment: 11.11 — Tenant-session integration coverage  
+Implementation branch: `feat/phase-11-tenant-integration-tests`
 
 ## Delivered in increment 11.1
 
@@ -88,16 +88,21 @@ Implementation branch: `feat/phase-11-accessibility-tenant-audit`
 - Verify failed logo replacement cleanup retains the old media metadata for retry.
 - Document the storage cleanup contract in ADR 0016.
 
-## Delivered in increment 11.10 (implementation in progress)
+## Delivered in increment 11.10 — merged PR #80
 
 - Add explicit accessible labels for the public menu landmark, template radio group, and advertising banner.
 - Improve product image alternative text with image ordering and expose the slider as a named image gallery region.
 - Announce the empty-menu state to assistive technology.
 - Add a nested-route tenant-isolation regression test proving a business cannot resolve another business's menu.
 
+## Delivered in increment 11.11 (implementation in progress)
+
+- Add controller-level integration tests proving a forged foreign active-business session cannot redirect menu theme or advertising-banner updates to another tenant.
+- Verify the tenant middleware restores the authenticated user's own active business before the settings controllers execute.
+
 ## Remaining Phase 11 work
 
-1. Complete accessibility and tenant-isolation review for the public-menu customization flows.
+1. Complete the remaining tenant-isolation and accessibility review for the public-menu customization flows.
 2. Verify all new behavior across SQLite and PostgreSQL and retain the existing Release Gate requirements.
 
 ## Operational constraints
@@ -191,6 +196,16 @@ Implementation branch: `feat/phase-11-accessibility-tenant-audit`
 - Frontend unit tests, Vue/TypeScript checks, Pint, and PHPStan passed.
 - Production image build, Compose validation, and Nginx validation passed.
 
-### Increment 11.10 — current branch
+### Increment 11.10 — merged PR #80
+
+- SQLite: 253 passed, 7 skipped.
+- PostgreSQL: 260 passed.
+- PublicMenuTenantIsolationTest passed on both database engines.
+- Frontend unit tests: 3 files passed; Vue/TypeScript checks and PHPStan passed.
+- Production image build, Compose validation, and Nginx validation passed.
+
+### Increment 11.11 — current branch
+
+- Tenant-session integration coverage for theme and banner settings is in progress; CI verification is pending.
 
 - Accessibility improvements and nested tenant-route isolation coverage are in progress; CI verification is pending.
