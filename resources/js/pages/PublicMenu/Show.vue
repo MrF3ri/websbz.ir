@@ -27,7 +27,7 @@ defineProps<{
         title: string;
         slug: string;
         locale: string;
-        theme: { template: string; primary_color: string; font: string; mode: string };
+        theme: { template: string; primary_color: string; font: string; mode: string; density: string; card_style: string; heading_size: string };
         image_slider_enabled: boolean;
         advertising_banner: { title: string | null; message: string | null; cta_label: string | null; cta_url: string | null } | null;
     };
@@ -39,6 +39,45 @@ const tomanFormatter = new Intl.NumberFormat('fa-IR', {
 });
 
 const productLabelTitles = { new: 'جدید', popular: 'پرفروش', recommended: 'پیشنهاد ویژه', chef_special: 'پیشنهاد سرآشپز' } as const;
+
+const densityClasses: Record<string, string> = {
+    compact: 'space-y-6',
+    comfortable: 'space-y-8',
+    spacious: 'space-y-10',
+};
+const categoryDensityClasses: Record<string, string> = {
+    compact: 'space-y-2',
+    comfortable: 'space-y-3',
+    spacious: 'space-y-5',
+};
+const productPaddingClasses: Record<string, string> = {
+    compact: 'px-4 py-3',
+    comfortable: 'px-5 py-4',
+    spacious: 'px-6 py-6',
+};
+const headingSizeClasses: Record<string, string> = {
+    normal: 'text-3xl sm:text-4xl',
+    large: 'text-4xl sm:text-5xl',
+    display: 'text-5xl sm:text-6xl',
+};
+const categoryHeadingClasses: Record<string, string> = {
+    normal: 'text-xl',
+    large: 'text-2xl',
+    display: 'text-3xl',
+};
+const productBorderClasses: Record<string, string> = {
+    classic: 'border border-stone-200 dark:border-stone-800',
+    minimal: 'border-0',
+    editorial: 'border-y border-stone-300 dark:border-stone-700',
+    modern: 'border border-stone-200 dark:border-stone-700',
+    cafe: 'border border-amber-200 dark:border-amber-900',
+    contrast: 'border-2 border-stone-900 dark:border-white',
+};
+const cardStyleClasses: Record<string, string> = {
+    standard: 'rounded-2xl shadow-sm',
+    flat: 'rounded-none shadow-none',
+    elevated: 'rounded-3xl shadow-lg',
+};
 const imageSliderRefs = new Map<string, HTMLDivElement>();
 
 function setImageSliderRef(publicId: string, element: unknown): void {
@@ -76,14 +115,14 @@ function formatPrice(value: number): string {
 
     <div :class="menu.theme.mode === 'dark' ? 'dark' : ''">
     <main dir="rtl" lang="fa" :data-template="menu.theme.template" :style="{ '--menu-accent': menu.theme.primary_color }"  :class="['min-h-screen bg-stone-50 px-4 py-8 text-stone-900 dark:bg-stone-950 dark:text-stone-100 sm:py-12', menu.theme.font === 'serif' ? 'font-serif' : menu.theme.font === 'rounded' ? 'font-sans tracking-wide' : 'font-sans']">
-        <div class="mx-auto w-full max-w-3xl space-y-8">
+        <div class="mx-auto w-full max-w-3xl" :class="densityClasses[menu.theme.density] ?? densityClasses.comfortable">
             <header class="border border-stone-200 bg-white px-6 py-8 text-center shadow-sm dark:border-stone-800 dark:bg-stone-900 sm:px-10"  :class="{ classic: 'rounded-3xl shadow-sm', minimal: 'rounded-xl border-0 shadow-none', editorial: 'rounded-none border-x-0 border-t-0 shadow-none', modern: 'rounded-2xl border-2 border-stone-100 shadow-lg dark:border-stone-700', cafe: 'rounded-[2rem] border-amber-200 dark:border-amber-900', contrast: 'rounded-md border-2 border-stone-900 shadow-md dark:border-white' }[menu.theme.template] ?? 'rounded-3xl'">
                 <img v-if="business.logo_url" :src="business.logo_url" :alt="'لوگوی ' + business.name" class="mx-auto mb-4 size-20 rounded-xl object-contain" width="80" height="80" />
                 <p class="text-sm font-medium text-stone-500 dark:text-stone-400">
                     {{ business.name }}
                 </p>
                 <p v-if="business.introduction" class="mx-auto mt-3 max-w-2xl text-sm leading-7 text-stone-600 dark:text-stone-300">{{ business.introduction }}</p>
-                <h1 class="mt-2 text-3xl font-bold tracking-tight sm:text-4xl" style="color: var(--menu-accent)">
+                <h1 class="mt-2 font-bold tracking-tight" :class="headingSizeClasses[menu.theme.heading_size] ?? headingSizeClasses.normal" style="color: var(--menu-accent)">
                     {{ menu.title }}
                 </h1>
                 <p class="mt-3 text-sm text-stone-500 dark:text-stone-400">
@@ -113,10 +152,10 @@ function formatPrice(value: number): string {
                 <section
                     v-for="(category, index) in categories"
                     :key="category.name + '-' + index"
-                    class="space-y-3"
+                    :class="categoryDensityClasses[menu.theme.density] ?? categoryDensityClasses.comfortable"
                 >
                     <div class="flex items-center gap-3">
-                        <h2 class="text-xl font-bold" style="color: var(--menu-accent)">{{ category.name }}</h2>
+                        <h2 class="font-bold" :class="categoryHeadingClasses[menu.theme.heading_size] ?? categoryHeadingClasses.normal" style="color: var(--menu-accent)">{{ category.name }}</h2>
                         <div class="h-px flex-1 bg-stone-200 dark:bg-stone-800" />
                     </div>
 
@@ -124,8 +163,7 @@ function formatPrice(value: number): string {
                         <article
                             v-for="(product, productIndex) in category.products"
                             :key="product.public_id"
-                            class="px-5 py-4"
-                            :class="{ 'border-t border-stone-100 dark:border-stone-800': productIndex > 0 }"
+                            :class="[productPaddingClasses[menu.theme.density] ?? productPaddingClasses.comfortable, productIndex > 0 ? 'border-t border-stone-100 dark:border-stone-800' : '']"
                         >
                             <div v-if="menu.image_slider_enabled && product.images.length > 1" class="mb-4">
                                 <div class="mb-2 flex justify-end gap-2" dir="rtl">
