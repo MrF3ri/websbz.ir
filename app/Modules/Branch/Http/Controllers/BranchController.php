@@ -8,6 +8,7 @@ use App\Modules\Branch\Actions\UpdateBranchAction;
 use App\Modules\Branch\Http\Requests\SaveBranchRequest;
 use App\Modules\Branch\Models\Branch;
 use App\Modules\Business\Models\Business;
+use App\Modules\Menu\Enums\MenuStatus;
 use App\Modules\Menu\Models\Menu;
 use App\Modules\PublicMenu\Services\PublicMenuCache;
 use App\Modules\Tenancy\Services\CurrentBusiness;
@@ -24,25 +25,40 @@ class BranchController
         $business = $this->resolveBusiness($currentBusiness);
         Gate::authorize('view', $business);
 
+        $menu = Menu::query()->where('business_id', $business->getKey())->firstOrFail();
+        $menuIsPublished = $menu->status === MenuStatus::Published;
+
+        $branches = $business->branches()
+            ->orderByDesc('is_primary')
+            ->orderBy('id')
+            ->get([
+                'public_id',
+                'name',
+                'slug',
+                'status',
+                'is_primary',
+                'phone',
+                'email',
+                'address',
+                'latitude',
+                'longitude',
+                'timezone',
+                'opening_hours',
+            ])
+            ->map(function (Branch $branch) use ($business, $menu, $menuIsPublished): Branch {
+                $branch->setAttribute(
+                    'public_url',
+                    $menuIsPublished && $branch->status === 'active'
+                        ? route('public.menu.branch.show', [$business->slug, $menu->slug, $branch->slug])
+                        : null,
+                );
+
+                return $branch;
+            });
+
         return Inertia::render('Branches/Index', [
             'canManage' => Gate::allows('update', $business),
-            'branches' => $business->branches()
-                ->orderByDesc('is_primary')
-                ->orderBy('id')
-                ->get([
-                    'public_id',
-                    'name',
-                    'slug',
-                    'status',
-                    'is_primary',
-                    'phone',
-                    'email',
-                    'address',
-                    'latitude',
-                    'longitude',
-                    'timezone',
-                    'opening_hours',
-                ]),
+            'branches' => $branches,
         ]);
     }
 

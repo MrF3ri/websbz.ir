@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue';
 import { Head, router, useForm } from '@inertiajs/vue3';
-import { Building2, Clock3, MapPin, Plus, Save, Store, X } from '@lucide/vue';
+import { Building2, Clock3, MapPin, Plus, QrCode, Save, Store, X } from '@lucide/vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
+import { createQrSvg } from '@/lib/qrCode';
 
 type Weekday = 'sat' | 'sun' | 'mon' | 'tue' | 'wed' | 'thu' | 'fri';
 type Period = { open: string; close: string };
@@ -23,6 +24,7 @@ type Branch = {
     longitude: string | number | null;
     timezone: string;
     opening_hours: OpeningHours | null;
+    public_url: string | null;
 };
 type DayState = { closed: boolean; first: Period; secondEnabled: boolean; second: Period };
 
@@ -149,6 +151,23 @@ function daySummary(branch: Branch): string {
     const openDays = Object.values(branch.opening_hours).filter((periods) => periods && periods.length > 0).length;
     return openDays === 0 ? 'تمام روزها تعطیل' : `${numberFormatter.format(openDays)} روز دارای ساعت کاری`;
 }
+
+const branchQrDataUrls = computed<Record<string, string>>(() => {
+    const urls: Record<string, string> = {};
+
+    for (const branch of props.branches) {
+        if (!branch.public_url) continue;
+
+        const svg = createQrSvg(branch.public_url);
+        urls[branch.public_id] = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    }
+
+    return urls;
+});
+
+function branchQrDataUrl(branch: Branch): string {
+    return branchQrDataUrls.value[branch.public_id] ?? '';
+}
 </script>
 
 <template>
@@ -175,7 +194,7 @@ function daySummary(branch: Branch): string {
                 <form class="space-y-6 p-5 sm:p-6" @submit.prevent="submit">
                     <div class="grid gap-5 sm:grid-cols-2">
                         <div class="grid gap-2"><Label for="branch-name">نام شعبه *</Label><Input id="branch-name" v-model="form.name" required maxlength="160" placeholder="مثلاً شعبه مرکزی" :disabled="form.processing" /><p v-if="form.errors.name" class="text-sm text-destructive">{{ form.errors.name }}</p></div>
-                        <div class="grid gap-2"><Label for="branch-slug">شناسه نشانی (انگلیسی) *</Label><Input id="branch-slug" v-model="form.slug" required maxlength="80" dir="ltr" placeholder="central" :disabled="form.processing" /><p v-if="form.errors.slug" class="text-sm text-destructive">{{ form.errors.slug }}</p></div>
+                        <div class="grid gap-2"><Label for="branch-slug">شناسه نشانی (انگلیسی) *</Label><Input id="branch-slug" v-model="form.slug" required maxlength="80" dir="ltr" placeholder="central" :disabled="form.processing || selected !== null" /><p v-if="selected" class="text-xs text-muted-foreground">شناسه نشانی پس از ایجاد ثابت می‌ماند تا QRهای چاپ‌شده معتبر بمانند.</p><p v-if="form.errors.slug" class="text-sm text-destructive">{{ form.errors.slug }}</p></div>
                         <div class="grid gap-2"><Label for="branch-phone">تلفن</Label><Input id="branch-phone" v-model="form.phone" type="tel" dir="ltr" placeholder="+982112345678" :disabled="form.processing" /><p v-if="form.errors.phone" class="text-sm text-destructive">{{ form.errors.phone }}</p></div>
                         <div class="grid gap-2"><Label for="branch-email">ایمیل</Label><Input id="branch-email" v-model="form.email" type="email" dir="ltr" placeholder="branch@example.com" :disabled="form.processing" /><p v-if="form.errors.email" class="text-sm text-destructive">{{ form.errors.email }}</p></div>
                         <div class="grid gap-2 sm:col-span-2"><Label for="branch-address">نشانی</Label><textarea id="branch-address" v-model="form.address" rows="2" class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" :disabled="form.processing" /><p v-if="form.errors.address" class="text-sm text-destructive">{{ form.errors.address }}</p></div>
@@ -221,6 +240,17 @@ function daySummary(branch: Branch): string {
                     <div class="mt-4 flex flex-wrap gap-2 text-xs"><span v-if="branch.is_primary" class="rounded-md bg-primary/10 px-2 py-1 text-primary">شعبه اصلی</span><span class="rounded-md bg-muted px-2 py-1 text-muted-foreground">{{ daySummary(branch) }}</span></div>
                     <p v-if="branch.address" class="mt-3 flex items-start gap-2 text-sm text-muted-foreground"><MapPin class="mt-0.5 size-4 shrink-0" />{{ branch.address }}</p>
                     <p v-if="branch.phone" dir="ltr" class="mt-2 text-left text-sm text-muted-foreground">{{ branch.phone }}</p>
+                    <div v-if="branch.public_url" class="mt-4 flex flex-col items-center gap-3 rounded-lg border border-border bg-muted/20 p-3 sm:flex-row sm:items-center">
+                        <img :src="branchQrDataUrl(branch)" :alt="'QR منوی شعبه ' + branch.name" width="112" height="112" class="size-28 rounded-md border border-border bg-white p-1" />
+                        <div class="min-w-0 flex-1 space-y-2 text-center sm:text-right">
+                            <div class="flex items-center justify-center gap-2 text-sm font-medium sm:justify-start"><QrCode class="size-4 text-primary" /> منوی عمومی این شعبه</div>
+                            <a :href="branch.public_url" target="_blank" rel="noopener noreferrer" class="text-sm text-primary underline underline-offset-4">مشاهده منوی شعبه</a>
+                            <div>
+                                <a :href="branchQrDataUrl(branch)" :download="'menu-' + branch.slug + '-qr.svg'" class="inline-flex items-center rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:bg-accent">دانلود QR (SVG)</a>
+                            </div>
+                        </div>
+                    </div>
+                    <p v-else class="mt-4 rounded-lg bg-muted/30 px-3 py-2 text-xs leading-5 text-muted-foreground">QR این شعبه پس از فعال بودن شعبه و انتشار منوی عمومی در دسترس خواهد بود.</p>
                     <div v-if="canManage" class="mt-5 flex flex-wrap gap-2 border-t border-border pt-4">
                         <Button size="sm" variant="outline" @click="fillForm(branch)">ویرایش اطلاعات</Button>
                         <Button v-if="!branch.is_primary" size="sm" :variant="branch.status === 'active' ? 'destructive' : 'secondary'" @click="setStatus(branch)">{{ branch.status === 'active' ? 'غیرفعال‌سازی' : 'فعال‌سازی' }}</Button>

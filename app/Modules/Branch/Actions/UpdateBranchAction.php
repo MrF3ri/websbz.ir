@@ -5,6 +5,7 @@ namespace App\Modules\Branch\Actions;
 use App\Modules\Branch\Models\Branch;
 use App\Modules\Business\Models\Business;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class UpdateBranchAction
 {
@@ -24,9 +25,14 @@ class UpdateBranchAction
                 ->lockForUpdate()
                 ->firstOrFail();
 
+            if (isset($data['slug']) && $data['slug'] !== $lockedBranch->slug) {
+                throw ValidationException::withMessages([
+                    'slug' => 'شناسه نشانی شعبه پس از ایجاد قابل تغییر نیست.',
+                ]);
+            }
+
             $attributes = [
                 'name' => $data['name'],
-                'slug' => $data['slug'],
             ];
 
             foreach (['phone', 'email', 'address', 'latitude', 'longitude', 'timezone', 'opening_hours'] as $field) {

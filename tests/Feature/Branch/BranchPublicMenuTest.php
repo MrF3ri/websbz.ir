@@ -189,4 +189,33 @@ class BranchPublicMenuTest extends TestCase
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page->where('categories.0.products.0.name', 'Canonical'));
     }
+
+    public function test_branch_management_page_exposes_branch_qr_only_for_active_branches_with_a_published_menu(): void
+    {
+        [$user, $business, $menu] = $this->createCatalogTenant('top');
+        $primary = app(EnsurePrimaryBranchAction::class)->execute($business);
+        $secondary = app(CreateBranchAction::class)->execute($business, [
+            'name' => 'North Branch',
+            'slug' => 'north',
+        ]);
+        app(SetBranchStatusAction::class)->execute($business, $secondary, false);
+        $user->forceFill(['email_verified_at' => now()])->save();
+        $menu->update(['status' => MenuStatus::Published]);
+
+        $this->actingAs($user)
+            ->get(route('business.branches.manage'))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('branches.0.public_url', route('public.menu.branch.show', [$business->slug, $menu->slug, $primary->slug]))
+                ->where('branches.1.public_url', null));
+
+        $menu->update(['status' => MenuStatus::Draft]);
+
+        $this->actingAs($user)
+            ->get(route('business.branches.manage'))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('branches.0.public_url', null)
+                ->where('branches.1.public_url', null));
+    }
 }

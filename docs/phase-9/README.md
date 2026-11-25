@@ -1,8 +1,8 @@
 # Phase 9 — Branch Management
 
 Status: In progress  
-Current increment: 9.2 — Branch-aware public menu projection  
-Implementation branch: `feat/phase-9-branch-public-read`  
+Current increment: 9.3 — Branch-specific public menu QR  
+Implementation branch: `feat/phase-9-branch-menu-qr`  
 Approved model: Hybrid shared catalog with branch-level overrides (ADR 0014)
 
 ## Delivered foundation
@@ -23,13 +23,21 @@ Approved model: Hybrid shared catalog with branch-level overrides (ADR 0014)
 - Scope the public-menu cache by branch and invalidate all branch projections when canonical menu data changes.
 - Keep branch content overrides ahead of canonical translations; untranslated fields continue to use existing locale fallback.
 
+## Increment 9.3 — Branch-specific QR targets
+
+- Expose each active branch's stable public URL in the branch management page only while the canonical menu is published.
+- Generate QR SVG locally in the browser using the existing QR utility; no third-party QR service receives the URL.
+- Display and download a separate SVG QR for each active branch.
+- Do not offer a QR for inactive branches or unpublished menus.
+- Branch slugs are immutable after creation so previously printed branch QR codes keep resolving to the same branch.
+- Preserve the existing primary-menu QR in the catalog page for backward compatibility.
+
 ## Remaining Phase 9 work
 
 1. Add tenant-scoped management UI and actions for category/product branch settings, including explicit clear/inherit semantics and validation of effective discounts and stock.
-2. Add QR targets that resolve to the selected branch's stable public URL.
-3. Audit every canonical and branch-specific write path for correct branch-cache invalidation.
-4. Add PostgreSQL concurrency coverage for branch quota and settings writes.
-5. Complete owner-driven end-to-end acceptance: create a second branch, customize it, scan its QR, and verify the primary branch is unchanged.
+2. Audit every canonical and branch-specific write path for correct branch-cache invalidation.
+3. Add PostgreSQL concurrency coverage for branch quota and settings writes.
+4. Complete owner-driven end-to-end acceptance: create a second branch, customize it, scan its QR, and verify the primary branch is unchanged.
 
 ## Effective product rules
 
