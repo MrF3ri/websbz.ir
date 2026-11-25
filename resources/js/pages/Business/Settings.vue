@@ -14,11 +14,12 @@ interface Business {
     city: string | null;
     postal_code: string | null;
     logo_url: string | null;
+    introduction: string | null;
 }
 
 const props = defineProps<{
     business: Business;
-    features: { business_logo: boolean; can_manage_logo: boolean };
+    features: { business_logo: boolean; can_manage_logo: boolean; business_introduction: boolean };
 }>();
 
 defineOptions({
@@ -39,6 +40,7 @@ const form = useForm({
     address: props.business.address ?? '',
     city: props.business.city ?? '',
     postal_code: props.business.postal_code ?? '',
+    introduction: props.business.introduction ?? '',
 });
 
 const logoForm = useForm<{ logo: File | null }>({ logo: null });
@@ -216,6 +218,29 @@ function submit() {
                                 {{ form.errors.email }}
                             </p>
                         </div>
+                    </div>
+                </section>
+
+                <section class="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+                    <div class="border-b border-border px-5 py-4 sm:px-6">
+                        <h2 class="font-semibold text-foreground">معرفی کسب‌وکار</h2>
+                        <p class="mt-1 text-xs text-muted-foreground">متنی کوتاه درباره فضای کسب‌وکار و تجربه‌ای که به مشتری ارائه می‌دهید.</p>
+                    </div>
+                    <div class="space-y-3 p-5 sm:p-6">
+                        <Label for="business-introduction">متن معرفی (حداکثر ۱۲۰۰ نویسه)</Label>
+                        <textarea
+                            id="business-introduction"
+                            v-model="form.introduction"
+                            rows="4"
+                            maxlength="1200"
+                            class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm leading-6 outline-none focus-visible:ring-2 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-60"
+                            :readonly="!features.business_introduction && Boolean(form.introduction)"
+                            :disabled="!features.business_introduction && !form.introduction"
+                            :aria-invalid="Boolean(form.errors.introduction)"
+                        />
+                        <p v-if="form.errors.introduction" class="text-sm text-destructive" role="alert">{{ form.errors.introduction }}</p>
+                        <p v-if="!features.business_introduction" class="text-xs text-muted-foreground">معرفی کسب‌وکار در طرح فعلی قابل ویرایش نیست. متن قبلی حفظ می‌شود؛ می‌توانید آن را حذف کنید.</p>
+                        <Button v-if="!features.business_introduction && form.introduction" type="button" variant="outline" size="sm" @click="form.introduction = ''">حذف معرفی قبلی</Button>
                     </div>
                 </section>
 
