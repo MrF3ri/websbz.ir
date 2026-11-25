@@ -15,6 +15,16 @@ use Inertia\Response;
 
 class PublicMenuController
 {
+    /** @return array{url: string, width: int, height: int} */
+    private function imageData(ProductImage $image): array
+    {
+        return [
+            'url' => route('media.public', $image->media->public_id),
+            'width' => $image->media->width,
+            'height' => $image->media->height,
+        ];
+    }
+
     public function show(
         string $businessSlug,
         string $menuSlug,
@@ -68,11 +78,7 @@ class PublicMenuController
                         'description' => $product->description,
                         'price' => $product->base_price,
                         'discount_price' => $product->discount_price,
-                        'images' => $product->images->map(fn (ProductImage $image): array => [
-                            'url' => route('media.public', $image->media->public_id),
-                            'width' => $image->media->width,
-                            'height' => $image->media->height,
-                        ])->values()->all(),
+                        'images' => $product->images->map(fn (ProductImage $image): array => $this->imageData($image))->values()->all(),
                     ])->values()->all(),
                 ])->values()->all(),
             ];
