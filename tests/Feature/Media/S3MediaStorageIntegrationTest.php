@@ -23,6 +23,7 @@ class S3MediaStorageIntegrationTest extends TestCase
         if (
             getenv('MEDIA_S3_INTEGRATION') !== '1'
             || getenv('MEDIA_S3_BUCKET_IS_NON_PRODUCTION') !== '1'
+            || ! class_exists(\League\Flysystem\AwsS3V3\PortableVisibilityConverter::class)
             || blank(config('filesystems.disks.s3.key'))
             || blank(config('filesystems.disks.s3.secret'))
             || blank(config('filesystems.disks.s3.bucket'))
