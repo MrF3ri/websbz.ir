@@ -17,6 +17,7 @@ use App\Modules\Tenancy\Services\CurrentBusiness;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 class ProductController
@@ -86,11 +87,24 @@ class ProductController
         $menu = $this->currentMenu($currentBusiness, $ensurePrimaryMenu);
         $product = $this->resolveProduct($menu, $productPublicId);
         Gate::authorize('delete', $product);
+        $mediaItems = $product->images()->with('media')->get()->pluck('media')->filter();
 
-        DB::transaction(function () use ($menu, $product): void {
+        DB::transaction(function () use ($menu, $product, $mediaItems): void {
             $lockedMenu = Menu::query()->whereKey($menu->getKey())->lockForUpdate()->firstOrFail();
             $lockedMenu->products()->whereKey($product->getKey())->firstOrFail()->delete();
+
+            foreach ($mediaItems as $media) {
+                if (! $media->productImages()->exists()) {
+                    $media->delete();
+                }
+            }
         });
+
+        foreach ($mediaItems as $media) {
+            if (! $media->fresh()) {
+                Storage::disk($media->disk)->delete($media->path);
+            }
+        }
         $publicMenuCache->forget($menu);
 
         return back()->with('success', 'محصول حذف شد.');
