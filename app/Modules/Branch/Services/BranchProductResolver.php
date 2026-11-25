@@ -16,7 +16,7 @@ class BranchProductResolver
     {
         $basePrice = $setting?->base_price_override ?? $product->base_price;
         $discountPrice = match ($setting?->discount_override_mode ?? 'inherit') {
-            'set' => $setting->discount_price_override,
+            'set' => $setting?->discount_price_override,
             'clear' => null,
             default => $product->discount_price,
         };
