@@ -80,9 +80,9 @@ function save(): void {
                         <h2 class="font-semibold">انتخاب قالب</h2>
                         <p class="mt-1 text-sm text-muted-foreground">پیش‌نمایش‌های زیر در چیدمان واکنش‌گرا نمایش داده می‌شوند.</p>
                     </div>
-                    <div class="flex items-center gap-1 rounded-lg border border-border p-1" aria-label="اندازه پیش‌نمایش">
-                        <button type="button" class="rounded-md px-3 py-1.5 text-xs" :class="previewMode === 'mobile' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'" @click="previewMode = 'mobile'">موبایل</button>
-                        <button type="button" class="rounded-md px-3 py-1.5 text-xs" :class="previewMode === 'desktop' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'" @click="previewMode = 'desktop'">دسکتاپ</button>
+                    <div role="group" aria-label="اندازه پیش‌نمایش" class="flex items-center gap-1 rounded-lg border border-border p-1">
+                        <button type="button" class="rounded-md px-3 py-1.5 text-xs"  :class="previewMode === 'mobile' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'" :aria-pressed="previewMode === 'mobile'" @click="previewMode = 'mobile'">موبایل</button>
+                        <button type="button" class="rounded-md px-3 py-1.5 text-xs"  :class="previewMode === 'desktop' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'" :aria-pressed="previewMode === 'desktop'" @click="previewMode = 'desktop'">دسکتاپ</button>
                     </div>
                 </div>
                 <p class="mt-1 text-sm text-muted-foreground">قالب‌های قابل انتخاب بر اساس اشتراک فعال نمایش داده می‌شوند.</p>
@@ -94,7 +94,7 @@ function save(): void {
                         :class="form.template === key ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'"
                     >
                         <span
-                            class="mx-auto mb-3 block overflow-hidden p-3 transition-[width]"
+                            aria-hidden="true" class="mx-auto mb-3 block overflow-hidden p-3 transition-[width]"
                             :class="[getMenuTemplatePreview(key, previewMode).viewport, getMenuTemplatePreview(key, previewMode).frame]"
                         >
                             <span class="mb-2 flex items-center justify-between gap-2">
