@@ -5,11 +5,14 @@ namespace Tests\Feature\Business;
 use App\Enums\BusinessRole;
 use App\Modules\Menu\Enums\MenuStatus;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\Concerns\InteractsWithCatalog;
 use Tests\TestCase;
+use App\Modules\Media\Models\BusinessLogo;
 
 class BusinessLogoTest extends TestCase
 {
@@ -164,6 +167,27 @@ class BusinessLogoTest extends TestCase
 
         $this->get(route('media.business-logo', [$businessB->public_id, $media->public_id]))
             ->assertOk();
+    }
+
+    public function test_database_rejects_a_logo_media_record_from_another_business(): void
+    {
+        [, $businessA] = $this->createCatalogTenant('professional');
+        [$userB, $businessB] = $this->createCatalogTenant('professional');
+
+        $this->actingAs($userB)->post(route('business.logo.store'), [
+            'logo' => UploadedFile::fake()->image('other-tenant.png', 128, 128),
+        ])->assertRedirect();
+
+        $media = $businessB->fresh()->logo()->with('media')->firstOrFail()->media;
+
+        $this->expectException(QueryException::class);
+
+        DB::table('business_logos')->insert([
+            'business_id' => $businessA->getKey(),
+            'media_id' => $media->getKey(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
     }
 
     public function test_logo_upload_rejects_mismatched_file_content(): void
