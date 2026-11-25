@@ -2,7 +2,10 @@
 
 namespace Tests\Feature\Menu;
 
+use App\Modules\Menu\Enums\MenuStatus;
+use App\Modules\Product\Enums\ProductStatus;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\Concerns\InteractsWithCatalog;
 use Tests\TestCase;
@@ -138,6 +141,87 @@ class MenuTranslationsTest extends TestCase
             'product_id' => $product->getKey(),
             'locale' => 'en',
         ]);
+    }
+
+    public function test_forged_foreign_active_business_session_cannot_write_foreign_menu_translations(): void
+    {
+        [$userA, , $menuA] = $this->createCatalogTenant('top');
+        [, $businessB, $menuB] = $this->createCatalogTenant('top');
+        $categoryB = $this->createCatalogCategory($menuB, 'Tenant B category');
+        $productB = $this->createCatalogProduct($menuB, $categoryB, 'Tenant B product');
+
+        $this->actingAs($userA)
+            ->withSession(['active_business_id' => $businessB->getKey()])
+            ->put(route('catalog.menu.translations.update', 'en'), [
+                'menu_title' => 'Forged translation',
+                'categories' => [
+                    ['public_id' => $categoryB->public_id, 'name' => 'Foreign category'],
+                ],
+                'products' => [
+                    ['public_id' => $productB->public_id, 'name' => 'Foreign product'],
+                ],
+            ])
+            ->assertSessionHasErrors(['categories', 'products']);
+
+        $this->assertDatabaseMissing('menu_translations', [
+            'menu_id' => $menuA->getKey(),
+            'locale' => 'en',
+        ]);
+        $this->assertDatabaseMissing('menu_translations', [
+            'menu_id' => $menuB->getKey(),
+            'locale' => 'en',
+        ]);
+        $this->assertDatabaseMissing('category_translations', [
+            'category_id' => $categoryB->getKey(),
+            'locale' => 'en',
+        ]);
+        $this->assertDatabaseMissing('product_translations', [
+            'product_id' => $productB->getKey(),
+            'locale' => 'en',
+        ]);
+    }
+
+    public function test_saving_translations_invalidates_a_warm_public_menu_cache(): void
+    {
+        config(['cache.default' => 'array']);
+        Cache::store('array')->flush();
+
+        [$user, $business, $menu] = $this->createCatalogTenant('top');
+        $category = $this->createCatalogCategory($menu, 'قهوه');
+        $product = $this->createCatalogProduct(
+            $menu,
+            $category,
+            'اسپرسو',
+            status: ProductStatus::Published,
+        );
+        $menu->update(['status' => MenuStatus::Published]);
+        $url = route('public.menu.show', [$business->slug, $menu->slug]).'?lang=en';
+
+        $this->get($url)
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('menu.title', $menu->title)
+                ->where('categories.0.name', 'قهوه')
+                ->where('categories.0.products.0.name', 'اسپرسو'));
+
+        $this->actingAs($user)
+            ->put(route('catalog.menu.translations.update', 'en'), [
+                'menu_title' => 'Coffee menu',
+                'categories' => [
+                    ['public_id' => $category->public_id, 'name' => 'Coffee'],
+                ],
+                'products' => [
+                    ['public_id' => $product->public_id, 'name' => 'Espresso'],
+                ],
+            ])
+            ->assertRedirect(route('catalog.menu.translations.edit', 'en'));
+
+        $this->get($url)
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('menu.title', 'Coffee menu')
+                ->where('categories.0.name', 'Coffee')
+                ->where('categories.0.products.0.name', 'Espresso'));
     }
 
     public function test_translation_update_rejects_category_and_product_ids_from_another_menu(): void
