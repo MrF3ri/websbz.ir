@@ -178,7 +178,7 @@ class BranchPublicMenuTest extends TestCase
             'name_override' => 'South-only',
         ]);
 
-        app(\App\Modules\PublicMenu\Services\PublicMenuCache::class)->forget($menu, $branch);
+        app(PublicMenuCache::class)->forget($menu, $branch);
 
         $this->get(route('public.menu.branch.show', [$business->slug, $menu->slug, $branch->slug]))
             ->assertOk()
