@@ -10,8 +10,8 @@ class MenuThemeRegistry
 {
     /**
      * The first three templates are available on Economic; Professional and Top
-     * receive the complete predefined registry. Template availability is also
-     * constrained by the subscription snapshot, never by plan-name checks.
+     * receive the complete predefined registry. Availability comes from the
+     * subscription snapshot, never from plan-name checks.
      *
      * @var array<string, array{name: string, description: string, layout: string}>
      */
@@ -24,15 +24,11 @@ class MenuThemeRegistry
         'contrast' => ['name' => 'کنتراست', 'description' => 'تضاد بصری بیشتر برای مرور سریع', 'layout' => 'contrast'],
     ];
 
-    public function __construct(
-        private readonly EntitlementService $entitlements,
-    ) {}
-
     /** @return array<string, array{name: string, description: string, layout: string}> */
-    public function availableFor(Business $business): array
+    public function availableFor(Business $business, EntitlementService $entitlements): array
     {
-        $this->assertBusinessContext($business);
-        $limit = $this->entitlements->getLimit('menu_template_count');
+        $this->assertBusinessContext($business, $entitlements);
+        $limit = $entitlements->getLimit('menu_template_count');
 
         if ($limit === -1) {
             return self::TEMPLATES;
@@ -46,9 +42,12 @@ class MenuThemeRegistry
     }
 
     /** @return array{name: string, description: string, layout: string} */
-    public function findAvailable(Business $business, string $template): array
-    {
-        $available = $this->availableFor($business);
+    public function findAvailable(
+        Business $business,
+        EntitlementService $entitlements,
+        string $template,
+    ): array {
+        $available = $this->availableFor($business, $entitlements);
 
         if (! isset($available[$template])) {
             throw new AccessDeniedHttpException('The selected menu template is not available for this plan.');
@@ -57,9 +56,9 @@ class MenuThemeRegistry
         return $available[$template];
     }
 
-    private function assertBusinessContext(Business $business): void
+    private function assertBusinessContext(Business $business, EntitlementService $entitlements): void
     {
-        if (! $this->entitlements->isForBusiness($business)) {
+        if (! $entitlements->isForBusiness($business)) {
             throw new \LogicException('The entitlement service is bound to a different business.');
         }
     }
