@@ -69,7 +69,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::get('/business/settings', [BusinessSettingsController::class, 'edit'])->name('business.settings.edit');
         Route::put('/business/settings', [BusinessSettingsController::class, 'update'])->name('business.settings.update');
-        Route::post('/business/logo', [BusinessLogoController::class, 'store'])->name('business.logo.store');
+        Route::post('/business/logo', [BusinessLogoController::class, 'store'])->middleware('throttle:5,1')->name('business.logo.store');
         Route::delete('/business/logo', [BusinessLogoController::class, 'destroy'])->name('business.logo.destroy');
 
         Route::get('/business/branches', [BranchController::class, 'index'])->name('business.branches.index');
