@@ -1,6 +1,6 @@
 # Roadmap and delivery status
 
-Last reviewed: 2026-11-25
+Last reviewed: 2026-11-26
 
 This roadmap preserves the phase numbering in `docs/master-spec.md` and its ERRATA. Historical audit statements describe the repository at the time of that audit; the current status below reflects the changes merged afterward.
 
@@ -69,8 +69,8 @@ This snapshot records the operational state reported and verified during the own
 
 ## Current product phase
 
-- **Phase 12 — Localization and Translation Management:** in progress. PRs #83–#87 delivered the locale registry/schema, Top-only translation management, public-menu locale rendering, translation completeness, and tenant/cache regression coverage. Remaining: decide whether banner and business-introduction fields enter the approved translation model, then complete the repository-wide Release Gate. Only Top supports `fa`, `en`, and `ar`; Economic and Professional remain single-language. See `docs/phase-12/README.md`.
-- **Phase 9 — Branch Management:** implementation resumed. The branch schema/lifecycle foundation is already merged; increment 9.1 centralizes canonical-to-branch product value resolution. The public branch read path, branch catalog settings UI, branch-specific URLs/QR, and PostgreSQL concurrency acceptance remain. See `docs/phase-9/README.md`.
+- **Phase 12 — Localization and Translation Management:** in progress. PRs #83–#87 delivered the locale registry/schema, Top-only translation management, public-menu locale rendering, translation completeness, and tenant/cache regression coverage. Increment 12.6 extracts translation persistence into an action and adds PostgreSQL concurrency coverage for simultaneous locale writes. The approved translation schema covers menu, category, product name, and product description; banner and business-introduction fields remain outside the approved translation scope. Only Top supports `fa`, `en`, and `ar`; Economic and Professional remain single-language. See `docs/phase-12/README.md`.
+- **Phase 9 — Branch Management:** implementation is merged through PRs #89–#94: branch-aware public menu projection, branch-specific QR targets, immutable branch slugs, branch catalog settings, cache invalidation audit, and PostgreSQL quota/settings concurrency tests. Only owner-controlled physical acceptance remains: create a second branch, customize it, scan its downloaded QR with a phone, and verify the primary branch is unchanged. No production deployment is included. See `docs/phase-9/README.md`.
 - **Phase 11 — Menu Customization and Visual Templates:** complete and merged through PR #82. See `docs/phase-11/README.md` for increment-level implementation and CI history.
 
 ## Deferred product phases

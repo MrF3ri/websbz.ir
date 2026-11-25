@@ -5,14 +5,13 @@ namespace App\Modules\Menu\Http\Controllers;
 use App\Modules\Business\Models\Business;
 use App\Modules\Localization\Services\LocaleRegistry;
 use App\Modules\Menu\Actions\EnsurePrimaryMenuAction;
+use App\Modules\Menu\Actions\SaveMenuTranslationsAction;
 use App\Modules\Menu\Http\Requests\SaveMenuTranslationsRequest;
 use App\Modules\Menu\Models\Menu;
 use App\Modules\PublicMenu\Services\PublicMenuCache;
 use App\Modules\Tenancy\Services\CurrentBusiness;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -81,6 +80,7 @@ class MenuTranslationsController
         CurrentBusiness $currentBusiness,
         EnsurePrimaryMenuAction $ensurePrimaryMenu,
         LocaleRegistry $localeRegistry,
+        SaveMenuTranslationsAction $saveTranslations,
         PublicMenuCache $publicMenuCache,
     ): RedirectResponse {
         $business = $this->currentBusiness($currentBusiness);
@@ -91,70 +91,7 @@ class MenuTranslationsController
         /** @var array{menu_title: string, categories: list<array{public_id: string, name: string}>, products: list<array{public_id: string, name: string, description?: string|null}>} $data */
         $data = $request->validated();
 
-        DB::transaction(function () use ($menu, $locale, $data): void {
-            $lockedMenu = Menu::query()
-                ->where('business_id', $menu->business_id)
-                ->whereKey($menu->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
-
-            $categories = $lockedMenu->categories()->lockForUpdate()->get();
-            $products = $lockedMenu->products()->lockForUpdate()->get();
-
-            $submittedCategoryIds = collect($data['categories'])
-                ->pluck('public_id')
-                ->sort()
-                ->values()
-                ->all();
-            $expectedCategoryIds = $categories->pluck('public_id')->sort()->values()->all();
-
-            $submittedProductIds = collect($data['products'])
-                ->pluck('public_id')
-                ->sort()
-                ->values()
-                ->all();
-            $expectedProductIds = $products->pluck('public_id')->sort()->values()->all();
-
-            $errors = [];
-
-            if ($submittedCategoryIds !== $expectedCategoryIds) {
-                $errors['categories'] = 'فهرست دسته‌بندی‌ها باید دقیقاً متعلق به همین منو باشد.';
-            }
-
-            if ($submittedProductIds !== $expectedProductIds) {
-                $errors['products'] = 'فهرست محصولات باید دقیقاً متعلق به همین منو باشد.';
-            }
-
-            if ($errors !== []) {
-                throw ValidationException::withMessages($errors);
-            }
-
-            $lockedMenu->translations()->updateOrCreate(
-                ['locale' => $locale],
-                ['title' => $data['menu_title']],
-            );
-
-            foreach ($data['categories'] as $translation) {
-                $category = $categories->firstWhere('public_id', $translation['public_id']);
-
-                $category->translations()->updateOrCreate(
-                    ['locale' => $locale],
-                    ['name' => $translation['name']],
-                );
-            }
-
-            foreach ($data['products'] as $translation) {
-                $product = $products->firstWhere('public_id', $translation['public_id']);
-
-                $product->translations()->updateOrCreate(
-                    ['locale' => $locale],
-                    [
-                        'name' => $translation['name'],
-                        'description' => $translation['description'] ?? null,
-                    ],
-                );
-            }
-        });
+        $saveTranslations->execute($menu, $locale, $data);
 
         $publicMenuCache->forget($menu);
 

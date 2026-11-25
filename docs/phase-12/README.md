@@ -1,8 +1,8 @@
 # Phase 12 — Localization and Translation Management
 
 Status: In progress  
-Current increment: 12.5 — Translation tenant-isolation and cache regression coverage  
-Implementation branch: `test/phase-12-translation-isolation`
+Current increment: 12.6 — PostgreSQL translation write concurrency  
+Implementation branch: `test/phase-12-translation-postgres-concurrency`
 
 ## Approved scope
 
@@ -57,17 +57,27 @@ Economic and Professional remain single-language. Locale availability is control
 - Show completed, total, and remaining translation fields in the translation editor.
 - Add request-level coverage proving blank required menu/category/product text is rejected before translation rows are persisted.
 
-## Increment 12.5 — translation tenant-isolation and cache regression coverage
+## Delivered in increment 12.5 — merged PR #87: translation tenant-isolation and cache regression coverage
 
 - Verify a forged foreign active-business session cannot write translations for another tenant's menu.
 - Verify translation writes invalidate a warm public-menu cache and translated content is visible on the next request.
 - Preserve the existing per-menu transaction and row-lock boundary.
 
+## Increment 12.6 — PostgreSQL translation write concurrency (in review)
+
+- Extract the existing per-menu transaction and row-lock logic into `SaveMenuTranslationsAction`; the HTTP controller remains responsible for tenant authorization, locale entitlement, and cache invalidation.
+- Exercise concurrent writes for English and Arabic on the same menu using independent PostgreSQL connections.
+- Verify each locale's menu/category/product translation rows persist without interleaving or loss.
+- Force a failure after the menu row lock is acquired and verify a waiting locale write proceeds after rollback.
+- Observe real PostgreSQL lock waits through `pg_stat_activity`; SQLite skips these tests because it does not provide the required row-lock semantics.
+
+## Scope clarification
+
+The approved normalized translation schema and Phase 12 tasks cover menu, category, product name, and product description fields. Advertising banner and business-introduction content are not included in that schema or the approved translation tasks, so they remain outside this increment unless a later product decision expands the scope.
+
 ## Remaining Phase 12 work
 
-1. Review translation behavior for banner and business-introduction fields; these fields are not part of the approved normalized translation tables yet.
-2. Add broader PostgreSQL concurrency coverage for simultaneous translation writes if the CI test harness can exercise independent connections deterministically.
-3. Reconcile the phase roadmap and run the full repository Release Gate when all product phases are complete.
+1. Reconcile the phase roadmap and run the full repository Release Gate when all product phases are complete.
 
 ## Acceptance criteria
 
