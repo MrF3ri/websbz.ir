@@ -4,6 +4,8 @@ namespace Tests\Feature\PublicMenu;
 
 use App\Enums\BusinessStatus;
 use App\Modules\Menu\Enums\MenuStatus;
+use App\Modules\Media\Models\Media;
+use App\Modules\Media\Models\ProductImage;
 use App\Modules\Product\Enums\ProductLabel;
 use App\Modules\Product\Enums\ProductStatus;
 use Illuminate\Database\Events\QueryExecuted;
@@ -171,12 +173,34 @@ class PublicMenuTest extends TestCase
 
         [, $business, $menu] = $this->createCatalogTenant('professional');
         $category = $this->createCatalogCategory($menu, 'Coffee');
-        $this->createCatalogProduct(
+        $product = $this->createCatalogProduct(
             $menu,
             $category,
             'Gallery coffee',
             status: ProductStatus::Published,
         );
+
+        foreach ([1, 2] as $index) {
+            $media = Media::query()->create([
+                'business_id' => $menu->business_id,
+                'disk' => 'media',
+                'path' => "products/gallery-{$index}.jpg",
+                'mime_type' => 'image/jpeg',
+                'size' => 1200,
+                'width' => 800,
+                'height' => 600,
+                'variants' => null,
+            ]);
+
+            ProductImage::query()->create([
+                'business_id' => $menu->business_id,
+                'menu_id' => $menu->getKey(),
+                'product_id' => $product->getKey(),
+                'media_id' => $media->getKey(),
+                'sort_order' => $index,
+            ]);
+        }
+
         $menu->update(['status' => MenuStatus::Published]);
 
         $url = route('public.menu.show', [$business->slug, $menu->slug]);
@@ -184,7 +208,8 @@ class PublicMenuTest extends TestCase
         $this->get($url)
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->where('menu.image_slider_enabled', true));
+                ->where('menu.image_slider_enabled', true)
+                ->has('categories.0.products.0.images', 2));
 
         $subscription = $business->subscriptions()->latest('id')->firstOrFail();
         $snapshot = $subscription->features_snapshot;
@@ -194,7 +219,8 @@ class PublicMenuTest extends TestCase
         $this->get($url)
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->where('menu.image_slider_enabled', false));
+                ->where('menu.image_slider_enabled', false)
+                ->has('categories.0.products.0.images', 2));
     }
 
     public function test_guest_cannot_view_a_draft_menu_or_suspended_business(): void
