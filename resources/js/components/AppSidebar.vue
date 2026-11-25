@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, Building2, ClipboardList, CreditCard, FolderGit2, LayoutGrid, Store } from '@lucide/vue';
+import { BookOpen, Building2, ClipboardList, CreditCard, FolderGit2, LayoutGrid, Palette, Store } from '@lucide/vue';
 import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
@@ -15,7 +15,7 @@ import type { NavItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
     { title: 'داشبورد', href: dashboard(), icon: LayoutGrid },
-    { title: 'مدیریت منو', href: catalogIndex(), icon: ClipboardList },
+    { title: 'مدیریت منو', href: catalogIndex(), icon: ClipboardList },\n    { title: 'قالب و ظاهر منو', href: '/catalog/menu/theme', icon: Palette },
     { title: 'مدیریت شعب', href: '/business/branches/manage', icon: Store },
     { title: 'اشتراک و پرداخت', href: '/billing', icon: CreditCard },
     { title: 'تنظیمات کسب‌وکار', href: '/business/settings', icon: Building2 },
