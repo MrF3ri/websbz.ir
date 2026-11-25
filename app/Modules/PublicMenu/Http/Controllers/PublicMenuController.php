@@ -5,10 +5,10 @@ namespace App\Modules\PublicMenu\Http\Controllers;
 use App\Enums\BusinessStatus;
 use App\Modules\Business\Models\Business;
 use App\Modules\Category\Models\Category;
+use App\Modules\Localization\Services\LocaleRegistry;
 use App\Modules\Media\Models\ProductImage;
 use App\Modules\Menu\Enums\MenuStatus;
 use App\Modules\Menu\Models\Menu;
-use App\Modules\Localization\Services\LocaleRegistry;
 use App\Modules\Product\Enums\ProductStatus;
 use App\Modules\Product\Models\Product;
 use App\Modules\PublicMenu\Services\PublicMenuCache;
@@ -94,7 +94,7 @@ class PublicMenuController
     }
 
     /**
-     * @return array{public_id: string, name: string, description: string|null, label: string|null, price: int, discount_price: int|null, images: array<int, array{url: string, srcset: string, sizes: string, width: int, height: int}>}
+     * @return array{public_id: string, name: string, description: string|null, label: string|null, price: int, discount_price: int|null, images: array<int, array{url: string, srcset: string, sizes: string, width: int, height: int}>, translations: array<string, array{name: string, description: string|null}>}
      */
     private function productData(Product $product): array
     {
