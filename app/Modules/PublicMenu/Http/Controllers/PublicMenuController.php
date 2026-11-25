@@ -127,7 +127,7 @@ class PublicMenuController
         $data = [
             'title' => $title !== '' ? $title : null,
             'message' => $message !== '' ? $message : null,
-            'cta_label' => $ctaLabel !== '' ? $ctaLabel : null,
+            'cta_label' => $ctaLabel,
             'cta_url' => $ctaUrl,
         ];
 
