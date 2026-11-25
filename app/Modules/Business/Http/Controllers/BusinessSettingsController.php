@@ -40,6 +40,7 @@ class BusinessSettingsController
             ]),
             'features' => [
                 'business_logo' => (new EntitlementService($business))->hasFeature('business_logo'),
+                'can_manage_logo' => Gate::allows('update', $business),
             ],
         ]);
     }
