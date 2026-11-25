@@ -15,7 +15,7 @@ Professional and Top subscriptions enable an image slider. The public menu alrea
 - Render the existing responsive image grid when the feature is unavailable or there is only one image.
 - Use fixed application markup and classes; do not accept user-supplied HTML or CSS.
 - Resolve `image_slider` outside the cached public-menu catalog payload so a subscription change takes effect immediately without requiring a menu cache purge.
-- Version the public-menu cache key when the payload shape changes, so cached entries created before product public IDs and slider fields are added cannot be reused.
+- Version the public-menu cache key when the payload shape changes, so cached entries created before product public IDs, slider fields, and custom design tokens are added cannot be reused.
 - Make the slider keyboard-focusable and provide accessible region labels and control labels.
 
 ## Consequences
