@@ -7,12 +7,12 @@ use App\Modules\Menu\Enums\MenuStatus;
 use Illuminate\Database\QueryException;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use RuntimeException;
 use Inertia\Testing\AssertableInertia as Assert;
+use RuntimeException;
 use Tests\Concerns\InteractsWithCatalog;
 use Tests\TestCase;
 
@@ -239,7 +239,6 @@ class BusinessLogoTest extends TestCase
             ->assertInertia(fn (Assert $page) => $page->where('business.logo_url', null));
     }
 
-
     public function test_replacement_storage_failure_keeps_old_media_metadata_for_retry(): void
     {
         [$user, $business] = $this->createCatalogTenant('professional');
@@ -302,5 +301,4 @@ class BusinessLogoTest extends TestCase
         $this->assertTrue($business->fresh()->logo()->exists());
         $this->assertDatabaseHas('media', ['id' => $media->getKey(), 'path' => $media->path]);
     }
-
 }
