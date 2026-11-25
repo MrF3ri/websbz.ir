@@ -52,7 +52,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/onboarding', [BusinessOnboardingController::class, 'store'])->name('onboarding.store');
 
     Route::middleware([TenantMiddleware::class])->group(function () {
-        Route::inertia('dashboard', 'Dashboard')->name('dashboard');
+        Route::inertia('dashboard', 'Dashboard')->name('dashboard');\n\n        Route::get('/catalog/menu/theme', [MenuThemeController::class, 'edit'])->name('catalog.menu.theme.edit');\n        Route::put('/catalog/menu/theme', [MenuThemeController::class, 'update'])->name('catalog.menu.theme.update');
 
         Route::get('/billing', [BillingController::class, 'index'])->name('billing.index');
         Route::post('/billing/payments', [ManualPaymentController::class, 'store'])
