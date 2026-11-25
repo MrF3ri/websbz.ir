@@ -67,7 +67,7 @@ class PublicMenuController
                         'name' => $product->name,
                         'description' => $product->description,
                         'price' => $product->base_price,
-                        'discount_price' => $product->discount_price,
+                        'discount_price' => $product->discount_price,\n                        'images' => $product->images->map(fn ($image): array => [\n                            'url' => route('media.public', $image->media->public_id),\n                            'width' => $image->media->width,\n                            'height' => $image->media->height,\n                        ])->values()->all(),
                     ])->values()->all(),
                 ])->values()->all(),
             ];
