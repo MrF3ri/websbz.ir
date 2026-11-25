@@ -10,6 +10,7 @@ use App\Modules\Media\Http\Controllers\MediaController;
 use App\Modules\Menu\Http\Controllers\MenuBannerController;
 use App\Modules\Menu\Http\Controllers\MenuPublicationController;
 use App\Modules\Menu\Http\Controllers\MenuThemeController;
+use App\Modules\Menu\Http\Controllers\MenuTranslationsController;
 use App\Modules\Platform\Http\Controllers\AdminAuditLogController;
 use App\Modules\Platform\Http\Controllers\AdminBusinessController;
 use App\Modules\Platform\Http\Controllers\AdminDashboardController;
@@ -60,6 +61,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::get('/catalog/menu/theme', [MenuThemeController::class, 'edit'])->name('catalog.menu.theme.edit');
         Route::put('/catalog/menu/theme', [MenuThemeController::class, 'update'])->name('catalog.menu.theme.update');
+        Route::get('/catalog/menu/translations/{locale}', [MenuTranslationsController::class, 'edit'])->name('catalog.menu.translations.edit');
+        Route::put('/catalog/menu/translations/{locale}', [MenuTranslationsController::class, 'update'])->name('catalog.menu.translations.update');
         Route::put('/catalog/menu/banner', [MenuBannerController::class, 'update'])->name('catalog.menu.banner.update');
 
         Route::get('/billing', [BillingController::class, 'index'])->name('billing.index');

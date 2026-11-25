@@ -1,8 +1,8 @@
 # Phase 12 — Localization and Translation Management
 
 Status: In progress  
-Current increment: 12.1 — Locale registry and translation schema  
-Implementation branch: `feat/phase-12-localization`
+Current increment: 12.2 — Tenant-scoped translation management  
+Implementation branch: `feat/phase-12-translation-management`
 
 ## Approved scope
 
@@ -14,7 +14,7 @@ Support multilingual public menus for Top only:
 
 Economic and Professional remain single-language. Locale availability is controlled by the existing `max_languages` subscription snapshot.
 
-## Delivered in increment 12.1 (implementation in progress)
+## Delivered in increment 12.1 — merged PR #83
 
 - Add a centralized supported-locale registry with display names and direction metadata.
 - Resolve the available locale list from the current business subscription snapshot.
@@ -36,14 +36,22 @@ Economic and Professional remain single-language. Locale availability is control
 9. Prices, availability, labels, images, and branch overrides remain language-neutral.
 10. Public menu URL and tenant resolution remain unchanged.
 
+## Delivered in increment 12.2 (implementation in progress)
+
+- Add owner-authorized translation editor routes scoped to the authenticated current business.
+- Enforce locale availability through the existing subscription snapshot; the default locale is source text and cannot be edited as an alternate translation.
+- Save menu, category, and product translations atomically.
+- Require the submitted category and product public-ID sets to match the current menu exactly, rejecting cross-menu IDs and omissions.
+- Add a Top-only translation editor with source-text context, locale direction, and completion progress.
+- Show the translation navigation item only when max_languages exceeds one.
+
 ## Remaining Phase 12 work
 
-1. Implement tenant-scoped translation CRUD and Top-only authorization.
-2. Add validation and translation completeness indicators for menu/category/product text.
-3. Add a public-menu language switcher with locale entitlement enforcement.
-4. Render translated text with correct page language and direction.
-5. Implement deterministic fallback for missing translation fields.
-6. Add SQLite/PostgreSQL coverage for translation CRUD, entitlement changes, fallback, and cross-tenant access.
+1. Add validation and translation completeness indicators for menu/category/product text.
+2. Add a public-menu language switcher with locale entitlement enforcement.
+3. Render translated text with correct page language and direction.
+4. Implement deterministic fallback for missing translation fields.
+5. Add SQLite/PostgreSQL coverage for entitlement changes, fallback, and cross-tenant access.
 
 ## Operational constraints
 
