@@ -290,6 +290,22 @@ function uploadProductImage(product: Product, event: Event): void {
     });
 }
 
+function reorderProductImages(product: Product, image: ProductImage, direction: -1 | 1): void {
+    const current = [...product.images];
+    const index = current.findIndex((item) => item.public_id === image.public_id);
+    const target = index + direction;
+    if (index < 0 || target < 0 || target >= current.length) return;
+    [current[index], current[target]] = [current[target], current[index]];
+
+    router.put(`/catalog/products/${product.public_id}/images/reorder`, {
+        media_public_ids: current.map((item) => item.public_id),
+    }, {
+        preserveScroll: true,
+        onSuccess: () => { successMessage.value = 'ترتیب تصاویر ذخیره شد.'; },
+        onError: () => { serverError.value = 'مرتب‌سازی تصاویر انجام نشد.'; },
+    });
+}
+
 function deleteProductImage(product: Product, image: ProductImage): void {
     if (!window.confirm('این تصویر از محصول حذف شود؟')) return;
 
@@ -866,8 +882,14 @@ function goToPage(pageNumber: number): void {
                                         {{ product.description }}
                                     </p>
                                     <div v-if="product.images.length" class="mt-2 flex items-center gap-2">
-                                        <div v-for="image in product.images" :key="image.public_id" class="relative">
+                                        <div v-for="(image, imageIndex) in product.images" :key="image.public_id" class="relative">
                                             <img :src="image.url" :alt="`تصویر ${product.name}`" width="48" height="48" class="size-12 rounded-md object-cover" />
+                                            <button type="button" class="absolute -right-1 -top-1 rounded-full bg-background p-0.5 text-foreground shadow" :disabled="imageIndex === 0" :aria-label="`انتقال تصویر ${product.name} به بالا`" @click="reorderProductImages(product, image, -1)">
+                                                <ChevronUp class="size-3" />
+                                            </button>
+                                            <button type="button" class="absolute -right-1 -bottom-1 rounded-full bg-background p-0.5 text-foreground shadow" :disabled="imageIndex === product.images.length - 1" :aria-label="`انتقال تصویر ${product.name} به پایین`" @click="reorderProductImages(product, image, 1)">
+                                                <ChevronDown class="size-3" />
+                                            </button>
                                             <button type="button" class="absolute -left-1 -top-1 rounded-full bg-destructive p-0.5 text-white" :aria-label="`حذف تصویر ${product.name}`" @click="deleteProductImage(product, image)">
                                                 <X class="size-3" />
                                             </button>
