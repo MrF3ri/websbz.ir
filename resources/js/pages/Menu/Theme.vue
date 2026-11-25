@@ -8,11 +8,11 @@ type Template = { name: string; description: string; layout: string };
 
 const props = defineProps<{
     menu: {
-        theme: { template: string; primary_color: string; font: string; mode: string };
+        theme: { template: string; primary_color: string; font: string; mode: string; density: string; card_style: string; heading_size: string };
         advertising_banner: { title: string | null; message: string | null; cta_label: string | null; cta_url: string | null } | null;
     };
     templates: Record<string, Template>;
-    features: { custom_colors: boolean; font_selection: boolean; dark_mode: boolean; advertising_banner: boolean };
+    features: { custom_colors: boolean; font_selection: boolean; dark_mode: boolean; custom_design: boolean; advertising_banner: boolean };
 }>();
 
 const form = useForm({
@@ -20,6 +20,9 @@ const form = useForm({
     primary_color: props.menu.theme.primary_color,
     font: props.menu.theme.font,
     mode: props.menu.theme.mode,
+    density: props.menu.theme.density,
+    card_style: props.menu.theme.card_style,
+    heading_size: props.menu.theme.heading_size,
 });
 
 const bannerForm = useForm({
@@ -42,6 +45,14 @@ function clearBanner(): void {
     bannerForm.message = '';
     bannerForm.cta_label = '';
     bannerForm.cta_url = '';
+}
+
+const hasCustomDesign = computed(() => form.density !== 'comfortable' || form.card_style !== 'standard' || form.heading_size !== 'normal');
+
+function resetCustomDesign(): void {
+    form.density = 'comfortable';
+    form.card_style = 'standard';
+    form.heading_size = 'normal';
 }
 
 const previewMode = ref<'mobile' | 'desktop'>('mobile');
@@ -146,6 +157,41 @@ function save(): void {
                     </div>
                     <p v-if="!features.dark_mode" class="text-xs text-muted-foreground">حالت تاریک در طرح فعلی فعال نیست.</p>
                 </div>
+            </section>
+
+            <section class="space-y-4 rounded-xl border border-border bg-card p-5">
+                <div>
+                    <h2 class="font-semibold">تنظیمات طراحی اختصاصی</h2>
+                    <p class="mt-1 text-sm text-muted-foreground">چیدمان فاصله‌ها، سبک کارت محصولات و اندازه عنوان‌ها را با گزینه‌های کنترل‌شده تنظیم کنید.</p>
+                </div>
+                <div class="grid gap-4 sm:grid-cols-3">
+                    <div class="space-y-2">
+                        <label for="theme-density" class="text-sm font-medium">تراکم چیدمان</label>
+                        <select id="theme-density" v-model="form.density" class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm" :disabled="!features.custom_design">
+                            <option value="compact">فشرده</option>
+                            <option value="comfortable">استاندارد</option>
+                            <option value="spacious">باز و خلوت</option>
+                        </select>
+                    </div>
+                    <div class="space-y-2">
+                        <label for="theme-card-style" class="text-sm font-medium">سبک کارت محصول</label>
+                        <select id="theme-card-style" v-model="form.card_style" class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm" :disabled="!features.custom_design">
+                            <option value="standard">استاندارد</option>
+                            <option value="flat">تخت و ساده</option>
+                            <option value="elevated">برجسته</option>
+                        </select>
+                    </div>
+                    <div class="space-y-2">
+                        <label for="theme-heading-size" class="text-sm font-medium">اندازه عنوان‌ها</label>
+                        <select id="theme-heading-size" v-model="form.heading_size" class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm" :disabled="!features.custom_design">
+                            <option value="normal">معمولی</option>
+                            <option value="large">بزرگ</option>
+                            <option value="display">نمایشی</option>
+                        </select>
+                    </div>
+                </div>
+                <p v-if="!features.custom_design" class="text-xs text-muted-foreground">طراحی اختصاصی فقط در پلن Top فعال است. تنظیمات فعلی پس از کاهش پلن حفظ می‌شوند.</p>
+                <Button v-if="!features.custom_design && hasCustomDesign" type="button" variant="outline" size="sm" @click="resetCustomDesign">بازگشت تنظیمات طراحی به پیش‌فرض</Button>
             </section>
 
             <section class="space-y-4 rounded-xl border border-border bg-card p-5">
