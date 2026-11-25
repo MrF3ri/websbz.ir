@@ -19,7 +19,7 @@ type PublicCategory = {
     products: PublicProduct[];
 };
 
-defineProps<{
+const props = defineProps<{
     business: {
         name: string;
         slug: string;
