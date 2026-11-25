@@ -10,6 +10,7 @@ use App\Modules\Menu\Actions\EnsurePrimaryMenuAction;
 use App\Modules\Menu\Enums\MenuStatus;
 use App\Modules\Product\Enums\ProductStatus;
 use App\Modules\Product\Models\Product;
+use App\Modules\PublicMenu\Services\PublicMenuCache;
 use App\Modules\Tenancy\Services\CurrentBusiness;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
@@ -25,6 +26,7 @@ class MediaController
         CurrentBusiness $currentBusiness,
         EnsurePrimaryMenuAction $ensurePrimaryMenu,
         UploadProductImageAction $upload,
+        PublicMenuCache $publicMenuCache,
     ): RedirectResponse {
         $business = $this->business($currentBusiness);
         $menu = $ensurePrimaryMenu->execute($business);
@@ -33,6 +35,7 @@ class MediaController
         Gate::authorize('update', $product);
 
         $upload->execute($business, $product, $request->file('image'));
+        $publicMenuCache->forget($menu);
 
         return back()->with('success', 'تصویر محصول با موفقیت بارگذاری شد.');
     }
@@ -42,6 +45,7 @@ class MediaController
         string $mediaPublicId,
         CurrentBusiness $currentBusiness,
         EnsurePrimaryMenuAction $ensurePrimaryMenu,
+        PublicMenuCache $publicMenuCache,
     ): RedirectResponse {
         $business = $this->business($currentBusiness);
         $menu = $ensurePrimaryMenu->execute($business);
@@ -67,6 +71,7 @@ class MediaController
         if (! $media->fresh()) {
             Storage::disk($media->disk)->delete($media->path);
         }
+        $publicMenuCache->forget($menu);
 
         return back()->with('success', 'تصویر محصول حذف شد.');
     }
