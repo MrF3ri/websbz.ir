@@ -106,7 +106,9 @@ class PublicMenuController
             ->where('status', MenuStatus::Published)
             ->firstOrFail();
 
-        $publicMenu = $publicMenuCache->remember($menu, function () use ($menu, $business): array {\n            $logo = $business->logo()->first();\n            $logo = $business->logo()->first();
+        $publicMenu = $publicMenuCache->remember($menu, function () use ($menu, $business): array {
+            $logo = $business->logo()->first();
+            $logo = $business->logo()->first();
             $categories = $menu->categories()
                 ->where('is_active', true)
                 ->whereHas('products', function ($query) use ($menu): void {
@@ -131,6 +133,7 @@ class PublicMenuController
                 'business' => [
                     'name' => $business->name,
                     'slug' => $business->slug,
+                    'logo_url' => $logo ? route('media.business-logo', [$business->public_id, $logo->public_id]) : null,
                 ],
                 'menu' => [
                     'title' => $menu->title,
