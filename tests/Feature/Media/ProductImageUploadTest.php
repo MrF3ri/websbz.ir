@@ -181,6 +181,7 @@ class ProductImageUploadTest extends TestCase
         $this->assertDatabaseCount('media', 0);
         Storage::disk('media')->assertMissing($path);
     }
+
     public function test_owner_can_reorder_all_images_for_a_product(): void
     {
         [$user, , $menu] = $this->createCatalogTenant('top');
