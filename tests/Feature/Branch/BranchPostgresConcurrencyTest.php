@@ -89,7 +89,7 @@ class BranchPostgresConcurrencyTest extends TestCase
 
     public function test_failed_branch_creation_releases_business_lock_for_waiting_worker(): void
     {
-        [, $business, $menu] = $this->createCatalogTenant('top');
+        [, $business] = $this->createCatalogTenant('top');
         app(EnsurePrimaryBranchAction::class)->execute($business);
 
         [$first, $second] = $this->runContendedPair(
