@@ -8,10 +8,12 @@ use App\Modules\Category\Models\Category;
 use App\Modules\Media\Models\ProductImage;
 use App\Modules\Menu\Enums\MenuStatus;
 use App\Modules\Menu\Models\Menu;
+use App\Modules\Localization\Services\LocaleRegistry;
 use App\Modules\Product\Enums\ProductStatus;
 use App\Modules\Product\Models\Product;
 use App\Modules\PublicMenu\Services\PublicMenuCache;
 use App\Modules\Subscription\Services\EntitlementService;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use LogicException;
@@ -98,8 +100,8 @@ class PublicMenuController
     {
         return [
             'public_id' => $product->public_id,
-            'name' => $product->name,
-            'description' => $product->description,
+            'name' => $product->translations->first()->name ?? $product->name,
+            'description' => $product->translations->first()->description ?? $product->description,
             'label' => $product->label?->value,
             'price' => $product->base_price,
             'discount_price' => $product->discount_price,
@@ -149,9 +151,11 @@ class PublicMenuController
     }
 
     public function show(
+        Request $request,
         string $businessSlug,
         string $menuSlug,
         PublicMenuCache $publicMenuCache,
+        LocaleRegistry $localeRegistry,
     ): Response {
         $business = Business::query()
             ->where('slug', $businessSlug)
@@ -163,8 +167,19 @@ class PublicMenuController
             ->where('status', MenuStatus::Published)
             ->firstOrFail();
 
-        $publicMenu = $publicMenuCache->remember($menu, function () use ($menu, $business): array {
+        $requestedLocale = $request->query('lang');
+        $locale = $localeRegistry->resolveFor(
+            $business,
+            $menu->default_locale,
+            is_string($requestedLocale) ? $requestedLocale : null,
+        );
+        $defaultLocale = $menu->default_locale;
+
+        $publicMenu = $publicMenuCache->remember($menu, $locale, function () use ($menu, $business, $locale, $defaultLocale): array {
             $logo = $business->logo()->with('media')->first();
+            $menuTranslation = $locale === $defaultLocale
+                ? null
+                : $menu->translations()->where('locale', $locale)->first();
             $categories = $menu->categories()
                 ->where('is_active', true)
                 ->whereHas('products', function ($query) use ($menu): void {
@@ -173,14 +188,21 @@ class PublicMenuController
                         ->where('status', ProductStatus::Published)
                         ->where('is_available', true);
                 })
-                ->with(['products' => function ($query) use ($menu): void {
-                    $query
-                        ->where('products.menu_id', $menu->getKey())
-                        ->where('status', ProductStatus::Published)
-                        ->where('is_available', true)
-                        ->orderBy('sort_order')
-                        ->orderBy('id');
-                }, 'products.images.media'])
+                ->with([
+                    'translations' => fn ($query) => $query->where('locale', $locale),
+                    'products' => function ($query) use ($menu, $locale): void {
+                        $query
+                            ->where('products.menu_id', $menu->getKey())
+                            ->where('status', ProductStatus::Published)
+                            ->where('is_available', true)
+                            ->orderBy('sort_order')
+                            ->orderBy('id')
+                            ->with([
+                                'translations' => fn ($translationQuery) => $translationQuery->where('locale', $locale),
+                                'images.media',
+                            ]);
+                    },
+                ])
                 ->orderBy('sort_order')
                 ->orderBy('id')
                 ->get();
@@ -192,17 +214,26 @@ class PublicMenuController
                     'logo_url' => $logo ? route('media.business-logo', [$business->public_id, $logo->media->public_id]) : null,
                 ],
                 'menu' => [
-                    'title' => $menu->title,
+                    'title' => $menuTranslation->title ?? $menu->title,
                     'slug' => $menu->slug,
-                    'locale' => $menu->default_locale,
+                    'locale' => $locale,
                     'theme' => $this->themeData($menu),
                 ],
                 'categories' => $categories->map(fn (Category $category): array => [
-                    'name' => $category->name,
+                    'name' => $category->translations->first()->name ?? $category->name,
                     'products' => $category->products->map(fn (Product $product): array => $this->productData($product))->values()->all(),
                 ])->values()->all(),
             ];
         });
+
+        $publicMenu['menu']['direction'] = $localeRegistry->direction($locale);
+        $publicMenu['locales'] = collect($localeRegistry->availableFor($business))
+            ->map(fn (array $metadata, string $code): array => [
+                'code' => $code,
+                ...$metadata,
+            ])
+            ->values()
+            ->all();
 
         if (is_array($publicMenu) && is_array($publicMenu['menu'] ?? null) && is_array($publicMenu['business'] ?? null)) {
             $entitlements = new EntitlementService($business);
