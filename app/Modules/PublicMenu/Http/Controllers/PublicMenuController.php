@@ -212,7 +212,7 @@ class PublicMenuController
             ? $branchQuery->where('slug', $branchSlug)->firstOrFail()
             : $branchQuery->where('is_primary', true)->firstOrFail();
 
-        $publicMenu = $publicMenuCache->remember($menu, function () use ($menu, $business, $branch): array {
+        $publicMenu = $publicMenuCache->remember($menu, function () use ($menu, $business, $branch, $resolver): array {
             $logo = $business->logo()->with('media')->first();
             $categorySettings = $branch->categorySettings()->get()->keyBy('category_id');
             $productSettings = $branch->productSettings()->get()->keyBy('product_id');
