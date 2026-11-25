@@ -15,18 +15,39 @@ use Inertia\Response;
 
 class PublicMenuController
 {
-    /** @return array{url: string, width: int, height: int} */
+    /**
+     * @return array{url: string, srcset: string, sizes: string, width: int, height: int}
+     */
     private function imageData(ProductImage $image): array
     {
+        $media = $image->media;
+        $srcset = [];
+
+        foreach (['thumbnail', 'medium'] as $variantName) {
+            $variant = $media->variants[$variantName] ?? null;
+
+            if (is_array($variant) && isset($variant['width'])) {
+                $srcset[] = route('media.public', [
+                    'mediaPublicId' => $media->public_id,
+                    'variant' => $variantName,
+                ]).' '.$variant['width'].'w';
+            }
+        }
+
+        $originalUrl = route('media.public', $media->public_id);
+        $srcset[] = $originalUrl.' '.$media->width.'w';
+
         return [
-            'url' => route('media.public', $image->media->public_id),
-            'width' => $image->media->width,
-            'height' => $image->media->height,
+            'url' => $originalUrl,
+            'srcset' => implode(', ', $srcset),
+            'sizes' => '(max-width: 640px) 80px, 96px',
+            'width' => $media->width,
+            'height' => $media->height,
         ];
     }
 
     /**
-     * @return array{name: string, description: string|null, price: int, discount_price: int|null, images: array<int, array{url: string, width: int, height: int}>}
+     * @return array{name: string, description: string|null, price: int, discount_price: int|null, images: array<int, array{url: string, srcset: string, sizes: string, width: int, height: int}>}
      */
     private function productData(Product $product): array
     {
