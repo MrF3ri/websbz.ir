@@ -1,9 +1,9 @@
 # Phase 11 — Public Menu Customization
 
 Status: In progress  
-Current increment: 11.6 — Subscription-gated advertising banner  
-Implementation branch: `feat/phase-11-advertising-banner`  
-Pull request: #76 (Draft)
+Current increment: 11.7 — Top-only controlled custom design  
+Implementation branch: `feat/phase-11-top-custom-design`  
+Pull request: #77 (Draft)
 
 ## Delivered in increment 11.1
 
@@ -64,11 +64,20 @@ Pull request: #76 (Draft)
 - Add tests for plan access, HTTPS validation, downgrade behavior, and public rendering.
 - Record the decision in ADR 0020.
 
+## Delivered in increment 11.7 (implementation in progress)
+
+- Add Top-only controlled design tokens for density, product card style, and heading size.
+- Enforce `custom_design` from the current subscription snapshot on the server.
+- Preserve existing custom design, color, font, and mode values after downgrade when unchanged.
+- Permit resetting existing values to defaults without entitlement; deny assigning another non-default value.
+- Render only fixed allow-listed tokens and application-owned class maps; no user CSS, HTML, or JavaScript.
+- Add tests for Top access, Professional denial, downgrade preservation/reset, and public renderer fallbacks.
+- Record the behavior in ADR 0021.
+
 ## Remaining Phase 11 work
 
 1. Add visual regression coverage for all template previews and test mobile/desktop breakpoints.
-2. Add Top-plan controlled custom-design settings without arbitrary user HTML, CSS, or JavaScript.
-3. Verify accessibility, cache invalidation, tenant isolation, storage-failure recovery, and SQLite/PostgreSQL parity for all new features.
+2. Verify accessibility, cache invalidation, tenant isolation, storage-failure recovery, and SQLite/PostgreSQL parity for all new features.
 
 ## Operational constraints
 
@@ -125,7 +134,7 @@ Pull request: #76 (Draft)
 - PHPStan reported no errors; all CI quality checks passed.
 - Production image build, Compose validation, and Nginx validation: passed.
 
-### Increment 11.6 — PR #76
+### Increment 11.6 — merged PR #76
 
 - SQLite: 244 passed, 7 skipped.
 - PostgreSQL test suite: passed.
@@ -134,3 +143,7 @@ Pull request: #76 (Draft)
 - Frontend test files: 2 passed; Vue/TypeScript checks passed.
 - PHPStan reported no errors; all CI quality checks passed.
 - Production image build, Compose validation, and Nginx validation: passed.
+
+### Increment 11.7 — PR #77
+
+- GitHub Actions verification is pending for the current branch head.
