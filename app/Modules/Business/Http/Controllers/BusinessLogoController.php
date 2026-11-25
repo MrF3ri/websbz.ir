@@ -13,11 +13,9 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use Throwable;
 
 class BusinessLogoController
 {
@@ -42,9 +40,7 @@ class BusinessLogoController
     ): RedirectResponse {
         $business = $this->business($currentBusiness);
         Gate::authorize('update', $business);
-        $oldMedia = null;
-
-        DB::transaction(function () use ($business, &$oldMedia): void {
+        DB::transaction(function () use ($business): void {
             $lockedBusiness = Business::query()
                 ->whereKey($business->getKey())
                 ->lockForUpdate()
@@ -52,12 +48,13 @@ class BusinessLogoController
 
             $oldLogo = $lockedBusiness->logo()->lockForUpdate()->first();
             $oldMedia = $oldLogo?->media()->lockForUpdate()->first();
+
+            if ($oldMedia instanceof Media) {
+                $this->deleteMedia($oldMedia);
+            }
+
             $oldLogo?->delete();
         });
-
-        if ($oldMedia instanceof Media) {
-            $this->deleteMedia($oldMedia);
-        }
 
         $this->forgetPublicMenu($business, $publicMenuCache);
 
@@ -112,21 +109,12 @@ class BusinessLogoController
             return;
         }
 
-        try {
-            $disk = Storage::disk($media->disk);
+        $disk = Storage::disk($media->disk);
 
-            if ($disk->exists($media->path) && ! $disk->delete($media->path)) {
-                throw new RuntimeException('Unable to delete business logo from storage.');
-            }
-
-            $media->delete();
-        } catch (Throwable $exception) {
-            Log::warning('Unable to delete business logo; metadata retained for retry.', [
-                'media_id' => $media->getKey(),
-                'disk' => $media->disk,
-                'path' => $media->path,
-                'exception' => $exception::class,
-            ]);
+        if ($disk->exists($media->path) && ! $disk->delete($media->path)) {
+            throw new RuntimeException('Unable to delete business logo from storage.');
         }
+
+        $media->delete();
     }
 }
