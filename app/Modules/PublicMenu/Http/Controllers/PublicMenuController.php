@@ -154,6 +154,9 @@ class PublicMenuController
         if (is_array($publicMenu) && is_array($publicMenu['menu'] ?? null) && is_array($publicMenu['business'] ?? null)) {
             $entitlements = new EntitlementService($business);
             $publicMenu['menu']['image_slider_enabled'] = $entitlements->hasFeature('image_slider');
+            $publicMenu['menu']['advertising_banner'] = $entitlements->hasFeature('advertising_banner')
+                ? $menu->advertising_banner
+                : null;
             $publicMenu['business']['introduction'] = $entitlements->hasFeature('business_introduction')
                 ? $business->introduction
                 : null;
