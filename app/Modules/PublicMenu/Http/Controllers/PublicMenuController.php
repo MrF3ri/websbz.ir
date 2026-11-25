@@ -118,6 +118,7 @@ class PublicMenuController
             || ! str_starts_with($ctaUrl, 'https://')
             || filter_var($ctaUrl, FILTER_VALIDATE_URL) === false
             || $ctaLabel === null
+            || $ctaLabel === ''
         ) {
             $ctaLabel = null;
             $ctaUrl = null;
