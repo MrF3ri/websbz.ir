@@ -27,6 +27,8 @@ class BusinessSettingsController
         Gate::authorize('view', $business);
 
         $logo = $business->logo()->with('media')->first();
+        $entitlements = new EntitlementService($business);
+        $canManage = Gate::allows('update', $business);
 
         return Inertia::render('Business/Settings', [
             'business' => array_merge($business->only([
@@ -41,10 +43,10 @@ class BusinessSettingsController
                 'logo_url' => $logo ? route('media.business-logo', [$business->public_id, $logo->media->public_id]) : null,
             ]),
             'features' => [
-                'business_logo' => (new EntitlementService($business))->hasFeature('business_logo'),
-                'can_manage_logo' => Gate::allows('update', $business),
-                'can_manage_business' => Gate::allows('update', $business),
-                'business_introduction' => (new EntitlementService($business))->hasFeature('business_introduction'),
+                'business_logo' => $entitlements->hasFeature('business_logo'),
+                'can_manage_logo' => $canManage,
+                'can_manage_business' => $canManage,
+                'business_introduction' => $entitlements->hasFeature('business_introduction'),
             ],
         ]);
     }
