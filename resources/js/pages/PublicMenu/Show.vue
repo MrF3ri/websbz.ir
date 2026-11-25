@@ -121,7 +121,7 @@ function formatPrice(value: number): string {
     </Head>
 
     <div :class="menu.theme.mode === 'dark' ? 'dark' : ''">
-    <main dir="rtl" lang="fa" :data-template="menu.theme.template" :style="{ '--menu-accent': menu.theme.primary_color }"  :class="['min-h-screen bg-stone-50 px-4 py-8 text-stone-900 dark:bg-stone-950 dark:text-stone-100 sm:py-12', menu.theme.font === 'serif' ? 'font-serif' : menu.theme.font === 'rounded' ? 'font-sans tracking-wide' : 'font-sans']">
+    <main id="public-menu-main" aria-labelledby="public-menu-title" dir="rtl" lang="fa" :data-template="menu.theme.template" :style="{ '--menu-accent': menu.theme.primary_color }"  :class="['min-h-screen bg-stone-50 px-4 py-8 text-stone-900 dark:bg-stone-950 dark:text-stone-100 sm:py-12', menu.theme.font === 'serif' ? 'font-serif' : menu.theme.font === 'rounded' ? 'font-sans tracking-wide' : 'font-sans']">
         <div class="mx-auto w-full max-w-3xl" :class="densityClasses[menu.theme.density] ?? densityClasses.comfortable">
             <header class="border border-stone-200 bg-white px-6 py-8 text-center shadow-sm dark:border-stone-800 dark:bg-stone-900 sm:px-10"  :class="{ classic: 'rounded-3xl shadow-sm', minimal: 'rounded-xl border-0 shadow-none', editorial: 'rounded-none border-x-0 border-t-0 shadow-none', modern: 'rounded-2xl border-2 border-stone-100 shadow-lg dark:border-stone-700', cafe: 'rounded-[2rem] border-amber-200 dark:border-amber-900', contrast: 'rounded-md border-2 border-stone-900 shadow-md dark:border-white' }[menu.theme.template] ?? 'rounded-3xl'">
                 <img v-if="business.logo_url" :src="business.logo_url" :alt="'لوگوی ' + business.name" class="mx-auto mb-4 size-20 rounded-xl object-contain" width="80" height="80" />
@@ -129,7 +129,7 @@ function formatPrice(value: number): string {
                     {{ business.name }}
                 </p>
                 <p v-if="business.introduction" class="mx-auto mt-3 max-w-2xl text-sm leading-7 text-stone-600 dark:text-stone-300">{{ business.introduction }}</p>
-                <h1 class="mt-2 font-bold tracking-tight" :class="headingSizeClasses[menu.theme.heading_size] ?? headingSizeClasses.normal" style="color: var(--menu-accent)">
+                <h1 id="public-menu-title" class="mt-2 font-bold tracking-tight" :class="headingSizeClasses[menu.theme.heading_size] ?? headingSizeClasses.normal" style="color: var(--menu-accent)">
                     {{ menu.title }}
                 </h1>
                 <p class="mt-3 text-sm text-stone-500 dark:text-stone-400">
@@ -137,7 +137,7 @@ function formatPrice(value: number): string {
                 </p>
             </header>
 
-            <section v-if="menu.advertising_banner" class="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-5 text-amber-950 shadow-sm dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-100 sm:px-7">
+            <section v-if="menu.advertising_banner" aria-label="بنر تبلیغاتی" class="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-5 text-amber-950 shadow-sm dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-100 sm:px-7">
                 <h2 v-if="menu.advertising_banner.title" class="text-lg font-bold">{{ menu.advertising_banner.title }}</h2>
                 <p v-if="menu.advertising_banner.message" class="mt-2 whitespace-pre-line text-sm leading-7">{{ menu.advertising_banner.message }}</p>
                 <a
@@ -151,7 +151,7 @@ function formatPrice(value: number): string {
                 </a>
             </section>
 
-            <div v-if="categories.length === 0" class="rounded-2xl border border-dashed border-stone-300 bg-white px-6 py-12 text-center text-sm text-stone-500 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-400">
+            <div v-if="categories.length === 0" role="status" aria-live="polite" class="rounded-2xl border border-dashed border-stone-300 bg-white px-6 py-12 text-center text-sm text-stone-500 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-400">
                 در حال حاضر محصولی برای نمایش وجود ندارد.
             </div>
 
@@ -159,6 +159,7 @@ function formatPrice(value: number): string {
                 <section
                     v-for="(category, index) in categories"
                     :key="category.name + '-' + index"
+                    :aria-label="'دسته‌بندی ' + category.name"
                     :class="categoryDensityClasses[menu.theme.density] ?? categoryDensityClasses.comfortable"
                 >
                     <div class="flex items-center gap-3">
@@ -177,9 +178,9 @@ function formatPrice(value: number): string {
                                     <button type="button" class="rounded-md border border-stone-200 px-3 py-1 text-xs text-stone-600 transition hover:bg-stone-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--menu-accent)] dark:border-stone-700 dark:text-stone-300 dark:hover:bg-stone-800" :aria-label="'تصاویر قبلی ' + product.name" @click="scrollProductImages(product.public_id, -1)">قبلی</button>
                                     <button type="button" class="rounded-md border border-stone-200 px-3 py-1 text-xs text-stone-600 transition hover:bg-stone-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--menu-accent)] dark:border-stone-700 dark:text-stone-300 dark:hover:bg-stone-800" :aria-label="'تصاویر بعدی ' + product.name" @click="scrollProductImages(product.public_id, 1)">بعدی</button>
                                 </div>
-                                <div :ref="(element) => setImageSliderRef(product.public_id, element)" class="flex snap-x snap-mandatory gap-2 overflow-x-auto scroll-smooth pb-2" dir="ltr" tabindex="0" role="region" :aria-label="'گالری تصاویر ' + product.name">
-                                    <div v-for="image in product.images" :key="image.url" class="w-[82%] shrink-0 snap-center sm:w-[62%]">
-                                        <img :src="image.url" :srcset="image.srcset" :sizes="image.sizes" :alt="'تصویر ' + product.name" :width="image.width" :height="image.height" loading="lazy" decoding="async" class="aspect-[4/3] w-full rounded-xl object-cover" />
+                                <div :ref="(element) => setImageSliderRef(product.public_id, element)" class="flex snap-x snap-mandatory gap-2 overflow-x-auto scroll-smooth pb-2" dir="ltr" tabindex="0" role="region" aria-roledescription="گالری تصاویر" :aria-label="'گالری تصاویر ' + product.name">
+                                    <div v-for="(image, imageIndex) in product.images" :key="image.url" class="w-[82%] shrink-0 snap-center sm:w-[62%]">
+                                        <img :src="image.url" :srcset="image.srcset" :sizes="image.sizes" :alt="'تصویر ' + product.name + '، شماره ' + (imageIndex + 1)" :width="image.width" :height="image.height" loading="lazy" decoding="async" class="aspect-[4/3] w-full rounded-xl object-cover" />
                                     </div>
                                 </div>
                             </div>
