@@ -235,10 +235,10 @@ class PublicMenuTest extends TestCase
         );
         $menu->translations()->create(['locale' => 'en', 'title' => 'Coffee menu']);
         $category->translations()->create(['locale' => 'en', 'name' => 'Coffee']);
+        $product->update(['description' => 'قهوه غلیظ']);
         $product->translations()->create([
             'locale' => 'en',
             'name' => 'Espresso',
-            'description' => 'A concentrated coffee drink.',
         ]);
         $menu->update(['status' => MenuStatus::Published]);
 
@@ -254,7 +254,7 @@ class PublicMenuTest extends TestCase
                 ->where('menu.available_locales.2.code', 'ar')
                 ->where('categories.0.name', 'Coffee')
                 ->where('categories.0.products.0.name', 'Espresso')
-                ->where('categories.0.products.0.description', 'A concentrated coffee drink.')
+                ->where('categories.0.products.0.description', 'قهوه غلیظ')
                 ->missing('categories.0.translations')
                 ->missing('categories.0.products.0.translations'));
     }
