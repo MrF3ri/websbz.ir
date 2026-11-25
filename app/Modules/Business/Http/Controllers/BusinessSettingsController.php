@@ -4,7 +4,7 @@ namespace App\Modules\Business\Http\Controllers;
 
 use App\Modules\Business\Http\Requests\UpdateBusinessSettingsRequest;
 use App\Modules\Business\Models\Business;
-use App\Modules\PublicMenu\Services\PublicMenuCache;
+use App\Modules\PublicMenu\Services\PublicMenuCache;\nuse App\Modules\Subscription\Services\EntitlementService;
 use App\Modules\Tenancy\Services\CurrentBusiness;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
