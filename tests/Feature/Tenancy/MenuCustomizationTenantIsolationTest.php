@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Tenancy;
 
-use App\Modules\Menu\Enums\MenuStatus;
 use App\Modules\Product\Enums\ProductStatus;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
