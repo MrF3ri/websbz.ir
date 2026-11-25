@@ -97,7 +97,7 @@ class PublicMenuController
     }
 
     /**
-     * @return array{public_id: string, name: string, description: string|null, label: string|null, price: int, discount_price: int|null, images: array<int, array{url: string, srcset: string, sizes: string, width: int, height: int}>, translations: array<string, array{name: string, description: string|null}>}
+     * @return array{public_id: string, name: string, description: string|null, branch_name_override: bool, branch_description_override: bool, label: string|null, price: int, discount_price: int|null, images: array<int, array{url: string, srcset: string, sizes: string, width: int, height: int}>, translations: array<string, array{name: string, description: string|null}>}
      */
     private function productData(Product $product, array $effective, ?BranchProductSetting $setting): array
     {
@@ -224,8 +224,12 @@ class PublicMenuController
                     $query
                         ->where('products.menu_id', $menu->getKey())
                         ->where('status', ProductStatus::Published)
-                        ->where('is_available', true);
+                        ->where('is_available', true)
+                        ->orderBy('sort_order')
+                        ->orderBy('id');
                 }, 'translations', 'products.images.media', 'products.translations'])
+                ->orderBy('sort_order')
+                ->orderBy('id')
                 ->get()
                 ->map(function (Category $category) use ($categorySettings, $productSettings, $resolver): ?array {
                     $categorySetting = $categorySettings->get($category->getKey());
@@ -323,7 +327,7 @@ class PublicMenuController
             $publicMenu['menu']['source_locale'] = $menu->default_locale;
             $publicMenu['menu']['locale'] = $locale;
             $publicMenu['menu']['direction'] = $localeRegistry->direction($locale);
-            $publicMenu['menu']['public_url'] = route('public.menu.show', [$business->slug, $menu->slug, $branch->slug]);
+            $publicMenu['menu']['public_url'] = route('public.menu.branch.show', [$business->slug, $menu->slug, $branch->slug]);
             $publicMenu['menu']['available_locales'] = collect($availableLocales)
                 ->map(fn (array $details, string $code): array => ['code' => $code, ...$details])
                 ->values()
