@@ -164,6 +164,39 @@ class PublicMenuTest extends TestCase
                 ->where('categories.0.products.0.label', ProductLabel::ChefSpecial->value));
     }
 
+    public function test_image_slider_entitlement_is_resolved_outside_public_menu_cache(): void
+    {
+        config(['cache.default' => 'array']);
+        Cache::store('array')->flush();
+
+        [, $business, $menu] = $this->createCatalogTenant('professional');
+        $category = $this->createCatalogCategory($menu, 'Coffee');
+        $this->createCatalogProduct(
+            $menu,
+            $category,
+            'Gallery coffee',
+            status: ProductStatus::Published,
+        );
+        $menu->update(['status' => MenuStatus::Published]);
+
+        $url = route('public.menu.show', [$business->slug, $menu->slug]);
+
+        $this->get($url)
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('menu.image_slider_enabled', true));
+
+        $subscription = $business->subscriptions()->latest('id')->firstOrFail();
+        $snapshot = $subscription->features_snapshot;
+        $snapshot['image_slider'] = false;
+        $subscription->update(['features_snapshot' => $snapshot]);
+
+        $this->get($url)
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('menu.image_slider_enabled', false));
+    }
+
     public function test_guest_cannot_view_a_draft_menu_or_suspended_business(): void
     {
         [, $business, $menu] = $this->createCatalogTenant();
