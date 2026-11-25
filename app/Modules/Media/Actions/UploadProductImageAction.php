@@ -1,0 +1,135 @@
+<?php
+
+namespace App\Modules\Media\Actions;
+
+use App\Modules\Business\Models\Business;
+use App\Modules\Media\Models\Media;
+use App\Modules\Media\Models\ProductImage;
+use App\Modules\Menu\Models\Menu;
+use App\Modules\Product\Models\Product;
+use App\Modules\Subscription\Services\EnforcementService;
+use App\Modules\Subscription\Services\EntitlementService;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+use Throwable;
+
+class UploadProductImageAction
+{
+    public function execute(Business $business, Product $product, UploadedFile $file): ProductImage
+    {
+        $mimeType = (new \finfo(FILEINFO_MIME_TYPE))->file($file->getPathname());
+        $extension = strtolower($file->getClientOriginalExtension());
+        $allowedExtensions = [
+            'image/jpeg' => ['jpg', 'jpeg'],
+            'image/png' => ['png'],
+            'image/webp' => ['webp'],
+        ];
+
+        if (! is_string($mimeType) || ! in_array($extension, $allowedExtensions[$mimeType] ?? [], true)) {
+            throw ValidationException::withMessages([
+                'image' => 'نوع واقعی تصویر و پسوند فایل با یکدیگر مطابقت ندارند.',
+            ]);
+        }
+
+        $dimensions = @getimagesize($file->getPathname());
+
+        if (
+            ! is_array($dimensions)
+            || ! isset($dimensions[0], $dimensions[1])
+            || $dimensions[0] < 1
+            || $dimensions[1] < 1
+            || $dimensions[0] > 6000
+            || $dimensions[1] > 6000
+        ) {
+            throw ValidationException::withMessages([
+                'image' => 'ابعاد تصویر معتبر نیست یا از حداکثر ۶۰۰۰ پیکسل بیشتر است.',
+            ]);
+        }
+
+        $menu = $product->menu()->firstOrFail();
+        abort_unless((int) $menu->business_id === (int) $business->getKey(), 404);
+
+        $disk = (string) config('filesystems.media_disk', 'media');
+        $publicId = (string) Str::ulid();
+        $path = null;
+
+        try {
+            return DB::transaction(function () use (
+                $business,
+                $menu,
+                $product,
+                $file,
+                $mimeType,
+                $extension,
+                $dimensions,
+                $disk,
+                $publicId,
+                &$path,
+            ): ProductImage {
+                $lockedBusiness = Business::query()
+                    ->whereKey($business->getKey())
+                    ->lockForUpdate()
+                    ->firstOrFail();
+
+                $lockedMenu = Menu::query()
+                    ->whereKey($menu->getKey())
+                    ->where('business_id', $lockedBusiness->getKey())
+                    ->lockForUpdate()
+                    ->firstOrFail();
+
+                $lockedProduct = Product::query()
+                    ->whereKey($product->getKey())
+                    ->where('menu_id', $lockedMenu->getKey())
+                    ->lockForUpdate()
+                    ->firstOrFail();
+
+                $enforcement = new EnforcementService(new EntitlementService($lockedBusiness));
+                $enforcement->requireLimit(
+                    $lockedBusiness,
+                    'max_product_images',
+                    $lockedProduct->images()->count(),
+                );
+
+                $directory = sprintf(
+                    'businesses/%s/products/%s',
+                    $lockedBusiness->public_id,
+                    $lockedProduct->public_id,
+                );
+                $filename = $publicId.'.'.$extension;
+                $path = Storage::disk($disk)->putFileAs($directory, $file, $filename);
+
+                if (! is_string($path) || $path === '') {
+                    throw new \RuntimeException('Unable to store product image.');
+                }
+
+                $media = Media::query()->create([
+                    'business_id' => $lockedBusiness->getKey(),
+                    'disk' => $disk,
+                    'path' => $path,
+                    'mime_type' => $mimeType,
+                    'size' => $file->getSize(),
+                    'width' => (int) $dimensions[0],
+                    'height' => (int) $dimensions[1],
+                ]);
+
+                $sortOrder = (int) ($lockedProduct->images()->max('sort_order') ?? -1) + 1;
+
+                return $lockedProduct->images()->create([
+                    'business_id' => $lockedBusiness->getKey(),
+                    'menu_id' => $lockedMenu->getKey(),
+                    'media_id' => $media->getKey(),
+                    'sort_order' => $sortOrder,
+                ]);
+            });
+        } catch (Throwable $exception) {
+            if (is_string($path) && $path !== '') {
+                Storage::disk($disk)->delete($path);
+            }
+
+            throw $exception;
+        }
+    }
+}
