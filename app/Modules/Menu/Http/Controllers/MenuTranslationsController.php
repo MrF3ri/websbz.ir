@@ -58,19 +58,19 @@ class MenuTranslationsController
             'locales' => $locales,
             'menu' => [
                 'source_title' => $menu->title,
-                'translation_title' => $menuTranslation?->title ?? '',
+                'translation_title' => $menuTranslation->title ?? '',
             ],
             'categories' => $categories->map(fn ($category): array => [
                 'public_id' => $category->public_id,
                 'source_name' => $category->name,
-                'translation_name' => $category->translations->first()?->name ?? '',
+                'translation_name' => $category->translations->first()->name ?? '',
             ])->values(),
             'products' => $products->map(fn ($product): array => [
                 'public_id' => $product->public_id,
                 'source_name' => $product->name,
                 'source_description' => $product->description,
-                'translation_name' => $product->translations->first()?->name ?? '',
-                'translation_description' => $product->translations->first()?->description ?? '',
+                'translation_name' => $product->translations->first()->name ?? '',
+                'translation_description' => $product->translations->first()->description ?? '',
             ])->values(),
         ]);
     }
@@ -88,6 +88,7 @@ class MenuTranslationsController
 
         $menu = $ensurePrimaryMenu->execute($business);
         $this->authorizeLocale($business, $menu, $locale, $localeRegistry);
+        /** @var array{menu_title: string, categories: list<array{public_id: string, name: string}>, products: list<array{public_id: string, name: string, description?: string|null}>} $data */
         $data = $request->validated();
 
         DB::transaction(function () use ($menu, $locale, $data): void {
