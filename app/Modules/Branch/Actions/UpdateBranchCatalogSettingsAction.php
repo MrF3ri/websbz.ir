@@ -89,13 +89,13 @@ class UpdateBranchCatalogSettingsAction
                     ]);
                 }
 
-                if ((bool) $item['track_inventory'] && $item['stock_quantity'] === null) {
+                if ((bool) $item['track_inventory'] && ($item['stock_quantity'] ?? null) === null) {
                     throw ValidationException::withMessages([
                         'products' => "برای موجودی‌شماری «{$product->name}» تعداد موجودی را وارد کنید.",
                     ]);
                 }
 
-                if (! (bool) $item['track_inventory'] && $item['stock_quantity'] !== null) {
+                if (! (bool) $item['track_inventory'] && ($item['stock_quantity'] ?? null) !== null) {
                     throw ValidationException::withMessages([
                         'products' => "برای «{$product->name}» در حالت بدون موجودی‌شماری، تعداد موجودی باید خالی باشد.",
                     ]);
@@ -117,7 +117,7 @@ class UpdateBranchCatalogSettingsAction
                         'is_visible' => (bool) $item['is_visible'],
                         'is_available' => (bool) $item['is_available'],
                         'track_inventory' => (bool) $item['track_inventory'],
-                        'stock_quantity' => $item['track_inventory'] ? (int) $item['stock_quantity'] : null,
+                        'stock_quantity' => $item['track_inventory'] ? (int) ($item['stock_quantity'] ?? 0) : null,
                         'sort_order' => (int) $item['sort_order'],
                     ],
                 );
