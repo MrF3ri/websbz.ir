@@ -8,6 +8,7 @@ use App\Modules\Catalog\Http\Controllers\CatalogController;
 use App\Modules\Category\Http\Controllers\CategoryController;
 use App\Modules\Media\Http\Controllers\MediaController;
 use App\Modules\Menu\Http\Controllers\MenuPublicationController;
+use App\Modules\Menu\Http\Controllers\MenuBannerController;
 use App\Modules\Menu\Http\Controllers\MenuThemeController;
 use App\Modules\Platform\Http\Controllers\AdminAuditLogController;
 use App\Modules\Platform\Http\Controllers\AdminBusinessController;
@@ -59,6 +60,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::get('/catalog/menu/theme', [MenuThemeController::class, 'edit'])->name('catalog.menu.theme.edit');
         Route::put('/catalog/menu/theme', [MenuThemeController::class, 'update'])->name('catalog.menu.theme.update');
+        Route::put('/catalog/menu/banner', [MenuBannerController::class, 'update'])->name('catalog.menu.banner.update');
 
         Route::get('/billing', [BillingController::class, 'index'])->name('billing.index');
         Route::post('/billing/payments', [ManualPaymentController::class, 'store'])
