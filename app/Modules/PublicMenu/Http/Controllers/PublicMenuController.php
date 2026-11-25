@@ -226,6 +226,10 @@ class PublicMenuController
             ];
         });
 
+        if (! is_array($publicMenu) || ! is_array($publicMenu['menu'] ?? null) || ! is_array($publicMenu['business'] ?? null)) {
+            throw new LogicException('The cached public menu payload is invalid.');
+        }
+
         $publicMenu['menu']['direction'] = $localeRegistry->direction($locale);
         $publicMenu['locales'] = collect($localeRegistry->availableFor($business))
             ->map(fn (array $metadata, string $code): array => [
@@ -235,18 +239,14 @@ class PublicMenuController
             ->values()
             ->all();
 
-        if (is_array($publicMenu) && is_array($publicMenu['menu'] ?? null) && is_array($publicMenu['business'] ?? null)) {
-            $entitlements = new EntitlementService($business);
-            $publicMenu['menu']['image_slider_enabled'] = $entitlements->hasFeature('image_slider');
-            $publicMenu['menu']['advertising_banner'] = $entitlements->hasFeature('advertising_banner')
-                ? $this->bannerData($menu)
-                : null;
-            $publicMenu['business']['introduction'] = $entitlements->hasFeature('business_introduction')
-                ? $business->introduction
-                : null;
-        } else {
-            throw new LogicException('The cached public menu payload is invalid.');
-        }
+        $entitlements = new EntitlementService($business);
+        $publicMenu['menu']['image_slider_enabled'] = $entitlements->hasFeature('image_slider');
+        $publicMenu['menu']['advertising_banner'] = $entitlements->hasFeature('advertising_banner')
+            ? $this->bannerData($menu)
+            : null;
+        $publicMenu['business']['introduction'] = $entitlements->hasFeature('business_introduction')
+            ? $business->introduction
+            : null;
 
         return Inertia::render('PublicMenu/Show', $publicMenu);
     }
