@@ -1,5 +1,6 @@
 <?php
 
+use App\Modules\Branch\Http\Controllers\BranchCatalogController;
 use App\Modules\Branch\Http\Controllers\BranchController;
 use App\Modules\Business\Http\Controllers\BusinessLogoController;
 use App\Modules\Business\Http\Controllers\BusinessOnboardingController;
@@ -81,6 +82,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::get('/business/branches', [BranchController::class, 'index'])->name('business.branches.index');
         Route::get('/business/branches/manage', [BranchController::class, 'manage'])->name('business.branches.manage');
+        Route::get('/business/branches/{branchPublicId}/catalog', [BranchCatalogController::class, 'show'])->name('business.branches.catalog');
+        Route::put('/business/branches/{branchPublicId}/catalog', [BranchCatalogController::class, 'update'])->name('business.branches.catalog.update');
         Route::post('/business/branches', [BranchController::class, 'store'])->name('business.branches.store');
         Route::put('/business/branches/{branchPublicId}', [BranchController::class, 'update'])->name('business.branches.update');
         Route::post('/business/branches/{branchPublicId}/activate', [BranchController::class, 'activate'])->name('business.branches.activate');

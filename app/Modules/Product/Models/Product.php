@@ -2,6 +2,7 @@
 
 namespace App\Modules\Product\Models;
 
+use App\Modules\Branch\Models\BranchProductSetting;
 use App\Modules\Category\Models\Category;
 use App\Modules\Media\Models\ProductImage;
 use App\Modules\Menu\Models\Menu;
@@ -72,6 +73,12 @@ class Product extends Model
     public function images(): HasMany
     {
         return $this->hasMany(ProductImage::class)->orderBy('sort_order')->orderBy('id');
+    }
+
+    /** @return HasMany<BranchProductSetting, $this> */
+    public function branchSettings(): HasMany
+    {
+        return $this->hasMany(BranchProductSetting::class);
     }
 
     /** @return HasMany<ProductTranslation, $this> */

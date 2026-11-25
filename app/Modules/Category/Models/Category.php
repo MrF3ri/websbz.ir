@@ -2,6 +2,7 @@
 
 namespace App\Modules\Category\Models;
 
+use App\Modules\Branch\Models\BranchCategorySetting;
 use App\Modules\Menu\Models\Menu;
 use App\Modules\Product\Models\Product;
 use Illuminate\Database\Eloquent\Model;
@@ -46,6 +47,12 @@ class Category extends Model
     public function products(): HasMany
     {
         return $this->hasMany(Product::class);
+    }
+
+    /** @return HasMany<BranchCategorySetting, $this> */
+    public function branchSettings(): HasMany
+    {
+        return $this->hasMany(BranchCategorySetting::class);
     }
 
     /** @return HasMany<CategoryTranslation, $this> */

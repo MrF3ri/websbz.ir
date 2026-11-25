@@ -1,8 +1,8 @@
 # Phase 9 — Branch Management
 
 Status: In progress  
-Current increment: 9.3 — Branch-specific public menu QR  
-Implementation branch: `feat/phase-9-branch-menu-qr`  
+Current increment: 9.4 — Branch catalog settings management  
+Implementation branch: `feat/phase-9-branch-catalog-settings`  
 Approved model: Hybrid shared catalog with branch-level overrides (ADR 0014)
 
 ## Delivered foundation
@@ -32,7 +32,7 @@ Approved model: Hybrid shared catalog with branch-level overrides (ADR 0014)
 - Branch slugs are immutable after creation so previously printed branch QR codes keep resolving to the same branch.
 - Preserve the existing primary-menu QR in the catalog page for backward compatibility.
 
-## Remaining Phase 9 work
+## Increment 9.4 — Branch catalog settings management (in review)\n\n- Add a tenant-scoped branch catalog settings page linked from each branch.\n- Manage branch category visibility/order and product visibility, availability, ordering, name/description overrides, base price, discount inheritance/set/clear, and optional manual stock counts.\n- Preserve canonical catalog records; only branch settings rows are changed.\n- Resolve the selected branch through the current tenant and validate every category/product public identifier against that tenant's canonical menu.\n- Validate effective discounts against effective base prices and enforce consistent stock-tracking state.\n- Serialize updates in a transaction coordinated by the Business row lock and invalidate the affected branch public-menu cache after a successful write.\n- Add HTTP regression coverage for tenant isolation, override persistence, invalid discounts, and stock validation.\n\n## Remaining Phase 9 work
 
 1. Add tenant-scoped management UI and actions for category/product branch settings, including explicit clear/inherit semantics and validation of effective discounts and stock.
 2. Audit every canonical and branch-specific write path for correct branch-cache invalidation.

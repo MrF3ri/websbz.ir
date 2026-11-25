@@ -252,7 +252,7 @@ function branchQrDataUrl(branch: Branch): string {
                     </div>
                     <p v-else class="mt-4 rounded-lg bg-muted/30 px-3 py-2 text-xs leading-5 text-muted-foreground">QR این شعبه پس از فعال بودن شعبه و انتشار منوی عمومی در دسترس خواهد بود.</p>
                     <div v-if="canManage" class="mt-5 flex flex-wrap gap-2 border-t border-border pt-4">
-                        <Button size="sm" variant="outline" @click="fillForm(branch)">ویرایش اطلاعات</Button>
+                        <Button size="sm" variant="outline" @click="fillForm(branch)">ویرایش اطلاعات</Button>\n                        <a :href="`/business/branches/${branch.public_id}/catalog`" class="inline-flex h-9 items-center rounded-md border border-border px-3 text-xs font-medium hover:bg-accent">تنظیم منوی شعبه</a>
                         <Button v-if="!branch.is_primary" size="sm" :variant="branch.status === 'active' ? 'destructive' : 'secondary'" @click="setStatus(branch)">{{ branch.status === 'active' ? 'غیرفعال‌سازی' : 'فعال‌سازی' }}</Button>
                     </div>
                 </article>
