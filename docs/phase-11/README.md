@@ -1,9 +1,9 @@
 # Phase 11 — Public Menu Customization
 
 Status: In progress  
-Current increment: 11.4 — Subscription-gated image slider  
-Implementation branch: `feat/phase-11-image-slider`  
-Pull request: #74 (Draft)
+Current increment: 11.5 — Subscription-gated business introduction  
+Implementation branch: `feat/phase-11-business-introduction`  
+Pull request: #75 (Draft)
 
 ## Delivered in increment 11.1
 
@@ -35,19 +35,29 @@ Pull request: #74 (Draft)
 - Add SQLite/PostgreSQL tests for entitlement enforcement, downgrade behavior, and public rendering.
 - Record the allow-list and downgrade behavior in ADR 0017.
 
-## Increment 11.4 — subscription-gated image slider
+## Delivered in increment 11.4
 
 - Add a subscription-snapshot-driven image slider to public product cards when more than one image exists.
 - Keep the responsive image grid for Economic plans and products with one image.
 - Add keyboard focus, previous/next controls, scroll-snap behavior, and accessible labels.
 - Resolve the `image_slider` entitlement outside the cached public-menu payload so subscription changes take effect immediately.
+- Version the public-menu cache key to prevent reuse of older payload shapes.
 - Add coverage for entitlement changes while the public-menu catalog cache remains warm.
 - Record the behavior in ADR 0018.
+
+## Delivered in increment 11.5 (implementation in progress)
+
+- Add a 1200-character plain-text business introduction field to business settings.
+- Gate new or changed introductions through the `business_introduction` subscription snapshot.
+- Preserve existing text across downgrade, allow clearing it, and hide it from public menus while the feature is unavailable.
+- Resolve the feature outside cached public-menu data so a downgrade takes effect immediately.
+- Add tests for Professional/Economic access, downgrade behavior, and public rendering.
+- Record the behavior in ADR 0019.
 
 ## Remaining Phase 11 work
 
 1. Add visual regression coverage for all template previews and test mobile/desktop breakpoints.
-2. Add plan-gated public-menu components: advertising banner and business introduction.
+2. Add the plan-gated advertising banner.
 3. Add Top-plan controlled custom-design settings without arbitrary user HTML, CSS, or JavaScript.
 4. Verify accessibility, cache invalidation, tenant isolation, storage-failure recovery, and SQLite/PostgreSQL parity for all new features.
 
@@ -86,7 +96,7 @@ Pull request: #74 (Draft)
 - Pint: 238 files passed; PHPStan reported no errors.
 - Production image build, Compose validation, and Nginx validation: passed.
 
-### Increment 11.4 — PR #74
+### Increment 11.4 — merged PR #74
 
 - SQLite: 234 passed, 7 skipped (522 assertions).
 - PostgreSQL test suite: passed.
@@ -95,3 +105,7 @@ Pull request: #74 (Draft)
 - Frontend unit tests: 7 passed; Vue/TypeScript checks passed.
 - Pint: 238 files passed; PHPStan reported no errors.
 - Production image build, Compose validation, and Nginx validation: passed.
+
+### Increment 11.5 — PR #75
+
+- GitHub Actions verification is pending for the current branch head.
