@@ -130,7 +130,7 @@ class PublicMenuController
     {
         $banner = $menu->advertising_banner;
 
-        if (! is_array($banner)) {
+        if (is_array($banner) === false) {
             return null;
         }
 
@@ -140,8 +140,8 @@ class PublicMenuController
         $ctaUrl = $banner['cta_url'] ?? null;
 
         if (
-            ! is_string($ctaUrl)
-            || ! str_starts_with($ctaUrl, 'https://')
+            is_string($ctaUrl) === false
+            || str_starts_with($ctaUrl, 'https://') === false
             || filter_var($ctaUrl, FILTER_VALIDATE_URL) === false
             || $ctaLabel === null
             || $ctaLabel === ''
