@@ -1,8 +1,8 @@
 # Phase 9 — Branch Management
 
 Status: In progress  
-Current increment: 9.5 — Public-menu cache invalidation audit  
-Implementation branch: `test/phase-9-cache-invalidation-audit`  
+Current increment: 9.6 — PostgreSQL branch concurrency coverage  
+Implementation branch: `test/phase-9-branch-postgres-concurrency`  
 Approved model: Hybrid shared catalog with branch-level overrides (ADR 0014)
 
 ## Delivered foundation
@@ -42,17 +42,24 @@ Approved model: Hybrid shared catalog with branch-level overrides (ADR 0014)
 - Serialize updates in a transaction coordinated by the Business row lock and invalidate the affected branch public-menu cache after a successful write.
 - Add HTTP regression coverage for tenant isolation, override persistence, invalid discounts, and stock validation.
 
-## Increment 9.5 — Public-menu cache invalidation audit (in review)
+## Increment 9.5 — Public-menu cache invalidation audit (delivered)
 
 - Audit canonical writes for categories, products, product images, menu translations/theme/banner/publication, and business profile/logo data. Their controllers call `forget($menu)`, which clears the legacy primary-menu key and every branch-specific key for that menu.
 - Audit branch-only writes. Branch profile updates and branch catalog settings updates call `forget($menu, $branch)`, preserving other branches' cached projections.
 - Branch creation starts with a new branch identifier and therefore has no prior cache key to invalidate. Activation/deactivation is checked before cache access and status is not part of the cached public projection.
 - Add regression tests proving canonical invalidation clears the primary and branch projections, branch-scoped invalidation preserves the primary projection, and a canonical product update refreshes both public routes.
 
+## Increment 9.6 — PostgreSQL branch concurrency coverage (in review)
+
+- Add a PostgreSQL-only multi-process worker for branch creation and branch catalog settings writes.
+- Prove two simultaneous branch creations serialize on the Business row lock and cannot exceed the Top plan's two-branch limit.
+- Prove concurrent writes to separate branch-product settings preserve both updates and do not mutate canonical Product records.
+- Prove a failed transaction after acquiring the Business lock releases it so a waiting branch-creation worker can proceed.
+- Use PostgreSQL lock-wait observation rather than timing-only assertions; SQLite skips these tests because it does not provide the required row-lock semantics.
+
 ## Remaining Phase 9 work
 
-1. Add PostgreSQL concurrency coverage for branch quota and settings writes.
-2. Complete owner-driven end-to-end acceptance: create a second branch, customize it, scan its QR, and verify the primary branch is unchanged.
+1. Complete owner-driven end-to-end acceptance: create a second branch, customize it, scan its QR, and verify the primary branch is unchanged.
 
 ## Effective product rules
 
