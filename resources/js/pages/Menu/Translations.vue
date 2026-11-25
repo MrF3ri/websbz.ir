@@ -3,6 +3,7 @@ import { computed } from 'vue';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Button } from '@/components/ui/button';
+import { getTranslationCompletion } from '@/lib/translation-completion';
 
 type LocaleOption = {
     code: string;
@@ -38,15 +39,15 @@ const form = useForm({
     })),
 });
 
-const totalFields = computed(() => 1 + form.categories.length + form.products.length);
-const completedFields = computed(() => (
-    Number(form.menu_title.trim().length > 0)
-    + form.categories.filter((category) => category.name.trim().length > 0).length
-    + form.products.filter((product) => product.name.trim().length > 0).length
-));
-const completionPercent = computed(() => totalFields.value === 0
-    ? 100
-    : Math.round((completedFields.value / totalFields.value) * 100));
+const completion = computed(() => getTranslationCompletion({
+    menuTitle: form.menu_title,
+    categories: form.categories,
+    products: form.products.map((product, index) => ({
+        name: product.name,
+        description: product.description,
+        sourceDescription: props.products[index]?.source_description ?? null,
+    })),
+}));
 
 function changeLocale(locale: string): void {
     if (locale !== props.locale.code) {
@@ -95,17 +96,17 @@ function save(): void {
                 <div class="min-w-48 flex-1 space-y-2">
                     <div class="flex items-center justify-between text-sm">
                         <span>تکمیل ترجمه</span>
-                        <span class="tabular-nums">{{ completedFields }} از {{ totalFields }}</span>
+                        <span class="tabular-nums">{{ completion.completed }} از {{ completion.total }} · {{ completion.missing }} مورد باقی‌مانده</span>
                     </div>
                     <div
                         role="progressbar"
                         aria-label="درصد تکمیل ترجمه"
-                        :aria-valuenow="completionPercent"
+                        :aria-valuenow="completion.percent"
                         aria-valuemin="0"
                         aria-valuemax="100"
                         class="h-2 overflow-hidden rounded-full bg-muted"
                     >
-                        <div class="h-full rounded-full bg-primary transition-[width]" :style="{ width: completionPercent + '%' }" />
+                        <div class="h-full rounded-full bg-primary transition-[width]" :style="{ width: completion.percent + '%' }" />
                     </div>
                 </div>
             </section>
