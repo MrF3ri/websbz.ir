@@ -53,7 +53,7 @@ class PublicMenuController
      * Resolve only supported presentation tokens; persisted JSON is never trusted
      * as a source of arbitrary CSS values, classes, or markup.
      *
-     * @return array{template: string, primary_color: string, font: string, mode: string}
+     * @return array{template: string, primary_color: string, font: string, mode: string, density: string, card_style: string, heading_size: string}
      */
     private function themeData(Menu $menu): array
     {
@@ -62,6 +62,9 @@ class PublicMenuController
         $color = $theme['primary_color'] ?? '#365B4A';
         $font = $theme['font'] ?? 'system';
         $mode = $theme['mode'] ?? 'light';
+        $density = $theme['density'] ?? 'comfortable';
+        $cardStyle = $theme['card_style'] ?? 'standard';
+        $headingSize = $theme['heading_size'] ?? 'normal';
 
         return [
             'template' => in_array($template, ['classic', 'minimal', 'editorial', 'modern', 'cafe', 'contrast'], true)
@@ -76,6 +79,15 @@ class PublicMenuController
             'mode' => in_array($mode, ['light', 'dark'], true)
                 ? $mode
                 : 'light',
+            'density' => in_array($density, ['compact', 'comfortable', 'spacious'], true)
+                ? $density
+                : 'comfortable',
+            'card_style' => in_array($cardStyle, ['standard', 'flat', 'elevated'], true)
+                ? $cardStyle
+                : 'standard',
+            'heading_size' => in_array($headingSize, ['normal', 'large', 'display'], true)
+                ? $headingSize
+                : 'normal',
         ];
     }
 
