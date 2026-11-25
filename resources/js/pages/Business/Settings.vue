@@ -18,7 +18,7 @@ interface Business {
 
 const props = defineProps<{
     business: Business;
-    features: { business_logo: boolean };
+    features: { business_logo: boolean; can_manage_logo: boolean };
 }>();
 
 defineOptions({
@@ -99,14 +99,14 @@ function submit() {
                     <div class="min-w-0 flex-1 space-y-3">
                         <form @submit.prevent="submitLogo" class="space-y-3">
                             <Label for="business-logo">انتخاب تصویر لوگو (JPG، PNG یا WebP، حداکثر ۲ مگابایت)</Label>
-                            <Input id="business-logo" type="file" accept="image/jpeg,image/png,image/webp" class="h-auto min-h-11 py-2" :disabled="!features.business_logo || logoForm.processing" @input="logoForm.logo = ($event.target as HTMLInputElement).files?.[0] ?? null" />
+                            <Input id="business-logo" type="file" accept="image/jpeg,image/png,image/webp" class="h-auto min-h-11 py-2"  :disabled="!features.business_logo || !features.can_manage_logo || logoForm.processing" @input="logoForm.logo = ($event.target as HTMLInputElement).files?.[0] ?? null" />
                             <p v-if="logoForm.errors.logo" class="text-sm text-destructive" role="alert">{{ logoForm.errors.logo }}</p>
                             <p v-if="!features.business_logo" class="text-xs text-muted-foreground">بارگذاری لوگو در طرح فعلی فعال نیست. لوگوی قبلی در صورت وجود نمایش داده می‌شود.</p>
                             <div class="flex flex-wrap gap-2">
-                                <Button type="submit" :disabled="!features.business_logo || !logoForm.logo || logoForm.processing">
+                                <Button type="submit"  :disabled="!features.business_logo || !features.can_manage_logo || !logoForm.logo || logoForm.processing">
                                     {{ logoForm.processing ? 'در حال بارگذاری...' : 'بارگذاری لوگو' }}
                                 </Button>
-                                <Button v-if="business.logo_url" type="button" variant="outline" :disabled="logoForm.processing" @click="removeLogo">حذف لوگو</Button>
+                                <Button v-if="business.logo_url && features.can_manage_logo" type="button" variant="outline" :disabled="logoForm.processing" @click="removeLogo">حذف لوگو</Button>
                             </div>
                         </form>
                     </div>
