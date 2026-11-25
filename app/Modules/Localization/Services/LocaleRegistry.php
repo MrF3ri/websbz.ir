@@ -47,6 +47,22 @@ class LocaleRegistry
         return array_key_exists($locale, $this->availableFor($business));
     }
 
+    public function resolveFor(Business $business, string $defaultLocale, ?string $requestedLocale): string
+    {
+        $available = $this->availableFor($business);
+        $fallback = array_key_exists($defaultLocale, $available)
+            ? $defaultLocale
+            : $this->default();
+
+        if (! array_key_exists($fallback, $available)) {
+            $fallback = (string) array_key_first($available);
+        }
+
+        return $requestedLocale !== null && array_key_exists($requestedLocale, $available)
+            ? $requestedLocale
+            : $fallback;
+    }
+
     public function direction(string $locale): string
     {
         return $this->supported()[$locale]['direction'] ?? $this->supported()[$this->default()]['direction'] ?? 'rtl';
