@@ -80,7 +80,7 @@ class ProductVideoController
         });
 
         $storage = Storage::disk($media->disk);
-        if ($storage->exists($media->path) && ! $storage->delete($media->path)) {
+        if ($storage->exists($media->path) && !$storage->delete($media->path)) {
             report(new RuntimeException('Unable to delete product video from storage.'));
         }
 
