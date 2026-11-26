@@ -50,7 +50,6 @@ See ADR 0024 for the privacy, moderation, and abuse-prevention decision.
 
 ## Remaining Phase 15 increments
 
-- **15.2 — Product reviews and ratings:** implementation in progress in this PR, with submission, rating validation, pending moderation, spam prevention, public display, tenant isolation, and Top-plan entitlement. See ADR 0024.
 - **15.3 — Product likes:** like/unlike, anonymous/session identity, duplicate prevention, abuse protection, and entitlement. Define the identity/privacy model before implementation.
 - **15.4 — Instagram integration:** official supported API only, OAuth/token lifecycle, retrieval/display, disconnect, and API-limit handling. Verify current API capabilities before implementation; no scraping.
 - **15.5 — Excel export:** tenant-scoped product export, plan access, safe downloadable files, and queued processing where needed.
