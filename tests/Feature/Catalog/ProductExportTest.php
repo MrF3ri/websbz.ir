@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Catalog;
 
-use App\Modules\Product\Models\Product;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Concerns\InteractsWithCatalog;
 use Tests\TestCase;
