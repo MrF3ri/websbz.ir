@@ -74,11 +74,12 @@ This snapshot records the operational state reported and verified during the own
 - **Phase 11 — Menu Customization and Visual Templates:** complete and merged through PR #82. See `docs/phase-11/README.md` for increment-level implementation and CI history.
 - **Phase 12 — Localization and Translation Management:** feature implementation is complete and merged through PRs #83–#87 and #95. The supported Top-plan locales are `fa`, `en`, and `ar`; Economic and Professional remain single-language. The approved translation schema covers menu, category, product name, and product description. Banner and business-introduction fields remain outside the approved translation scope. Only the repository-wide Release Gate remains, after all product phases are complete. See `docs/phase-12/README.md`.
 
+- **Phase 15 — Top-plan advanced features:** increment 15.1 (short product video) is implemented and merged through PR #97; exact-head pre-merge and post-merge CI passed. The approved implementation is one private MP4 per product, maximum 10 MiB and 5 seconds, with owner-side compression and entitlement/publication checks. Remaining increments are 15.2 reviews/ratings, 15.3 likes, 15.4 official Instagram API integration, 15.5 Excel export, 15.6 backup/restore, 15.7 notifications/customer communication, and 15.8 initial setup service. See `docs/phase-15/README.md`.
+
 ## Deferred product phases
 
 These are intentionally separate from the current localization increment:
 
-- **Phase 15:** Top-plan advanced features (video, reviews/ratings, likes, Instagram API, Excel export, backup/restore, notifications/customer communication, initial setup service).
 - **Phase 16:** Custom domains and HTTPS per tenant.
 - **Phase 17:** Social links, contact, and location integrations.
 - **Phase 18:** Expanded notifications, audit logs, and operational events.
