@@ -86,6 +86,25 @@ class ProductReviewTest extends TestCase
         $this->assertDatabaseCount('product_reviews', 0);
     }
 
+    public function test_guest_cannot_review_a_product_hidden_by_branch_settings(): void
+    {
+        [, $business, $menu, $product, $branch] = $this->publishedProduct('top');
+
+        $branch->productSettings()->create([
+            'business_id' => $business->getKey(),
+            'menu_id' => $menu->getKey(),
+            'product_id' => $product->getKey(),
+            'is_visible' => false,
+            'is_available' => true,
+        ]);
+
+        $this->post($this->reviewUrl($business, $menu, $product, $branch), [
+            'rating' => 4,
+        ])->assertNotFound();
+
+        $this->assertDatabaseCount('product_reviews', 0);
+    }
+
     public function test_rating_must_be_between_one_and_five(): void
     {
         [, $business, $menu, $product, $branch] = $this->publishedProduct('top');
