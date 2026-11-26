@@ -6,6 +6,7 @@ type PublicProduct = {
     name: string;
     label: 'new' | 'popular' | 'recommended' | 'chef_special' | null;
     images: { url: string; srcset: string; sizes: string; width: number; height: number }[];
+    video: { url: string; duration_ms: number } | null;
     description: string | null;
     price: number;
     discount_price: number | null;
@@ -217,6 +218,7 @@ function formatPrice(value: number): string {
                                     class="aspect-[4/3] w-full rounded-xl object-cover"
                                 />
                             </div>
+                            <video v-if="product.video" :src="product.video.url" controls preload="none" playsinline class="mb-4 aspect-video w-full max-h-64 rounded-xl bg-black object-contain" :aria-label="'ویدئوی ' + product.name" />
                             <div class="flex items-start justify-between gap-4">
                                 <div class="min-w-0 flex-1">
                                     <div class="flex flex-wrap items-center gap-2">

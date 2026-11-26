@@ -112,6 +112,10 @@ class PublicMenuController
             'price' => $effective['base_price'],
             'discount_price' => $effective['discount_price'],
             'images' => $product->images->map(fn (ProductImage $image): array => $this->imageData($image))->values()->all(),
+            'video' => $product->videos->first() ? [
+                'url' => route('media.product-video.public', $product->videos->first()->media->public_id),
+                'duration_ms' => $product->videos->first()->media->duration_ms,
+            ] : null,
             'translations' => $product->translations->keyBy('locale')->map(fn ($translation): array => [
                 'name' => $translation->name,
                 'description' => $translation->description,
@@ -229,7 +233,7 @@ class PublicMenuController
                         ->where('is_available', true)
                         ->orderBy('sort_order')
                         ->orderBy('id');
-                }, 'translations', 'products.images.media', 'products.translations'])
+                }, 'translations', 'products.images.media', 'products.videos.media', 'products.translations'])
                 ->orderBy('sort_order')
                 ->orderBy('id')
                 ->get()
@@ -360,6 +364,15 @@ class PublicMenuController
 
             $entitlements = new EntitlementService($business);
             $publicMenu['menu']['image_slider_enabled'] = $entitlements->hasFeature('image_slider');
+            if (! $entitlements->hasFeature('product_video')) {
+                foreach ($publicMenu['categories'] as &$category) {
+                    foreach ($category['products'] as &$product) {
+                        $product['video'] = null;
+                    }
+                    unset($product);
+                }
+                unset($category);
+            }
             $publicMenu['menu']['advertising_banner'] = $entitlements->hasFeature('advertising_banner')
                 ? $this->bannerData($menu)
                 : null;
