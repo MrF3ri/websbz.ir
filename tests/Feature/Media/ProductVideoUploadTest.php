@@ -80,6 +80,23 @@ class ProductVideoUploadTest extends TestCase
         Storage::disk('media')->assertDirectoryEmpty('businesses');
     }
 
+    public function test_video_larger_than_ten_megabytes_is_rejected(): void
+    {
+        [$user, , $menu] = $this->createCatalogTenant('top');
+        $category = $this->createCatalogCategory($menu);
+        $product = $this->createCatalogProduct($menu, $category);
+
+        $this->actingAs($user)
+            ->post(route('catalog.products.video.store', $product->public_id), [
+                'video' => UploadedFile::fake()->create('oversized.mp4', 10241, 'video/mp4'),
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseCount('product_videos', 0);
+        $this->assertDatabaseCount('media', 0);
+        Storage::disk('media')->assertDirectoryEmpty('businesses');
+    }
+
     public function test_non_mp4_upload_is_rejected_without_storing_a_file(): void
     {
         [$user, , $menu] = $this->createCatalogTenant('top');

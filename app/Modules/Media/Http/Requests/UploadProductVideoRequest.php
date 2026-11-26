@@ -16,7 +16,7 @@ class UploadProductVideoRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'video' => ['required', 'file', 'mimes:mp4', 'mimetypes:video/mp4', 'max:10240'],
+            'video' => ['required', 'file', 'max:10240'],
         ];
     }
 }
