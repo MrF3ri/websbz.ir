@@ -36,7 +36,7 @@ class ProductReviewController
             ->where('status', MenuStatus::Published)
             ->firstOrFail();
 
-        $menu->business->branches()
+        $business->branches()
             ->where('slug', $branchSlug)
             ->where('status', 'active')
             ->firstOrFail();
@@ -85,7 +85,7 @@ class ProductReviewController
         $cookie = cookie(
             self::VISITOR_COOKIE,
             $visitorKey,
-            60 * 24 * 365,
+            60 * 24 * 30,
             '/',
             null,
             $request->isSecure(),
