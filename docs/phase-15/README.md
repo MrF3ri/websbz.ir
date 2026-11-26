@@ -50,14 +50,16 @@ See ADR 0016 for the decision record.
 
 See ADR 0024 for the accepted privacy, moderation, and abuse-prevention decision.
 
-## Increment 15.5 — Product export (implementation in progress)
+## Increment 15.5 — Product export (complete)
 
 - Top-plan only through the excel_export entitlement.
 - Export the current business's canonical menu products only.
 - Stream an Excel-compatible UTF-8 CSV with BOM in chunks of 500; do not create temporary files or queue a job.
 - Neutralize formula-leading cells and send no-store/nosniff headers.
 - The output is CSV, not a native XLSX workbook. Branch-specific overrides and private media paths are excluded.
-- See ADR 0025 for the format and streaming decision.
+- PR #101 merged at commit `3e9f8ce25856fc91b1a181ed5e257f0645a74fd4`.
+- Exact-head pre-merge and post-merge CI passed: SQLite 312 passed (2 skipped), PostgreSQL 324 passed, Production Image/Compose/Nginx passed; Pint, PHPStan, TypeScript, Composer audit, and NPM audit passed.
+- See ADR 0025 for the accepted format and streaming decision.
 
 ## Remaining Phase 15 increments
 
