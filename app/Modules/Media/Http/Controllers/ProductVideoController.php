@@ -12,12 +12,14 @@ use App\Modules\Menu\Enums\MenuStatus;
 use App\Modules\Product\Enums\ProductStatus;
 use App\Modules\Product\Models\Product;
 use App\Modules\PublicMenu\Services\PublicMenuCache;
+use App\Modules\Subscription\Services\EntitlementService;
 use App\Modules\Tenancy\Services\CurrentBusiness;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
+use RuntimeException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ProductVideoController
@@ -79,7 +81,7 @@ class ProductVideoController
 
         $storage = Storage::disk($media->disk);
         if ($storage->exists($media->path) && ! $storage->delete($media->path)) {
-            report(new \RuntimeException('Unable to delete product video from storage.'));
+            report(new RuntimeException('Unable to delete product video from storage.'));
         }
 
         $publicMenuCache->forget($menu);
@@ -107,7 +109,7 @@ class ProductVideoController
         $business = $video->product->menu->business;
         abort_unless($business instanceof Business, 404);
 
-        $entitlements = new \App\Modules\Subscription\Services\EntitlementService($business);
+        $entitlements = new EntitlementService($business);
         abort_unless($entitlements->hasFeature('product_video'), 404);
 
         $media = $video->media;

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Media;
 
+use App\Modules\Media\Models\Media;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -41,7 +42,7 @@ class ProductVideoUploadTest extends TestCase
             'duration_ms' => 4750,
         ]);
 
-        $media = \App\Modules\Media\Models\Media::query()->where('mime_type', 'video/mp4')->firstOrFail();
+        $media = Media::query()->where('mime_type', 'video/mp4')->firstOrFail();
         Storage::disk('media')->assertExists($media->path);
     }
 

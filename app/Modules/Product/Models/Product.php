@@ -5,6 +5,7 @@ namespace App\Modules\Product\Models;
 use App\Modules\Branch\Models\BranchProductSetting;
 use App\Modules\Category\Models\Category;
 use App\Modules\Media\Models\ProductImage;
+use App\Modules\Media\Models\ProductVideo;
 use App\Modules\Menu\Models\Menu;
 use App\Modules\Product\Enums\ProductLabel;
 use App\Modules\Product\Enums\ProductStatus;
@@ -75,10 +76,10 @@ class Product extends Model
         return $this->hasMany(ProductImage::class)->orderBy('sort_order')->orderBy('id');
     }
 
-    /** @return HasMany<\App\Modules\Media\Models\ProductVideo, $this> */
+    /** @return HasMany<ProductVideo, $this> */
     public function videos(): HasMany
     {
-        return $this->hasMany(\App\Modules\Media\Models\ProductVideo::class);
+        return $this->hasMany(ProductVideo::class);
     }
 
     /** @return HasMany<BranchProductSetting, $this> */
