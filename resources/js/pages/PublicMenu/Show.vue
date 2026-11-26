@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
+import ProductReviewPanel from '@/components/ProductReviewPanel.vue';
 
 type PublicProduct = {
     public_id: string;
@@ -10,6 +11,9 @@ type PublicProduct = {
     description: string | null;
     price: number;
     discount_price: number | null;
+    review_count: number;
+    average_rating: number | null;
+    reviews: { rating: number; display_name: string | null; body: string | null; created_at: string | null }[];
 };
 
 type PublicCategory = {
@@ -24,6 +28,12 @@ const props = defineProps<{
         logo_url: string | null;
         introduction: string | null;
     };
+    branch: {
+        name: string;
+        slug: string;
+        phone: string | null;
+        address: string | null;
+    };
     menu: {
         title: string;
         slug: string;
@@ -34,6 +44,7 @@ const props = defineProps<{
         available_locales: { code: string; name: string; native_name: string; direction: 'rtl' | 'ltr' }[];
         theme: { template: string; primary_color: string; font: string; mode: string; density: string; card_style: string; heading_size: string };
         image_slider_enabled: boolean;
+        product_reviews_enabled: boolean;
         advertising_banner: { title: string | null; message: string | null; cta_label: string | null; cta_url: string | null } | null;
     };
     categories: PublicCategory[];
@@ -238,6 +249,14 @@ function formatPrice(value: number): string {
                                     </p>
                                 </div>
                             </div>
+                            <ProductReviewPanel
+                                v-if="menu.product_reviews_enabled"
+                                :product="product"
+                                :business-slug="business.slug"
+                                :menu-slug="menu.slug"
+                                :branch-slug="branch.slug"
+                                :locale="menu.locale"
+                            />
                         </article>
                     </div>
                 </section>
