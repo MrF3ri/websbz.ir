@@ -1,15 +1,15 @@
 <?php
 
-namespace App\\Modules\\Review\\Models;
+namespace App\Modules\Review\Models;
 
-use App\\Models\\User;
-use App\\Modules\\Business\\Models\\Business;
-use App\\Modules\\Menu\\Models\\Menu;
-use App\\Modules\\Product\\Models\\Product;
-use App\\Modules\\Review\\Enums\\ReviewStatus;
-use Illuminate\\Database\\Eloquent\\Model;
-use Illuminate\\Database\\Eloquent\\Relations\\BelongsTo;
-use Illuminate\\Support\\Str;
+use App\Models\User;
+use App\Modules\Business\Models\Business;
+use App\Modules\Menu\Models\Menu;
+use App\Modules\Product\Models\Product;
+use App\Modules\Review\Enums\ReviewStatus;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Str;
 
 /**
  * @property int $id
