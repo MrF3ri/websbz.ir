@@ -484,7 +484,7 @@ function goToPage(pageNumber: number): void {
                 <p class="text-sm leading-6 text-muted-foreground">
                     دسته‌بندی‌ها و محصولات منوی اصلی کسب‌وکار خود را مدیریت کنید.
                 </p>
-                <a v-if="canManageReviews" :href="route('catalog.reviews.index')" class="inline-flex text-sm font-medium text-primary underline underline-offset-4">مدیریت نظرات و امتیازها</a>
+                <a v-if="canManageReviews" :href="'/catalog/reviews'" class="inline-flex text-sm font-medium text-primary underline underline-offset-4">مدیریت نظرات و امتیازها</a>
             </header>
 
             <section class="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
