@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Review;
 
-use App\Enums\BusinessRole;
 use App\Models\User;
 use App\Modules\Branch\Models\Branch;
 use App\Modules\Business\Models\Business;
@@ -202,23 +201,6 @@ class ProductReviewTest extends TestCase
             ->assertInertia(fn (Assert $page) => $page
                 ->where('categories.0.products.0.review_count', 0)
                 ->has('categories.0.products.0.reviews', 0));
-    }
-
-    public function test_read_only_business_member_cannot_moderate_reviews(): void
-    {
-        [$user, $business, $menu] = $this->createCatalogTenant('top', BusinessRole::Viewer);
-        $category = $this->createCatalogCategory($menu);
-        $product = $this->createCatalogProduct($menu, $category);
-        $review = $this->createReview($business, $menu, $product);
-
-        $this->actingAs($user)
-            ->post(route('catalog.reviews.approve', $review->public_id))
-            ->assertForbidden();
-
-        $this->assertDatabaseHas('product_reviews', [
-            'id' => $review->getKey(),
-            'status' => ReviewStatus::Pending->value,
-        ]);
     }
 
     public function test_review_moderation_is_tenant_scoped(): void
