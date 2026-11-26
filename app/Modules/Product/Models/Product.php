@@ -9,6 +9,7 @@ use App\Modules\Media\Models\ProductVideo;
 use App\Modules\Menu\Models\Menu;
 use App\Modules\Product\Enums\ProductLabel;
 use App\Modules\Product\Enums\ProductStatus;
+use App\Modules\Review\Models\ProductReview;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -86,6 +87,12 @@ class Product extends Model
     public function branchSettings(): HasMany
     {
         return $this->hasMany(BranchProductSetting::class);
+    }
+
+    /** @return HasMany<ProductReview, $this> */
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(ProductReview::class);
     }
 
     /** @return HasMany<ProductTranslation, $this> */
