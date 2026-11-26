@@ -220,7 +220,7 @@ class ProductReviewTest extends TestCase
     }
 
     /**
-     * @return array{0: \App\Models\User, 1: \App\Modules\Business\Models\Business, 2: \App\Modules\Menu\Models\Menu, 3: \App\Modules\Product\Models\Product, 4: \App\Modules\Branch\Models\Branch}
+     * @return array{0: User, 1: Business, 2: Menu, 3: Product, 4: Branch}
      */
     private function publishedProduct(string $plan): array
     {
