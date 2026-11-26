@@ -2,7 +2,7 @@
 
 ## Increment 15.1 — Product video (complete)
 
-Status: Increment 15.1 — Product video — implemented, merged, and verified on `main` through PR #97 (merge commit `410652edbcf9ef27f47098fab29e8a146b8245b1`).
+Status: Increment 15.1 (product video) and 15.2 (product reviews and ratings) are implemented, merged, and verified on `main` through PRs #97 and #99.
 
 ### Approved first-release limits
 
@@ -35,7 +35,7 @@ See ADR 0016 for the decision record.
 - Post-merge SQLite/quality, PostgreSQL, and production-image workflows passed.
 - This completion applies only to increment 15.1; it does not complete Phase 15.
  
-## Increment 15.2 — Product reviews and ratings (implementation in progress)
+## Increment 15.2 — Product reviews and ratings (complete)
 
 - Top-plan only, based on the subscription feature snapshot.
 - Guest submissions require a 1–5 rating; display name and review text are optional.
@@ -44,9 +44,11 @@ See ADR 0016 for the decision record.
 - One review per product per pseudonymous browser token; the raw token is held only in an encrypted HttpOnly cookie and only its SHA-256 hash is stored in the database.
 - No email, phone number, or raw IP address is persisted for review identity.
 - Reviews are product-wide across branches because branches share canonical products.
-- Public submission requires an active branch URL, active business, published menu, and published/available product.
+- Public submission requires an active branch URL, active business, published menu, active category, and a product that is published, available, and visible/available in that branch.
+- PR #99 merged at commit `6880c59c7894873d946e635e1eca8565817acef9`.
+- Exact-head pre-merge and post-merge CI passed: SQLite 308 passed (2 skipped), PostgreSQL 320 passed, Production Image/Compose/Nginx passed; Pint, PHPStan, TypeScript, Composer audit, and NPM audit passed.
 
-See ADR 0024 for the privacy, moderation, and abuse-prevention decision.
+See ADR 0024 for the accepted privacy, moderation, and abuse-prevention decision.
 
 ## Remaining Phase 15 increments
 
