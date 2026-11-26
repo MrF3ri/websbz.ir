@@ -2,8 +2,13 @@
 
 namespace Tests\Feature\Review;
 
+use App\Models\User;
+use App\Modules\Branch\Models\Branch;
+use App\Modules\Business\Models\Business;
 use App\Modules\Menu\Enums\MenuStatus;
+use App\Modules\Menu\Models\Menu;
 use App\Modules\Product\Enums\ProductStatus;
+use App\Modules\Product\Models\Product;
 use App\Modules\Review\Enums\ReviewStatus;
 use App\Modules\Review\Models\ProductReview;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -229,7 +234,7 @@ class ProductReviewTest extends TestCase
         return [$user, $business, $menu, $product, $branch];
     }
 
-    private function reviewUrl($business, $menu, $product, $branch): string
+    private function reviewUrl(Business $business, Menu $menu, Product $product, Branch $branch): string
     {
         return route('public.menu.reviews.store', [
             $business->slug,
@@ -239,7 +244,7 @@ class ProductReviewTest extends TestCase
         ]);
     }
 
-    private function createReview($business, $menu, $product): ProductReview
+    private function createReview(Business $business, Menu $menu, Product $product): ProductReview
     {
         return ProductReview::query()->create([
             'business_id' => $business->getKey(),
