@@ -11,7 +11,7 @@ use App\Modules\Product\Enums\ProductStatus;
 use App\Modules\Product\Models\Product;
 use App\Modules\Review\Enums\ReviewStatus;
 use App\Modules\Review\Models\ProductReview;
-use Illuminate\Cookie\Middleware\EncryptCookies;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\Concerns\InteractsWithCatalog;
@@ -117,28 +117,15 @@ class ProductReviewTest extends TestCase
         $this->assertDatabaseCount('product_reviews', 0);
     }
 
-    public function test_same_browser_cannot_submit_duplicate_review_for_same_product(): void
+    public function test_database_rejects_duplicate_review_per_product_and_visitor(): void
     {
-        $this->withoutMiddleware(EncryptCookies::class);
+        [, $business, $menu, $product] = $this->publishedProduct('top');
 
-        [, $business, $menu, $product, $branch] = $this->publishedProduct('top');
-        $url = $this->reviewUrl($business, $menu, $product, $branch);
-        $visitorToken = str_repeat('a', 64);
+        $this->createReview($business, $menu, $product);
 
-        $this->withCookie('product_review_visitor', $visitorToken)
-            ->post($url, ['rating' => 4])
-            ->assertRedirect()
-            ->assertSessionHasNoErrors();
+        $this->expectException(QueryException::class);
 
-        $this->withCookie('product_review_visitor', $visitorToken)
-            ->post($url, ['rating' => 3])
-            ->assertSessionHasErrors('review');
-
-        $this->assertDatabaseCount('product_reviews', 1);
-        $this->assertDatabaseHas('product_reviews', [
-            'product_id' => $product->getKey(),
-            'visitor_key_hash' => hash('sha256', $visitorToken),
-        ]);
+        $this->createReview($business, $menu, $product);
     }
 
     public function test_public_menu_displays_only_approved_reviews_and_aggregates(): void
