@@ -74,6 +74,7 @@ const form = useForm({
     body: '',
 });
 const submitted = ref(false);
+const reviewError = ref('');
 
 function submit(): void {
     if (form.rating < 1 || form.rating > 5) {
@@ -81,16 +82,17 @@ function submit(): void {
         return;
     }
 
-    form.post(route('public.menu.reviews.store', [
-        props.businessSlug,
-        props.menuSlug,
-        props.branchSlug,
-        props.product.public_id,
-    ]), {
+    const url = `/menu/${encodeURIComponent(props.businessSlug)}/${encodeURIComponent(props.menuSlug)}/${encodeURIComponent(props.branchSlug)}/products/${encodeURIComponent(props.product.public_id)}/reviews`;
+
+    form.post(url, {
         preserveScroll: true,
         onSuccess: () => {
             submitted.value = true;
+            reviewError.value = '';
             form.reset('body', 'display_name');
+        },
+        onError: (errors) => {
+            reviewError.value = errors.review ?? '';
         },
     });
 }
@@ -146,7 +148,7 @@ function submit(): void {
                     <textarea v-model="form.body" maxlength="1500" rows="3" class="w-full rounded-md border border-stone-200 bg-transparent px-3 py-2 text-sm dark:border-stone-700" />
                     <span v-if="form.errors.body" class="text-xs text-red-600">{{ form.errors.body }}</span>
                 </label>
-                <p v-if="form.errors.review" class="text-xs text-red-600" role="alert">{{ form.errors.review }}</p>
+                <p v-if="reviewError" class="text-xs text-red-600" role="alert">{{ reviewError }}</p>
                 <p v-if="submitted" class="text-xs text-emerald-700 dark:text-emerald-400" role="status">{{ labels.pending }}</p>
                 <button type="submit" :disabled="form.processing" class="rounded-md bg-[var(--menu-accent)] px-4 py-2 text-xs font-semibold text-white disabled:opacity-50">
                     {{ form.processing ? '…' : labels.submit }}
