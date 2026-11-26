@@ -50,7 +50,7 @@ class ProductReviewController
         abort_unless((new EntitlementService($business))->hasFeature('product_reviews'), 404);
 
         $visitorKey = $request->cookie(self::VISITOR_COOKIE);
-        if (! is_string($visitorKey) || preg_match('/^[a-f0-9]{64}$/', $visitorKey) !== 1) {
+        if (is_string($visitorKey) === false || preg_match('/^[a-f0-9]{64}$/', $visitorKey) !== 1) {
             $visitorKey = bin2hex(random_bytes(32));
         }
 
