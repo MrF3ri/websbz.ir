@@ -91,7 +91,7 @@ class ProductExportController
     {
         $cell = (string) ($value ?? '');
 
-        if (preg_match('/^[\x00-\x20]*[=+\-@]/u', $cell) === 1) {
+        if (preg_match('/^[\x00-\x20]*[=+\-@]/', $cell) === 1) {
             return "'".$cell;
         }
 
