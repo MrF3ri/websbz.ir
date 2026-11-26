@@ -41,6 +41,6 @@ class PublicMenuCache
 
     private function key(Menu $menu, ?Branch $branch = null): string
     {
-        return 'public-menu:v5:'.$menu->getKey().':'.($branch?->getKey() ?? 'legacy');
+        return 'public-menu:v6:'.$menu->getKey().':'.($branch?->getKey() ?? 'legacy');
     }
 }
