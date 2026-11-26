@@ -29,6 +29,7 @@ use Illuminate\Support\Facades\Route;
 Route::inertia('/', 'Welcome')->name('home');
 
 Route::get('/media/{mediaPublicId}', [MediaController::class, 'publicImage'])->name('media.public');
+Route::get('/media/videos/{mediaPublicId}', [ProductVideoController::class, 'publicVideo'])->name('media.product-video.public');
 Route::get('/media/business-logo/{businessPublicId}/{mediaPublicId}', [BusinessLogoController::class, 'public'])->name('media.business-logo');
 
 Route::get('/menu/{businessSlug}/{menuSlug}/{branchSlug}', [PublicMenuController::class, 'showBranch'])
@@ -97,6 +98,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('/catalog/categories/{categoryPublicId}', [CategoryController::class, 'update'])->name('catalog.categories.update');
         Route::delete('/catalog/categories/{categoryPublicId}', [CategoryController::class, 'destroy'])->name('catalog.categories.destroy');
         Route::post('/catalog/products', [ProductController::class, 'store'])->name('catalog.products.store');
+        Route::post('/catalog/products/{productPublicId}/video', [ProductVideoController::class, 'store'])->middleware('throttle:10,1')->name('catalog.products.video.store');
+        Route::delete('/catalog/products/{productPublicId}/video/{mediaPublicId}', [ProductVideoController::class, 'destroy'])->name('catalog.products.video.destroy');
         Route::post('/catalog/products/{productPublicId}/images', [MediaController::class, 'store'])->name('catalog.products.images.store');
         Route::delete('/catalog/products/{productPublicId}/images/{mediaPublicId}', [MediaController::class, 'destroy'])->name('catalog.products.images.destroy');
         Route::put('/catalog/products/{productPublicId}/images/reorder', [MediaController::class, 'reorder'])->name('catalog.products.images.reorder');

@@ -75,6 +75,12 @@ class Product extends Model
         return $this->hasMany(ProductImage::class)->orderBy('sort_order')->orderBy('id');
     }
 
+    /** @return HasMany<\\App\\Modules\\Media\\Models\\ProductVideo, $this> */
+    public function videos(): HasMany
+    {
+        return $this->hasMany(\\App\\Modules\\Media\\Models\\ProductVideo::class);
+    }
+
     /** @return HasMany<BranchProductSetting, $this> */
     public function branchSettings(): HasMany
     {

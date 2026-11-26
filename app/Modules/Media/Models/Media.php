@@ -18,6 +18,7 @@ use Illuminate\Support\Str;
  * @property int $size
  * @property int $width
  * @property int $height
+ * @property int|null $duration_ms
  * @property array<string, array{path: string, width: int, height: int, mime_type: string}>|null $variants
  */
 class Media extends Model
@@ -30,6 +31,7 @@ class Media extends Model
         'size',
         'width',
         'height',
+        'duration_ms',
         'variants',
     ];
 
@@ -61,6 +63,7 @@ class Media extends Model
             'size' => 'integer',
             'width' => 'integer',
             'height' => 'integer',
+            'duration_ms' => 'integer',
             'variants' => 'array',
         ];
     }

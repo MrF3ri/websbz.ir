@@ -31,12 +31,14 @@ type Category = {
 };
 
 type ProductImage = { public_id: string; url: string; width: number; height: number };
+type ProductVideo = { public_id: string; url: string; duration_ms: number; size: number };
 
 type ProductLabel = 'new' | 'popular' | 'recommended' | 'chef_special';
 
 type Product = {
     public_id: string;
     images: ProductImage[];
+    video: ProductVideo | null;
     category_public_id: string;
     category_name: string;
     name: string;
@@ -133,6 +135,7 @@ const imageLimit = computed(() => {
     return typeof limit === 'number' ? limit : 0;
 });
 const canUploadImages = computed(() => imageLimit.value === -1 || imageLimit.value > 0);
+const canUploadVideo = computed(() => entitlements.value?.features.product_video === true);
 
 const qrSvg = computed(() => (
     props.menu.status === 'published' ? createQrSvg(props.menu.public_url) : null
@@ -304,6 +307,53 @@ function uploadProductImage(product: Product, event: Event): void {
         onSuccess: () => { successMessage.value = 'تصویر محصول بارگذاری شد.'; },
         onError: (errors) => { serverError.value = errors.image ?? 'بارگذاری تصویر انجام نشد.'; },
         onFinish: () => { input.value = ''; },
+    });
+}
+
+function uploadProductVideo(product: Product, event: Event): void {
+    const input = event.target;
+    if (!(input instanceof HTMLInputElement)) return;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+        serverError.value = 'حجم ویدئو نباید بیشتر از ۱۰ مگابایت باشد.';
+        input.value = '';
+        return;
+    }
+
+    const objectUrl = URL.createObjectURL(file);
+    const video = document.createElement('video');
+    video.preload = 'metadata';
+    video.onloadedmetadata = () => {
+        URL.revokeObjectURL(objectUrl);
+        if (video.duration > 5.05) {
+            serverError.value = 'مدت ویدئو نباید بیشتر از ۵ ثانیه باشد.';
+            input.value = '';
+            return;
+        }
+        router.post(`/catalog/products/${product.public_id}/video`, { video: file }, {
+            forceFormData: true,
+            preserveScroll: true,
+            onSuccess: () => { successMessage.value = 'ویدئوی محصول بارگذاری شد.'; },
+            onError: (errors) => { serverError.value = errors.video ?? 'بارگذاری ویدئو انجام نشد.'; },
+            onFinish: () => { input.value = ''; },
+        });
+    };
+    video.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        serverError.value = 'امکان خواندن اطلاعات ویدئو وجود ندارد.';
+        input.value = '';
+    };
+    video.src = objectUrl;
+}
+
+function deleteProductVideo(product: Product): void {
+    if (!product.video || !window.confirm('ویدئوی این محصول حذف شود؟')) return;
+    router.delete(`/catalog/products/${product.public_id}/video/${product.video.public_id}`, {
+        preserveScroll: true,
+        onSuccess: () => { successMessage.value = 'ویدئوی محصول حذف شد.'; },
+        onError: () => { serverError.value = 'حذف ویدئو انجام نشد.'; },
     });
 }
 
@@ -933,6 +983,17 @@ function goToPage(pageNumber: number): void {
                                             </button>
                                         </div>
                                     </div>
+                                    <div v-if="product.video" class="mt-3 flex items-center gap-3">
+                                        <video :src="product.video.url" controls preload="metadata" class="h-20 w-36 rounded-md bg-black object-contain" />
+                                        <div class="text-xs text-muted-foreground">
+                                            <p>ویدئوی محصول · {{ numberFormatter.format(product.video.duration_ms / 1000) }} ثانیه</p>
+                                            <button type="button" class="mt-1 text-destructive underline" @click="deleteProductVideo(product)">حذف ویدئو</button>
+                                        </div>
+                                    </div>
+                                    <label v-else-if="canUploadVideo" class="mt-2 inline-flex cursor-pointer items-center text-xs text-primary underline underline-offset-4">
+                                        افزودن ویدئو (MP4، حداکثر ۵ ثانیه و ۱۰ مگابایت)
+                                        <input type="file" accept="video/mp4,.mp4" class="sr-only" @change="uploadProductVideo(product, $event)" />
+                                    </label>
                                     <label v-if="canUploadImages && (imageLimit === -1 || product.images.length < imageLimit)" class="mt-2 inline-flex cursor-pointer items-center text-xs text-primary underline underline-offset-4">
                                         افزودن تصویر
                                         <input type="file" accept="image/jpeg,image/png,image/webp" class="sr-only" @change="uploadProductImage(product, $event)" />

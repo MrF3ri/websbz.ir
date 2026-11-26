@@ -43,7 +43,7 @@ class CatalogController
             ->get(['id', 'public_id', 'name', 'sort_order', 'is_active']);
 
         $productsQuery = $menu->products()
-            ->with(['category:id,public_id,name', 'images.media'])
+            ->with(['category:id,public_id,name', 'images.media', 'videos.media'])
             ->orderBy(
                 Category::query()
                     ->select('sort_order')
@@ -108,6 +108,12 @@ class CatalogController
                     'is_available' => $product->is_available,
                     'status' => $product->status->value,
                     'sort_order' => $product->sort_order,
+                    'video' => $product->videos->first() ? [
+                        'public_id' => $product->videos->first()->media->public_id,
+                        'url' => route('media.product-video.public', $product->videos->first()->media->public_id),
+                        'duration_ms' => $product->videos->first()->media->duration_ms,
+                        'size' => $product->videos->first()->media->size,
+                    ] : null,
                     'images' => $product->images->map(fn (ProductImage $image): array => [
                         'public_id' => $image->media->public_id,
                         'url' => route('media.public', $image->media->public_id),
