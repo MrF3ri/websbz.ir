@@ -9,6 +9,7 @@ use App\Modules\Review\Enums\ReviewStatus;
 use App\Modules\Review\Http\Requests\StoreProductReviewRequest;
 use App\Modules\Review\Models\ProductReview;
 use App\Modules\Product\Enums\ProductStatus;
+use App\Modules\Product\Models\Product;
 use App\Modules\Subscription\Services\EntitlementService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
@@ -54,18 +55,21 @@ class ProductReviewController
         }
 
         $visitorKeyHash = hash('sha256', $visitorKey);
-        $alreadyReviewed = ProductReview::query()
-            ->where('product_id', $product->getKey())
-            ->where('visitor_key_hash', $visitorKeyHash)
-            ->exists();
-
-        if ($alreadyReviewed) {
-            throw ValidationException::withMessages([
-                'review' => 'از این مرورگر قبلاً برای این محصول نظر ثبت شده است.',
-            ]);
-        }
 
         DB::transaction(function () use ($business, $menu, $product, $request, $visitorKeyHash): void {
+            Product::query()->whereKey($product->getKey())->lockForUpdate()->firstOrFail();
+
+            $alreadyReviewed = ProductReview::query()
+                ->where('product_id', $product->getKey())
+                ->where('visitor_key_hash', $visitorKeyHash)
+                ->exists();
+
+            if ($alreadyReviewed) {
+                throw ValidationException::withMessages([
+                    'review' => 'از این مرورگر قبلاً برای این محصول نظر ثبت شده است.',
+                ]);
+            }
+
             ProductReview::query()->create([
                 'business_id' => $business->getKey(),
                 'menu_id' => $menu->getKey(),
