@@ -10,7 +10,6 @@ use App\Modules\Media\Models\ProductVideo;
 use App\Modules\Menu\Actions\EnsurePrimaryMenuAction;
 use App\Modules\Menu\Enums\MenuStatus;
 use App\Modules\Product\Enums\ProductStatus;
-use App\Modules\Product\Models\Product;
 use App\Modules\PublicMenu\Services\PublicMenuCache;
 use App\Modules\Subscription\Services\EntitlementService;
 use App\Modules\Tenancy\Services\CurrentBusiness;
