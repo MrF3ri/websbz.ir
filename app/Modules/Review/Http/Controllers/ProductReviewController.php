@@ -1,18 +1,18 @@
 <?php
 
-namespace App\\Modules\\Review\\Http\\Controllers;
+namespace App\Modules\Review\Http\Controllers;
 
-use App\\Enums\\BusinessStatus;
-use App\\Modules\\Business\\Models\\Business;
-use App\\Modules\\Menu\\Enums\\MenuStatus;
-use App\\Modules\\Review\\Enums\\ReviewStatus;
-use App\\Modules\\Review\\Http\\Requests\\StoreProductReviewRequest;
-use App\\Modules\\Review\\Models\\ProductReview;
-use App\\Modules\\Product\\Enums\\ProductStatus;
-use App\\Modules\\Subscription\\Services\\EntitlementService;
-use Illuminate\\Http\\RedirectResponse;
-use Illuminate\\Support\\Facades\\DB;
-use Illuminate\\Validation\\ValidationException;
+use App\Enums\BusinessStatus;
+use App\Modules\Business\Models\Business;
+use App\Modules\Menu\Enums\MenuStatus;
+use App\Modules\Review\Enums\ReviewStatus;
+use App\Modules\Review\Http\Requests\StoreProductReviewRequest;
+use App\Modules\Review\Models\ProductReview;
+use App\Modules\Product\Enums\ProductStatus;
+use App\Modules\Subscription\Services\EntitlementService;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class ProductReviewController
 {
