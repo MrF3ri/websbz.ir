@@ -1,8 +1,8 @@
 # Phase 15 — Top-plan advanced features
 
-## Increment 15.1 — Product video
+## Increment 15.1 — Product video (complete)
 
-Status: Product-video upload and public playback implementation prepared in PR.
+Status: Increment 15.1 — Product video — implemented, merged, and verified on `main` through PR #97 (merge commit `410652edbcf9ef27f47098fab29e8a146b8245b1`).
 
 ### Approved first-release limits
 
@@ -24,3 +24,23 @@ Status: Product-video upload and public playback implementation prepared in PR.
 - External video platforms.
 
 See ADR 0016 for the decision record.
+
+
+### Verification and delivery
+
+- PR: [#97 — feat(media): add Top-plan short product videos](https://github.com/MrF3ri/websbz.ir/pull/97).
+- Merge commit: `410652edbcf9ef27f47098fab29e8a146b8245b1`.
+- Exact PR head: `758f7c9f7a33f196cf27acec77d1525e3be08cbf`.
+- Pre-merge SQLite/quality, PostgreSQL, production-image, Composer audit, and NPM audit checks passed.
+- Post-merge SQLite/quality, PostgreSQL, and production-image workflows passed.
+- This completion applies only to increment 15.1; it does not complete Phase 15.
+ 
+## Remaining Phase 15 increments
+
+- **15.2 — Product reviews and ratings:** submission, rating validation, moderation, spam prevention, public display, tenant isolation, and Top-plan entitlement.
+- **15.3 — Product likes:** like/unlike, anonymous/session identity, duplicate prevention, abuse protection, and entitlement. Define the identity/privacy model before implementation.
+- **15.4 — Instagram integration:** official supported API only, OAuth/token lifecycle, retrieval/display, disconnect, and API-limit handling. Verify current API capabilities before implementation; no scraping.
+- **15.5 — Excel export:** tenant-scoped product export, plan access, safe downloadable files, and queued processing where needed.
+- **15.6 — Backup and restore:** scope, schedule, encryption, secure retention, and a tested restore procedure.
+- **15.7 — Notifications and customer communication:** notification model, delivery tracking, preferences, failure handling, queue processing, rate limits, consent, and privacy.
+- **15.8 — Initial setup service:** setup status, assigned operator, required information, completion time, internal notes, and audit trail.
