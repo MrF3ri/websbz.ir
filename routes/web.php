@@ -6,6 +6,7 @@ use App\Modules\Business\Http\Controllers\BusinessLogoController;
 use App\Modules\Business\Http\Controllers\BusinessOnboardingController;
 use App\Modules\Business\Http\Controllers\BusinessSettingsController;
 use App\Modules\Catalog\Http\Controllers\CatalogController;
+use App\Modules\Catalog\Http\Controllers\ProductExportController;
 use App\Modules\Category\Http\Controllers\CategoryController;
 use App\Modules\Media\Http\Controllers\MediaController;
 use App\Modules\Media\Http\Controllers\ProductVideoController;
@@ -98,6 +99,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/business/branches/{branchPublicId}/deactivate', [BranchController::class, 'deactivate'])->name('business.branches.deactivate');
 
         Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog.index');
+        Route::get('/catalog/products/export', [ProductExportController::class, 'download'])->middleware('throttle:3,1')->name('catalog.products.export');
         Route::get('/catalog/reviews', [ProductReviewModerationController::class, 'index'])->name('catalog.reviews.index');
         Route::post('/catalog/reviews/{reviewPublicId}/approve', [ProductReviewModerationController::class, 'approve'])->name('catalog.reviews.approve');
         Route::post('/catalog/reviews/{reviewPublicId}/reject', [ProductReviewModerationController::class, 'reject'])->name('catalog.reviews.reject');

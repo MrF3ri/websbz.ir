@@ -137,6 +137,7 @@ const imageLimit = computed(() => {
 const canUploadImages = computed(() => imageLimit.value === -1 || imageLimit.value > 0);
 const canUploadVideo = computed(() => entitlements.value?.features.product_video === true);
 const canManageReviews = computed(() => entitlements.value?.features.product_reviews === true);
+const canExportProducts = computed(() => entitlements.value?.features.excel_export === true);
 
 const qrSvg = computed(() => (
     props.menu.status === 'published' ? createQrSvg(props.menu.public_url) : null
@@ -485,6 +486,7 @@ function goToPage(pageNumber: number): void {
                     دسته‌بندی‌ها و محصولات منوی اصلی کسب‌وکار خود را مدیریت کنید.
                 </p>
                 <a v-if="canManageReviews" :href="'/catalog/reviews'" class="inline-flex text-sm font-medium text-primary underline underline-offset-4">مدیریت نظرات و امتیازها</a>
+                <a v-if="canExportProducts" href="/catalog/products/export" class="inline-flex text-sm font-medium text-primary underline underline-offset-4">دریافت خروجی اکسل محصولات</a>
             </header>
 
             <section class="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">

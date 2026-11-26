@@ -50,11 +50,19 @@ See ADR 0016 for the decision record.
 
 See ADR 0024 for the accepted privacy, moderation, and abuse-prevention decision.
 
+## Increment 15.5 — Product export (implementation in progress)
+
+- Top-plan only through the excel_export entitlement.
+- Export the current business's canonical menu products only.
+- Stream an Excel-compatible UTF-8 CSV with BOM in chunks of 500; do not create temporary files or queue a job.
+- Neutralize formula-leading cells and send no-store/nosniff headers.
+- The output is CSV, not a native XLSX workbook. Branch-specific overrides and private media paths are excluded.
+- See ADR 0025 for the format and streaming decision.
+
 ## Remaining Phase 15 increments
 
 - **15.3 — Product likes:** like/unlike, anonymous/session identity, duplicate prevention, abuse protection, and entitlement. Define the identity/privacy model before implementation.
 - **15.4 — Instagram integration:** official supported API only, OAuth/token lifecycle, retrieval/display, disconnect, and API-limit handling. Verify current API capabilities before implementation; no scraping.
-- **15.5 — Excel export:** tenant-scoped product export, plan access, safe downloadable files, and queued processing where needed.
 - **15.6 — Backup and restore:** scope, schedule, encryption, secure retention, and a tested restore procedure.
 - **15.7 — Notifications and customer communication:** notification model, delivery tracking, preferences, failure handling, queue processing, rate limits, consent, and privacy.
 - **15.8 — Initial setup service:** setup status, assigned operator, required information, completion time, internal notes, and audit trail.
