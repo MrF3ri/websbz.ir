@@ -27,7 +27,7 @@ const processingId = ref<string | null>(null);
 
 function moderate(review: Review, action: 'approve' | 'reject'): void {
     processingId.value = review.public_id;
-    router.post(route('catalog.reviews.' + action, review.public_id), {}, {
+    router.post(`/catalog/reviews/${encodeURIComponent(review.public_id)}/${action}`, {}, {
         preserveScroll: true,
         onFinish: () => {
             processingId.value = null;
@@ -51,7 +51,7 @@ const statusLabels = {
                 <p class="text-sm font-medium text-primary">مدیریت کسب‌وکار</p>
                 <h1 class="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">نظرات و امتیازهای محصولات</h1>
                 <p class="text-sm leading-6 text-muted-foreground">نظرها ابتدا در انتظار بررسی هستند و فقط پس از تأیید در منوی عمومی نمایش داده می‌شوند.</p>
-                <a :href="route('catalog.index')" class="inline-flex text-sm text-primary underline underline-offset-4">بازگشت به مدیریت منو</a>
+                <a :href="'/catalog'" class="inline-flex text-sm text-primary underline underline-offset-4">بازگشت به مدیریت منو</a>
             </header>
 
             <section class="overflow-hidden rounded-xl border border-border bg-card">
