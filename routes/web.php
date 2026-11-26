@@ -98,7 +98,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/business/branches/{branchPublicId}/deactivate', [BranchController::class, 'deactivate'])->name('business.branches.deactivate');
 
         Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog.index');
-        Route::get('/catalog/products/export', [ProductExportController::class, 'download'])->name('catalog.products.export');
+        Route::get('/catalog/products/export', [ProductExportController::class, 'download'])->middleware('throttle:3,1')->name('catalog.products.export');
         Route::get('/catalog/reviews', [ProductReviewModerationController::class, 'index'])->name('catalog.reviews.index');
         Route::post('/catalog/reviews/{reviewPublicId}/approve', [ProductReviewModerationController::class, 'approve'])->name('catalog.reviews.approve');
         Route::post('/catalog/reviews/{reviewPublicId}/reject', [ProductReviewModerationController::class, 'reject'])->name('catalog.reviews.reject');
