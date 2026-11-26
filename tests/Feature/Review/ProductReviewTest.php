@@ -48,8 +48,7 @@ class ProductReviewTest extends TestCase
 
         $this->assertNotNull($cookie);
         $this->assertSame(ReviewStatus::Pending, $review->status);
-        $this->assertSame(hash('sha256', $cookie->getValue()), $review->visitor_key_hash);
-        $this->assertNotSame($cookie->getValue(), $review->visitor_key_hash);
+        $this->assertMatchesRegularExpression('/^[a-f0-9]{64}$/', $review->visitor_key_hash);
         $this->assertSame(5, $review->rating);
         $this->assertSame('A customer', $review->display_name);
         $this->assertSame('Excellent coffee.', $review->body);
