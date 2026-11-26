@@ -2,7 +2,9 @@
 
 namespace App\Modules\Review\Http\Controllers;
 
+use App\Models\User;
 use App\Modules\Business\Models\Business;
+use App\Modules\Catalog\Services\CatalogAuthorization;
 use App\Modules\PublicMenu\Services\PublicMenuCache;
 use App\Modules\Review\Enums\ReviewStatus;
 use App\Modules\Review\Models\ProductReview;
@@ -15,9 +17,9 @@ use Inertia\Response;
 
 class ProductReviewModerationController
 {
-    public function index(CurrentBusiness $currentBusiness): Response
+    public function index(CurrentBusiness $currentBusiness, CatalogAuthorization $authorization): Response
     {
-        $business = $this->business($currentBusiness);
+        $business = $this->business($currentBusiness, $authorization);
         abort_unless((new EntitlementService($business))->hasFeature('product_reviews'), 404);
 
         $reviews = ProductReview::query()
@@ -43,9 +45,10 @@ class ProductReviewModerationController
     public function approve(
         string $reviewPublicId,
         CurrentBusiness $currentBusiness,
+        CatalogAuthorization $authorization,
         PublicMenuCache $publicMenuCache,
     ): RedirectResponse {
-        return $this->moderate($reviewPublicId, ReviewStatus::Approved, $currentBusiness, $publicMenuCache);
+        return $this->moderate($reviewPublicId, ReviewStatus::Approved, $currentBusiness, $authorization, $publicMenuCache);
     }
 
     public function reject(
@@ -53,16 +56,17 @@ class ProductReviewModerationController
         CurrentBusiness $currentBusiness,
         PublicMenuCache $publicMenuCache,
     ): RedirectResponse {
-        return $this->moderate($reviewPublicId, ReviewStatus::Rejected, $currentBusiness, $publicMenuCache);
+        return $this->moderate($reviewPublicId, ReviewStatus::Rejected, $currentBusiness, $authorization, $publicMenuCache);
     }
 
     private function moderate(
         string $reviewPublicId,
         ReviewStatus $status,
         CurrentBusiness $currentBusiness,
+        CatalogAuthorization $authorization,
         PublicMenuCache $publicMenuCache,
     ): RedirectResponse {
-        $business = $this->business($currentBusiness);
+        $business = $this->business($currentBusiness, $authorization);
         abort_unless((new EntitlementService($business))->hasFeature('product_reviews'), 404);
 
         $review = ProductReview::query()
@@ -107,10 +111,12 @@ class ProductReviewModerationController
             : 'نظر رد شد.');
     }
 
-    private function business(CurrentBusiness $currentBusiness): Business
+    private function business(CurrentBusiness $currentBusiness, CatalogAuthorization $authorization): Business
     {
         $business = $currentBusiness->get();
+        $user = auth()->user();
         abort_unless($business instanceof Business, 404);
+        abort_unless($user instanceof User && $authorization->allows($user, $business), 403);
 
         return $business;
     }
