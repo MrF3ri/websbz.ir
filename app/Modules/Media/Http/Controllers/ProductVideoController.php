@@ -1,25 +1,25 @@
 <?php
 
-namespace App\\Modules\\Media\\Http\\Controllers;
+namespace App\Modules\Media\Http\Controllers;
 
-use App\\Modules\\Business\\Models\\Business;
-use App\\Modules\\Media\\Actions\\UploadProductVideoAction;
-use App\\Modules\\Media\\Http\\Requests\\UploadProductVideoRequest;
-use App\\Modules\\Media\\Models\\Media;
-use App\\Modules\\Media\\Models\\ProductVideo;
-use App\\Modules\\Menu\\Actions\\EnsurePrimaryMenuAction;
-use App\\Modules\\Menu\\Enums\\MenuStatus;
-use App\\Modules\\Product\\Enums\\ProductStatus;
-use App\\Modules\\Product\\Models\\Product;
-use App\\Modules\\PublicMenu\\Services\\PublicMenuCache;
-use App\\Modules\\Tenancy\\Services\\CurrentBusiness;
-use Illuminate\\Http\\RedirectResponse;
-use Illuminate\\Http\\Request;
-use Illuminate\\Http\\UploadedFile;
-use Illuminate\\Support\\Facades\\DB;
-use Illuminate\\Support\\Facades\\Gate;
-use Illuminate\\Support\\Facades\\Storage;
-use Symfony\\Component\\HttpFoundation\\StreamedResponse;
+use App\Modules\Business\Models\Business;
+use App\Modules\Media\Actions\UploadProductVideoAction;
+use App\Modules\Media\Http\Requests\UploadProductVideoRequest;
+use App\Modules\Media\Models\Media;
+use App\Modules\Media\Models\ProductVideo;
+use App\Modules\Menu\Actions\EnsurePrimaryMenuAction;
+use App\Modules\Menu\Enums\MenuStatus;
+use App\Modules\Product\Enums\ProductStatus;
+use App\Modules\Product\Models\Product;
+use App\Modules\PublicMenu\Services\PublicMenuCache;
+use App\Modules\Tenancy\Services\CurrentBusiness;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ProductVideoController
 {
@@ -80,7 +80,7 @@ class ProductVideoController
 
         $storage = Storage::disk($media->disk);
         if ($storage->exists($media->path) && ! $storage->delete($media->path)) {
-            report(new \\RuntimeException('Unable to delete product video from storage.'));
+            report(new \RuntimeException('Unable to delete product video from storage.'));
         }
 
         $publicMenuCache->forget($menu);
@@ -108,7 +108,7 @@ class ProductVideoController
         $business = $video->product->menu->business;
         abort_unless($business instanceof Business, 404);
 
-        $entitlements = new \\App\\Modules\\Subscription\\Services\\EntitlementService($business);
+        $entitlements = new \App\Modules\Subscription\Services\EntitlementService($business);
         abort_unless($entitlements->hasFeature('product_video'), 404);
 
         $media = $video->media;

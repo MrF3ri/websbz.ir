@@ -1,21 +1,21 @@
 <?php
 
-namespace App\\Modules\\Media\\Actions;
+namespace App\Modules\Media\Actions;
 
-use App\\Modules\\Business\\Models\\Business;
-use App\\Modules\\Media\\Models\\Media;
-use App\\Modules\\Media\\Models\\ProductVideo;
-use App\\Modules\\Media\\Services\\Mp4DurationReader;
-use App\\Modules\\Menu\\Models\\Menu;
-use App\\Modules\\Product\\Models\\Product;
-use App\\Modules\\Subscription\\Services\\EnforcementService;
-use App\\Modules\\Subscription\\Services\\EntitlementService;
-use Illuminate\\Http\\UploadedFile;
-use Illuminate\\Support\\Facades\\DB;
-use Illuminate\\Support\\Facades\\Log;
-use Illuminate\\Support\\Facades\\Storage;
-use Illuminate\\Support\\Str;
-use Illuminate\\Validation\\ValidationException;
+use App\Modules\Business\Models\Business;
+use App\Modules\Media\Models\Media;
+use App\Modules\Media\Models\ProductVideo;
+use App\Modules\Media\Services\Mp4DurationReader;
+use App\Modules\Menu\Models\Menu;
+use App\Modules\Product\Models\Product;
+use App\Modules\Subscription\Services\EnforcementService;
+use App\Modules\Subscription\Services\EntitlementService;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use RuntimeException;
 use Throwable;
 
@@ -39,7 +39,7 @@ class UploadProductVideoAction
             ]);
         }
 
-        $mimeType = (new \\finfo(FILEINFO_MIME_TYPE))->file($file->getPathname());
+        $mimeType = (new \finfo(FILEINFO_MIME_TYPE))->file($file->getPathname());
         $extension = strtolower($file->getClientOriginalExtension());
 
         if ($mimeType !== 'video/mp4' || $extension !== 'mp4') {
