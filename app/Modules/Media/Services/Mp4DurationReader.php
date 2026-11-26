@@ -70,7 +70,7 @@ class Mp4DurationReader
             $size = $limit - $offset;
         }
 
-        if (! is_int($size) || $size < $headerSize || $size > $limit - $offset) {
+        if ($size < $headerSize || $size > $limit - $offset) {
             return null;
         }
 
