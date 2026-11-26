@@ -1,6 +1,6 @@
 # ADR 0024 — Product reviews, moderation, and visitor privacy
 
-- Status: Proposed for Phase 15.2 implementation
+- Status: Accepted
 - Date: 2026-11-26
 
 ## Context
