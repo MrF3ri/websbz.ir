@@ -1,18 +1,18 @@
 <?php
 
-namespace App\\Modules\\Review\\Http\\Controllers;
+namespace App\Modules\Review\Http\Controllers;
 
-use App\\Modules\\Business\\Models\\Business;
-use App\\Modules\\Product\\Models\\Product;
-use App\\Modules\\PublicMenu\\Services\\PublicMenuCache;
-use App\\Modules\\Review\\Enums\\ReviewStatus;
-use App\\Modules\\Review\\Models\\ProductReview;
-use App\\Modules\\Subscription\\Services\\EntitlementService;
-use App\\Modules\\Tenancy\\Services\\CurrentBusiness;
-use Illuminate\\Http\\RedirectResponse;
-use Illuminate\\Support\\Facades\\DB;
-use Inertia\\Inertia;
-use Inertia\\Response;
+use App\Modules\Business\Models\Business;
+use App\Modules\Product\Models\Product;
+use App\Modules\PublicMenu\Services\PublicMenuCache;
+use App\Modules\Review\Enums\ReviewStatus;
+use App\Modules\Review\Models\ProductReview;
+use App\Modules\Subscription\Services\EntitlementService;
+use App\Modules\Tenancy\Services\CurrentBusiness;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class ProductReviewModerationController
 {
