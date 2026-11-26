@@ -120,21 +120,25 @@ class ProductReviewTest extends TestCase
     public function test_same_browser_cannot_submit_duplicate_review_for_same_product(): void
     {
         $this->withoutMiddleware(EncryptCookies::class);
+
         [, $business, $menu, $product, $branch] = $this->publishedProduct('top');
         $url = $this->reviewUrl($business, $menu, $product, $branch);
+        $visitorToken = str_repeat('a', 64);
 
-        $first = $this->post($url, ['rating' => 4]);
-        $first->assertRedirect()->assertCookie('product_review_visitor');
+        $this->withCookie('product_review_visitor', $visitorToken)
+            ->post($url, ['rating' => 4])
+            ->assertRedirect()
+            ->assertSessionHasNoErrors();
 
-        $cookie = collect($first->headers->getCookies())
-            ->first(fn ($item) => $item->getName() === 'product_review_visitor');
-        $this->assertNotNull($cookie);
-
-        $this->withCookie('product_review_visitor', $cookie->getValue())
+        $this->withCookie('product_review_visitor', $visitorToken)
             ->post($url, ['rating' => 3])
             ->assertSessionHasErrors('review');
 
         $this->assertDatabaseCount('product_reviews', 1);
+        $this->assertDatabaseHas('product_reviews', [
+            'product_id' => $product->getKey(),
+            'visitor_key_hash' => hash('sha256', $visitorToken),
+        ]);
     }
 
     public function test_public_menu_displays_only_approved_reviews_and_aggregates(): void
