@@ -47,7 +47,11 @@ class Mp4DurationReader
             return null;
         }
 
-        $size = unpack('Nsize', substr($contents, $offset, 4))['size'];
+        $size = $this->unsignedInt32($contents, $offset);
+
+        if ($size === null) {
+            return null;
+        }
         $type = substr($contents, $offset + 4, 4);
         $headerSize = 8;
 
@@ -56,7 +60,11 @@ class Mp4DurationReader
                 return null;
             }
 
-            $size = unpack('Jsize', substr($contents, $offset + 8, 8))['size'];
+            $size = $this->unsignedInt64($contents, $offset + 8);
+
+            if ($size === null) {
+                return null;
+            }
             $headerSize = 16;
         } elseif ($size === 0) {
             $size = $limit - $offset;
@@ -73,6 +81,28 @@ class Mp4DurationReader
         ];
     }
 
+    private function unsignedInt32(string $contents, int $offset): ?int
+    {
+        $unpacked = unpack('Nvalue', substr($contents, $offset, 4));
+
+        if (! is_array($unpacked) || ! isset($unpacked['value'])) {
+            return null;
+        }
+
+        return $unpacked['value'];
+    }
+
+    private function unsignedInt64(string $contents, int $offset): ?int
+    {
+        $unpacked = unpack('Jvalue', substr($contents, $offset, 8));
+
+        if (! is_array($unpacked) || ! isset($unpacked['value'])) {
+            return null;
+        }
+
+        return $unpacked['value'];
+    }
+
     private function movieDuration(string $contents, int $offset, int $end): ?float
     {
         while ($offset + 8 <= $end) {
@@ -87,16 +117,16 @@ class Mp4DurationReader
                 $version = ord($contents[$payload]);
 
                 if ($version === 0 && $payload + 20 <= $atom['end']) {
-                    $timescale = unpack('Nvalue', substr($contents, $payload + 12, 4))['value'];
-                    $duration = unpack('Nvalue', substr($contents, $payload + 16, 4))['value'];
+                    $timescale = $this->unsignedInt32($contents, $payload + 12);
+                    $duration = $this->unsignedInt32($contents, $payload + 16);
                 } elseif ($version === 1 && $payload + 32 <= $atom['end']) {
-                    $timescale = unpack('Nvalue', substr($contents, $payload + 20, 4))['value'];
-                    $duration = unpack('Jvalue', substr($contents, $payload + 24, 8))['value'];
+                    $timescale = $this->unsignedInt32($contents, $payload + 20);
+                    $duration = $this->unsignedInt64($contents, $payload + 24);
                 } else {
                     return null;
                 }
 
-                if ($timescale < 1 || $duration < 1) {
+                if ($timescale === null || $duration === null || $timescale < 1 || $duration < 1) {
                     return null;
                 }
 
