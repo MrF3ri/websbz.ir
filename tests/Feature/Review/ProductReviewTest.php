@@ -11,6 +11,7 @@ use App\Modules\Product\Enums\ProductStatus;
 use App\Modules\Product\Models\Product;
 use App\Modules\Review\Enums\ReviewStatus;
 use App\Modules\Review\Models\ProductReview;
+use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\Concerns\InteractsWithCatalog;
@@ -118,6 +119,7 @@ class ProductReviewTest extends TestCase
 
     public function test_same_browser_cannot_submit_duplicate_review_for_same_product(): void
     {
+        $this->withoutMiddleware(EncryptCookies::class);
         [, $business, $menu, $product, $branch] = $this->publishedProduct('top');
         $url = $this->reviewUrl($business, $menu, $product, $branch);
 
