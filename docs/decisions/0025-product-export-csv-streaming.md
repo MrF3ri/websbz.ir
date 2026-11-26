@@ -1,6 +1,6 @@
 # ADR 0025 — Product export format and streaming strategy
 
-- Status: Proposed for Phase 15.5 implementation
+- Status: Accepted
 - Date: 2026-11-26
 
 ## Context
