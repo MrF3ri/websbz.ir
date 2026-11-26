@@ -67,6 +67,7 @@ class PlanSeeder extends Seeder
                     'product_discount' => true,
                     'product_availability_toggle' => true,
                     'product_video' => false,
+                    'max_product_videos' => 0,
                     'product_reviews' => false,
                     'product_likes' => false,
                     'instagram_integration' => false,

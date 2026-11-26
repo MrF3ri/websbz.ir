@@ -76,6 +76,7 @@ class UploadProductVideoAction
                 $product,
                 $file,
                 $mimeType,
+                $fileSize,
                 $durationMs,
                 $disk,
                 $publicId,

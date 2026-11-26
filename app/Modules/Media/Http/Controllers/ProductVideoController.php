@@ -14,7 +14,6 @@ use App\Modules\Product\Models\Product;
 use App\Modules\PublicMenu\Services\PublicMenuCache;
 use App\Modules\Tenancy\Services\CurrentBusiness;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -88,7 +87,7 @@ class ProductVideoController
         return back()->with('success', 'ویدئوی محصول حذف شد.');
     }
 
-    public function publicVideo(string $mediaPublicId, Request $request): StreamedResponse
+    public function publicVideo(string $mediaPublicId): StreamedResponse
     {
         $video = ProductVideo::query()
             ->with(['media', 'product.menu.business'])

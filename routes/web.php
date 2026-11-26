@@ -8,6 +8,7 @@ use App\Modules\Business\Http\Controllers\BusinessSettingsController;
 use App\Modules\Catalog\Http\Controllers\CatalogController;
 use App\Modules\Category\Http\Controllers\CategoryController;
 use App\Modules\Media\Http\Controllers\MediaController;
+use App\Modules\Media\Http\Controllers\ProductVideoController;
 use App\Modules\Menu\Http\Controllers\MenuBannerController;
 use App\Modules\Menu\Http\Controllers\MenuPublicationController;
 use App\Modules\Menu\Http\Controllers\MenuThemeController;
