@@ -22,6 +22,8 @@ use App\Modules\Platform\Http\Controllers\AdminSubscriptionController;
 use App\Modules\Platform\Http\Controllers\PlatformSettingsController;
 use App\Modules\Product\Http\Controllers\ProductController;
 use App\Modules\PublicMenu\Http\Controllers\PublicMenuController;
+use App\Modules\Review\Http\Controllers\ProductReviewController;
+use App\Modules\Review\Http\Controllers\ProductReviewModerationController;
 use App\Modules\Subscription\Http\Controllers\BillingController;
 use App\Modules\Subscription\Http\Controllers\ManualPaymentController;
 use App\Modules\Tenancy\Http\Middleware\TenantMiddleware;
@@ -37,6 +39,10 @@ Route::get('/menu/{businessSlug}/{menuSlug}/{branchSlug}', [PublicMenuController
     ->name('public.menu.branch.show');
 Route::get('/menu/{businessSlug}/{menuSlug}', [PublicMenuController::class, 'showPrimary'])
     ->name('public.menu.show');
+
+Route::post('/menu/{businessSlug}/{menuSlug}/{branchSlug}/products/{productPublicId}/reviews', [ProductReviewController::class, 'store'])
+    ->middleware('throttle:5,1')
+    ->name('public.menu.reviews.store');
 
 Route::middleware(['auth', 'verified', 'can:platform-admin'])
     ->prefix('admin')
@@ -92,6 +98,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/business/branches/{branchPublicId}/deactivate', [BranchController::class, 'deactivate'])->name('business.branches.deactivate');
 
         Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog.index');
+        Route::get('/catalog/reviews', [ProductReviewModerationController::class, 'index'])->name('catalog.reviews.index');
+        Route::post('/catalog/reviews/{reviewPublicId}/approve', [ProductReviewModerationController::class, 'approve'])->name('catalog.reviews.approve');
+        Route::post('/catalog/reviews/{reviewPublicId}/reject', [ProductReviewModerationController::class, 'reject'])->name('catalog.reviews.reject');
         Route::put('/catalog/menu/publish', [MenuPublicationController::class, 'publish'])->name('catalog.menu.publish');
         Route::put('/catalog/menu/unpublish', [MenuPublicationController::class, 'unpublish'])->name('catalog.menu.unpublish');
         Route::post('/catalog/categories', [CategoryController::class, 'store'])->name('catalog.categories.store');

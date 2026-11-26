@@ -15,6 +15,7 @@ use App\Modules\Menu\Models\Menu;
 use App\Modules\Product\Enums\ProductStatus;
 use App\Modules\Product\Models\Product;
 use App\Modules\PublicMenu\Services\PublicMenuCache;
+use App\Modules\Review\Enums\ReviewStatus;
 use App\Modules\Subscription\Services\EntitlementService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -98,7 +99,7 @@ class PublicMenuController
 
     /**
      * @param  array<string, mixed>  $effective
-     * @return array{public_id: string, name: string, description: string|null, branch_name_override: bool, branch_description_override: bool, label: string|null, price: int, discount_price: int|null, images: array<int, array{url: string, srcset: string, sizes: string, width: int, height: int}>, translations: array<string, array{name: string, description: string|null}>}
+     * @return array{public_id: string, name: string, description: string|null, branch_name_override: bool, branch_description_override: bool, label: string|null, price: int, discount_price: int|null, images: array<int, array{url: string, srcset: string, sizes: string, width: int, height: int}>, translations: array<string, array{name: string, description: string|null}>, review_count: int, average_rating: float|null, reviews: array<int, array{rating: int, display_name: string|null, body: string|null, created_at: string|null}>}
      */
     private function productData(Product $product, array $effective, ?BranchProductSetting $setting): array
     {
@@ -116,6 +117,16 @@ class PublicMenuController
                 'url' => route('media.product-video.public', $product->videos->first()->media->public_id),
                 'duration_ms' => $product->videos->first()->media->duration_ms,
             ] : null,
+            'review_count' => (int) ($product->approved_reviews_count ?? 0),
+            'average_rating' => $product->approved_reviews_avg_rating !== null
+                ? round((float) $product->approved_reviews_avg_rating, 1)
+                : null,
+            'reviews' => $product->reviews->map(fn ($review): array => [
+                'rating' => $review->rating,
+                'display_name' => $review->display_name,
+                'body' => $review->body,
+                'created_at' => $review->created_at?->toIso8601String(),
+            ])->values()->all(),
             'translations' => $product->translations->keyBy('locale')->map(fn ($translation): array => [
                 'name' => $translation->name,
                 'description' => $translation->description,
@@ -232,8 +243,10 @@ class PublicMenuController
                         ->where('status', ProductStatus::Published)
                         ->where('is_available', true)
                         ->orderBy('sort_order')
-                        ->orderBy('id');
-                }, 'translations', 'products.images.media', 'products.videos.media', 'products.translations'])
+                        ->orderBy('id')
+                        ->withCount(['reviews as approved_reviews_count' => fn ($reviews) => $reviews->where('status', ReviewStatus::Approved->value)])
+                        ->withAvg(['reviews as approved_reviews_avg_rating' => fn ($reviews) => $reviews->where('status', ReviewStatus::Approved->value)], 'rating');
+                }, 'translations', 'products.images.media', 'products.videos.media', 'products.translations', 'products.reviews' => fn ($reviews) => $reviews->where('status', ReviewStatus::Approved->value)->latest('id')->limit(3)])
                 ->orderBy('sort_order')
                 ->orderBy('id')
                 ->get()
@@ -364,7 +377,19 @@ class PublicMenuController
 
             $entitlements = new EntitlementService($business);
             $publicMenu['menu']['image_slider_enabled'] = $entitlements->hasFeature('image_slider');
-            if (! $entitlements->hasFeature('product_video')) {
+            $publicMenu['menu']['product_reviews_enabled'] = $entitlements->hasFeature('product_reviews');
+            if ($publicMenu['menu']['product_reviews_enabled'] === false) {
+                foreach ($publicMenu['categories'] as &$category) {
+                    foreach ($category['products'] as &$product) {
+                        $product['review_count'] = 0;
+                        $product['average_rating'] = null;
+                        $product['reviews'] = [];
+                    }
+                    unset($product);
+                }
+                unset($category);
+            }
+            if ($entitlements->hasFeature('product_video') === false) {
                 foreach ($publicMenu['categories'] as &$category) {
                     foreach ($category['products'] as &$product) {
                         $product['video'] = null;
