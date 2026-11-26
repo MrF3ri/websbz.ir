@@ -1,10 +1,10 @@
 <?php
 
-namespace App\\Modules\\Media\\Models;
+namespace App\Modules\Media\Models;
 
-use App\\Modules\\Product\\Models\\Product;
-use Illuminate\\Database\\Eloquent\\Model;
-use Illuminate\\Database\\Eloquent\\Relations\\BelongsTo;
+use App\Modules\Product\Models\Product;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ProductVideo extends Model
 {

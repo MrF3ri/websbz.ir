@@ -1,12 +1,12 @@
 <?php
 
-namespace Tests\\Feature\\Media;
+namespace Tests\Feature\Media;
 
-use Illuminate\\Foundation\\Testing\\RefreshDatabase;
-use Illuminate\\Http\\UploadedFile;
-use Illuminate\\Support\\Facades\\Storage;
-use Tests\\Concerns\\InteractsWithCatalog;
-use Tests\\TestCase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Tests\Concerns\InteractsWithCatalog;
+use Tests\TestCase;
 
 class ProductVideoUploadTest extends TestCase
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\\Modules\\Media\\Services;
+namespace App\Modules\Media\Services;
 
 use RuntimeException;
 

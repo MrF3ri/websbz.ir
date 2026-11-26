@@ -63,6 +63,7 @@ class ProductVideoController
             ->with('media')
             ->firstOrFail();
 
+        $media = $video->media;
         DB::transaction(function () use ($video): void {
             $lockedVideo = ProductVideo::query()
                 ->whereKey($video->getKey())
@@ -75,9 +76,12 @@ class ProductVideoController
 
             $lockedVideo->delete();
             $media->delete();
-
-            Storage::disk($media->disk)->delete($media->path);
         });
+
+        $storage = Storage::disk($media->disk);
+        if ($storage->exists($media->path) && ! $storage->delete($media->path)) {
+            report(new \\RuntimeException('Unable to delete product video from storage.'));
+        }
 
         $publicMenuCache->forget($menu);
 

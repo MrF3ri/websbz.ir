@@ -1,9 +1,9 @@
 <?php
 
-namespace Tests\\Unit\\Media;
+namespace Tests\Unit\Media;
 
-use App\\Modules\\Media\\Services\\Mp4DurationReader;
-use PHPUnit\\Framework\\TestCase;
+use App\Modules\Media\Services\Mp4DurationReader;
+use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
 class Mp4DurationReaderTest extends TestCase
@@ -15,7 +15,7 @@ class Mp4DurationReaderTest extends TestCase
             .pack('N', 0)
             .pack('N', 1000)
             .pack('N', 4750)
-            .str_repeat("\\0", 80);
+            .str_repeat("\0", 80);
         $mvhd = pack('N', strlen($mvhdPayload) + 8).'mvhd'.$mvhdPayload;
         $moov = pack('N', strlen($mvhd) + 8).'moov'.$mvhd;
         $ftypPayload = 'isom'.pack('N', 0x200).'isomiso2';

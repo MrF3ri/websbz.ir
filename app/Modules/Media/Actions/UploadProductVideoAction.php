@@ -31,7 +31,9 @@ class UploadProductVideoAction
 
     public function execute(Business $business, Product $product, UploadedFile $file): ProductVideo
     {
-        if ($file->getSize() > self::MAX_SIZE_BYTES) {
+        $fileSize = $file->getSize();
+
+        if (! is_int($fileSize) || $fileSize > self::MAX_SIZE_BYTES) {
             throw ValidationException::withMessages([
                 'video' => 'حجم ویدئو نباید بیشتر از ۱۰ مگابایت باشد.',
             ]);
@@ -122,9 +124,9 @@ class UploadProductVideoAction
                     'disk' => $disk,
                     'path' => $actualPath,
                     'mime_type' => $mimeType,
-                    'size' => $file->getSize(),
-                    'width' => null,
-                    'height' => null,
+                    'size' => $fileSize,
+                    'width' => 0,
+                    'height' => 0,
                     'duration_ms' => $durationMs,
                     'variants' => null,
                 ]);

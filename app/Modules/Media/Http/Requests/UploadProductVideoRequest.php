@@ -1,8 +1,8 @@
 <?php
 
-namespace App\\Modules\\Media\\Http\\Requests;
+namespace App\Modules\Media\Http\Requests;
 
-use Illuminate\\Foundation\\Http\\FormRequest;
+use Illuminate\Foundation\Http\FormRequest;
 
 class UploadProductVideoRequest extends FormRequest
 {
