@@ -3,7 +3,6 @@
 namespace App\Modules\Review\Http\Controllers;
 
 use App\Modules\Business\Models\Business;
-use App\Modules\Product\Models\Product;
 use App\Modules\PublicMenu\Services\PublicMenuCache;
 use App\Modules\Review\Enums\ReviewStatus;
 use App\Modules\Review\Models\ProductReview;
@@ -75,14 +74,14 @@ class ProductReviewModerationController
             return back()->withErrors(['review' => 'این نظر قبلاً بررسی شده است.']);
         }
 
-        DB::transaction(function () use ($review, $status): void {
+        $moderated = DB::transaction(function () use ($review, $status): bool {
             $lockedReview = ProductReview::query()
                 ->whereKey($review->getKey())
                 ->lockForUpdate()
                 ->firstOrFail();
 
             if ($lockedReview->status !== ReviewStatus::Pending) {
-                return;
+                return false;
             }
 
             $lockedReview->update([
@@ -90,7 +89,13 @@ class ProductReviewModerationController
                 'moderated_by' => auth()->id(),
                 'moderated_at' => now(),
             ]);
+
+            return true;
         });
+
+        if (! $moderated) {
+            return back()->withErrors(['review' => 'این نظر قبلاً بررسی شده است.']);
+        }
 
         $menu = $review->menu;
         if ($menu !== null) {
