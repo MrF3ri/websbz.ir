@@ -1,8 +1,8 @@
 <?php
 
-namespace App\\Modules\\Review\\Http\\Requests;
+namespace App\Modules\Review\Http\Requests;
 
-use Illuminate\\Foundation\\Http\\FormRequest;
+use Illuminate\Foundation\Http\FormRequest;
 
 class StoreProductReviewRequest extends FormRequest
 {
