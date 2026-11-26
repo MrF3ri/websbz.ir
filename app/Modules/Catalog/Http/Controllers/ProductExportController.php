@@ -50,7 +50,7 @@ class ProductExportController
                 'وضعیت موجودی',
                 'برچسب',
                 'تاریخ ایجاد',
-            ], ',', '"', '', "\r\n");
+            ], ',', '"', '');
 
             $products->chunkById(500, function ($batch) use ($stream): void {
                 foreach ($batch as $product) {
@@ -73,7 +73,6 @@ class ProductExportController
                         ',',
                         '"',
                         '',
-                        "\r\n",
                     );
                 }
             });
