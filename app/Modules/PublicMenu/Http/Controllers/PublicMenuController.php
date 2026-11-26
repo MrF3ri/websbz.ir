@@ -378,7 +378,7 @@ class PublicMenuController
             $entitlements = new EntitlementService($business);
             $publicMenu['menu']['image_slider_enabled'] = $entitlements->hasFeature('image_slider');
             $publicMenu['menu']['product_reviews_enabled'] = $entitlements->hasFeature('product_reviews');
-            if (! $publicMenu['menu']['product_reviews_enabled']) {
+            if ($publicMenu['menu']['product_reviews_enabled'] === false) {
                 foreach ($publicMenu['categories'] as &$category) {
                     foreach ($category['products'] as &$product) {
                         $product['review_count'] = 0;
@@ -389,7 +389,7 @@ class PublicMenuController
                 }
                 unset($category);
             }
-            if (! $entitlements->hasFeature('product_video')) {
+            if ($entitlements->hasFeature('product_video') === false) {
                 foreach ($publicMenu['categories'] as &$category) {
                     foreach ($category['products'] as &$product) {
                         $product['video'] = null;
