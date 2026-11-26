@@ -6,6 +6,7 @@ use App\Modules\Business\Http\Controllers\BusinessLogoController;
 use App\Modules\Business\Http\Controllers\BusinessOnboardingController;
 use App\Modules\Business\Http\Controllers\BusinessSettingsController;
 use App\Modules\Catalog\Http\Controllers\CatalogController;
+use App\Modules\Catalog\Http\Controllers\ProductExportController;
 use App\Modules\Category\Http\Controllers\CategoryController;
 use App\Modules\Media\Http\Controllers\MediaController;
 use App\Modules\Media\Http\Controllers\ProductVideoController;
