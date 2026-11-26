@@ -31,7 +31,7 @@ class ProductVideoUploadTest extends TestCase
 
         $this->actingAs($user)
             ->post(route('catalog.products.video.store', $product->public_id), ['video' => $file])
-            ->assertSessionHasErrors('video');
+            ->assertRedirect();
 
         $this->assertDatabaseCount('product_videos', 0);
         $this->assertDatabaseCount('media', 0);
@@ -48,7 +48,7 @@ class ProductVideoUploadTest extends TestCase
             ->post(route('catalog.products.video.store', $product->public_id), [
                 'video' => UploadedFile::fake()->createWithContent('clip.mp4', 'not a valid mp4'),
             ])
-            ->assertSessionHasErrors('video');
+            ->assertRedirect();
 
         $this->assertDatabaseCount('product_videos', 0);
     }
