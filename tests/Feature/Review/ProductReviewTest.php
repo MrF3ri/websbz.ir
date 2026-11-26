@@ -1,15 +1,15 @@
 <?php
 
-namespace Tests\\Feature\\Review;
+namespace Tests\Feature\Review;
 
-use App\\Modules\\Menu\\Enums\\MenuStatus;
-use App\\Modules\\Product\\Enums\\ProductStatus;
-use App\\Modules\\Review\\Enums\\ReviewStatus;
-use App\\Modules\\Review\\Models\\ProductReview;
-use Illuminate\\Foundation\\Testing\\RefreshDatabase;
-use Inertia\\Testing\\AssertableInertia as Assert;
-use Tests\\Concerns\\InteractsWithCatalog;
-use Tests\\TestCase;
+use App\Modules\Menu\Enums\MenuStatus;
+use App\Modules\Product\Enums\ProductStatus;
+use App\Modules\Review\Enums\ReviewStatus;
+use App\Modules\Review\Models\ProductReview;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Inertia\Testing\AssertableInertia as Assert;
+use Tests\Concerns\InteractsWithCatalog;
+use Tests\TestCase;
 
 class ProductReviewTest extends TestCase
 {
@@ -216,7 +216,7 @@ class ProductReviewTest extends TestCase
     }
 
     /**
-     * @return array{0: \\App\\Models\\User, 1: \\App\\Modules\\Business\\Models\\Business, 2: \\App\\Modules\\Menu\\Models\\Menu, 3: \\App\\Modules\\Product\\Models\\Product, 4: \\App\\Modules\\Branch\\Models\\Branch}
+     * @return array{0: \App\Models\User, 1: \App\Modules\Business\Models\Business, 2: \App\Modules\Menu\Models\Menu, 3: \App\Modules\Product\Models\Product, 4: \App\Modules\Branch\Models\Branch}
      */
     private function publishedProduct(string $plan): array
     {
