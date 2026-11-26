@@ -54,6 +54,7 @@ class ProductReviewModerationController
     public function reject(
         string $reviewPublicId,
         CurrentBusiness $currentBusiness,
+        CatalogAuthorization $authorization,
         PublicMenuCache $publicMenuCache,
     ): RedirectResponse {
         return $this->moderate($reviewPublicId, ReviewStatus::Rejected, $currentBusiness, $authorization, $publicMenuCache);
