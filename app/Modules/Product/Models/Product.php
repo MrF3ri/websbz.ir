@@ -28,6 +28,8 @@ use Illuminate\Support\Str;
  * @property bool $is_available
  * @property ProductStatus $status
  * @property int $sort_order
+ * @property int|null $approved_reviews_count
+ * @property float|int|string|null $approved_reviews_avg_rating
  */
 class Product extends Model
 {
