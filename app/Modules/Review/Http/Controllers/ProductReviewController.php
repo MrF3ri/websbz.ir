@@ -3,6 +3,7 @@
 namespace App\Modules\Review\Http\Controllers;
 
 use App\Enums\BusinessStatus;
+use App\Modules\Branch\Services\BranchProductResolver;
 use App\Modules\Business\Models\Business;
 use App\Modules\Menu\Enums\MenuStatus;
 use App\Modules\Review\Enums\ReviewStatus;
@@ -25,6 +26,7 @@ class ProductReviewController
         string $menuSlug,
         string $branchSlug,
         string $productPublicId,
+        BranchProductResolver $branchProductResolver,
     ): RedirectResponse {
         $business = Business::query()
             ->where('slug', $businessSlug)
@@ -36,7 +38,7 @@ class ProductReviewController
             ->where('status', MenuStatus::Published)
             ->firstOrFail();
 
-        $business->branches()
+        $branch = $business->branches()
             ->where('slug', $branchSlug)
             ->where('status', 'active')
             ->firstOrFail();
@@ -45,7 +47,19 @@ class ProductReviewController
             ->where('public_id', $productPublicId)
             ->where('status', ProductStatus::Published)
             ->where('is_available', true)
+            ->whereHas('category', fn ($query) => $query->where('is_active', true))
             ->firstOrFail();
+
+        $categorySetting = $branch->categorySettings()
+            ->where('category_id', $product->category_id)
+            ->first();
+        abort_unless($categorySetting?->is_visible !== false, 404);
+
+        $productSetting = $branch->productSettings()
+            ->where('product_id', $product->getKey())
+            ->first();
+        $effectiveProduct = $branchProductResolver->resolve($product, $productSetting);
+        abort_unless($effectiveProduct['is_visible'] && $effectiveProduct['is_available'], 404);
 
         abort_unless((new EntitlementService($business))->hasFeature('product_reviews'), 404);
 
